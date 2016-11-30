@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cleveroad.library.BaseTableAdapter;
+import com.cleveroad.library.adapter.BaseTableAdapter;
 import com.cleveroad.library.ItemType;
 import com.cleveroad.library.TableLayout;
 import com.cleveroad.tablelayout.R;

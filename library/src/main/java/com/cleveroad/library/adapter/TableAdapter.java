@@ -1,8 +1,12 @@
-package com.cleveroad.library;
+package com.cleveroad.library.adapter;
 
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.cleveroad.library.ItemType;
+import com.cleveroad.library.TableDataSetObserver;
+import com.cleveroad.library.TableLayout;
 
 /**
  * The TableAdapter object acts as a bridge between an {@link TableLayout} and the
@@ -90,7 +94,7 @@ public interface TableAdapter<VH extends TableAdapter.ViewHolder> extends TableD
      * resources.</p>
      * <p>
      * {@link TableLayout} calls this method right before clearing ViewHolder's internal data and
-     * sending it to {@link Recycler}.
+     * sending it to Recycler.
      *
      * @param viewHolder The {@link ViewHolder} for the view being recycled
      */

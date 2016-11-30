@@ -1,4 +1,4 @@
-package com.cleveroad.library;
+package com.cleveroad.library.temp;
 
 class CalcHelper {
     static int sumArray(int array[]) {
