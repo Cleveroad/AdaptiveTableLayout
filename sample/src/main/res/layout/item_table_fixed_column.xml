@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+    <TextView
+        android:id="@android:id/text1"
+        android:layout_width="0dip"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_vertical|left"
+        android:paddingLeft="10dip" />
+
+    <View
+        android:layout_width="1.5dip"
+        android:layout_height="match_parent"
+        android:background="@drawable/separator_table_first" />
+
+</LinearLayout>
