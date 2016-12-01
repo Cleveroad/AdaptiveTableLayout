@@ -1,46 +1,54 @@
-package com.cleveroad.library;
+package com.cleveroad.library.scroll;
 
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
+import com.cleveroad.library.TableLayoutSettings;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ScrollHelper {
-
-
-    private final TableLayout mTableLayout;
+class ScrollHelper {
     private VelocityTracker mVelocityTracker;
     private SmoothScrollRunnable mSmoothScrollRunnable;
     private int mCurrentX;
     private int mCurrentY;
     private Timer mTimer;
+    private ScrollableView mScrollableView;
+    private ScrollMediatorListener mScrollMediatorListener;
 
     // flag show us if user moved screen in this tap "session"
     private boolean wasMoved = false;
 
-    // flag show us if user started dragging
-    private boolean isDragging = false;
-
-    @Nullable
+    @NonNull
     private ScrollHelperListener mListener;
+    private int mActualScrollX;
+    private int mActualScrollY;
 
-    ScrollHelper(TableLayout tableLayout) {
-        mTableLayout = tableLayout;
-        mSmoothScrollRunnable = new SmoothScrollRunnable(mTableLayout);
-    }
+    @SuppressWarnings("all")
+    ScrollHelper(@NonNull ScrollMediatorListener scrollMediatorListener,
+                 @NonNull ScrollableView scrollableView,
+                 @NonNull ScrollHelperListener listener) {
+        if (scrollMediatorListener == null) {
+            throw new IllegalStateException("ScrollMediatorListener is null!!");
+        }
 
-    public ScrollHelperListener getListener() {
-        return mListener;
-    }
+        if (scrollableView == null) {
+            throw new IllegalStateException("ScrollableView is null!!");
+        }
 
-    public void setListener(ScrollHelperListener listener) {
+        if (listener == null) {
+            throw new IllegalStateException("ScrollHelperListener is null!!");
+        }
+        mScrollMediatorListener = scrollMediatorListener;
+        mScrollableView = scrollableView;
         mListener = listener;
+        mSmoothScrollRunnable = new SmoothScrollRunnable(mScrollMediatorListener.getContext(), scrollableView);
     }
 
-    boolean onTouchEvent(MotionEvent event) {
+    boolean onTouchEvent(MotionEvent event, int actualScrollX, int actualScrollY) {
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
@@ -51,6 +59,8 @@ public class ScrollHelper {
         } else if (action == MotionEvent.ACTION_MOVE) {
             actionMove(event);
         } else if (action == MotionEvent.ACTION_UP) {
+            mActualScrollX = actualScrollX;
+            mActualScrollY = actualScrollY;
             actionUp(event);
             resetLongClickTimer();
         } else {
@@ -59,55 +69,38 @@ public class ScrollHelper {
         return true;
     }
 
-
     private void actionDown(MotionEvent event) {
         resetLongClickTimer();
-        Log.e("ScrollHelper", "isDragging = false");
-        isDragging = false;
         mCurrentX = (int) event.getRawX();
         mCurrentY = (int) event.getRawY();
         mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Log.e("ScrollHelper", "isDragging = true");
-                isDragging = true;
                 // TODO LONG CLICK!!!
                 Log.e("ScrollHelper", "mCurrentX = " + mCurrentX + " mCurrentY = " + mCurrentY);
-                if (mListener != null) {
-                    mTableLayout.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mListener.onDragAndDropStart(mCurrentX, mCurrentY);
-                        }
-                    });
+                mScrollableView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mListener.onLongTouch(mCurrentX, mCurrentY);
+                    }
+                });
 
-                }
             }
         }, TableLayoutSettings.LONG_PRESS_DELAY);
 
         if (!mSmoothScrollRunnable.isFinished()) {
             mSmoothScrollRunnable.forceFinished();
         }
-
     }
 
     private void actionMove(MotionEvent event) {
         int x2 = Math.abs(mCurrentX - (int) event.getRawX());
         int y2 = Math.abs(mCurrentY - (int) event.getRawY());
-        int touchSlop = mTableLayout.getSettings().getTouchSlop();
+        int touchSlop = mScrollMediatorListener.getTouchSlop();
         if (!wasMoved && (x2 < touchSlop && y2 < touchSlop)) {
-            // long click detecting
+            // long click detecting. Need to wait...
         } else {
-            if (isDragging) {
-                //TODO Implement dragging here!!
-                Log.e("ScrollHelper", "x2 = " + x2 + " y2 = " + y2);
-                if (mListener != null) {
-                    mListener.onDragAndDropScroll(x2, y2);
-                }
-            } else {
-                resetLongClickTimer();
-            }
-            Log.e("ScrollHelper", "wasMoved = true");
+            resetLongClickTimer();
             wasMoved = true;
             x2 = (int) event.getRawX();
             y2 = (int) event.getRawY();
@@ -115,33 +108,27 @@ public class ScrollHelper {
             final int diffY = mCurrentY - y2;
             mCurrentX = x2;
             mCurrentY = y2;
-            mTableLayout.scrollBy(diffX, diffY);
+            mScrollableView.scrollBy(diffX, diffY);
         }
     }
 
     private void actionUp(MotionEvent event) {
-        if (isDragging) {
-            if (mListener != null) {
-                mListener.onDragAndDropEnd(mCurrentX, mCurrentY);
-            }
-        }
         resetLongClickTimer();
-        Log.e("ScrollHelper", "isDragging = false");
-        isDragging = false;
-        mVelocityTracker.computeCurrentVelocity(1000, mTableLayout.getSettings().getMaximumVelocity());
+        mVelocityTracker.computeCurrentVelocity(1000, mScrollMediatorListener.getMaxVelocity());
         int velocityX = (int) mVelocityTracker.getXVelocity();
         int velocityY = (int) mVelocityTracker.getYVelocity();
 
-        if (Math.abs(velocityX) > mTableLayout.getSettings().getMinimumVelocity() || Math.abs(velocityY) > mTableLayout.getSettings().getMinimumVelocity()) {
+        if (Math.abs(velocityX) > mScrollMediatorListener.getMinVelocity() ||
+                Math.abs(velocityY) > mScrollMediatorListener.getMinVelocity()) {
             // need to smooth scroll end.
-            mSmoothScrollRunnable.start(mTableLayout.getActualScrollX(), mTableLayout.getActualScrollY(), velocityX, velocityY, mTableLayout.getMaxScrollX(), mTableLayout.getMaxScrollY());
+            mSmoothScrollRunnable.start(mActualScrollX, mActualScrollY,
+                    velocityX, velocityY, mScrollMediatorListener.getMaxScrollX(), mScrollMediatorListener.getMaxScrollY());
         } else {
             if (mVelocityTracker != null) { // If the velocity less than threshold
                 mVelocityTracker.recycle(); // recycle the tracker
                 mVelocityTracker = null; // DO NOT REMOVE THIS. Fix issue with IllegalStateException: Already in the pool!
             }
         }
-        Log.e("ScrollHelper", "wasMoved = false");
         wasMoved = false;
     }
 
@@ -153,16 +140,8 @@ public class ScrollHelper {
         mTimer = new Timer();
     }
 
-    public boolean isDragging() {
-        return isDragging;
-    }
-
     interface ScrollHelperListener {
-        void onDragAndDropStart(int x, int y);
-
-        void onDragAndDropScroll(int x, int y);
-
-        void onDragAndDropEnd(int x, int y);
+        void onLongTouch(int x, int y);
     }
 
 }

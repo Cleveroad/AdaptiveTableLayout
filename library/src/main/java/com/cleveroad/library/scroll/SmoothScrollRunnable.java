@@ -1,19 +1,21 @@
-package com.cleveroad.library;
+package com.cleveroad.library.scroll;
 
+import android.content.Context;
 import android.widget.Scroller;
 
 /**
- *  {@see http://stackoverflow.com/a/6219382/842697 }
+ * {@see http://stackoverflow.com/a/6219382/842697 }
  */
 class SmoothScrollRunnable implements Runnable {
-    private final TableLayout mTableLayout;
+    private final ScrollableView mView;
     private final Scroller mScroller;
 
-    private int mLastX, mLastY;
+    private int mLastX;
+    private int mLastY;
 
-    SmoothScrollRunnable(TableLayout tableLayout) {
-        mTableLayout = tableLayout;
-        mScroller = new Scroller(tableLayout.getContext());
+    SmoothScrollRunnable(Context context, ScrollableView view) {
+        mView = view;
+        mScroller = new Scroller(context);
     }
 
     void start(int initX, int initY, int initialVelocityX, int initialVelocityY, int maxX, int maxY) {
@@ -21,7 +23,7 @@ class SmoothScrollRunnable implements Runnable {
 
         mLastX = initX;
         mLastY = initY;
-        mTableLayout.post(this);
+        mView.post(this);
     }
 
     public void run() {
@@ -35,13 +37,13 @@ class SmoothScrollRunnable implements Runnable {
         int diffX = mLastX - x;
         int diffY = mLastY - y;
         if (diffX != 0 || diffY != 0) {
-            mTableLayout.scrollBy(diffX, diffY);
+            mView.scrollBy(diffX, diffY);
             mLastX = x;
             mLastY = y;
         }
 
         if (more) {
-            mTableLayout.post(this);
+            mView.post(this);
         }
     }
 

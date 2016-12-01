@@ -4,9 +4,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.cleveroad.library.TableLayout;
-import com.cleveroad.library.TableLayoutOld;
 import com.cleveroad.tablelayout.adapter.SortingAdapter;
-import com.cleveroad.tablelayout.adapter.TableAdapter;
+
+//import com.cleveroad.library.TableLayoutOld;
 
 public class SampleActivity extends AppCompatActivity {
 

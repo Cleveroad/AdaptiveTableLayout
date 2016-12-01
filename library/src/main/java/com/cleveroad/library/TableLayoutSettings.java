@@ -6,6 +6,8 @@ public class TableLayoutSettings {
     private int mMinimumVelocity;
     private int mMaximumVelocity;
     private int mTouchSlop;
+    private int mLayoutWidth;
+    private int mLayoutHeight;
 
 
     public TableLayoutSettings() {
@@ -44,6 +46,24 @@ public class TableLayoutSettings {
 
     public TableLayoutSettings setTouchSlop(int touchSlop) {
         mTouchSlop = touchSlop;
+        return this;
+    }
+
+    public int getLayoutWidth() {
+        return mLayoutWidth;
+    }
+
+    public TableLayoutSettings setLayoutWidth(int layoutWidth) {
+        mLayoutWidth = layoutWidth;
+        return this;
+    }
+
+    public int getLayoutHeight() {
+        return mLayoutHeight;
+    }
+
+    public TableLayoutSettings setLayoutHeight(int layoutHeight) {
+        mLayoutHeight = layoutHeight;
         return this;
     }
 }
