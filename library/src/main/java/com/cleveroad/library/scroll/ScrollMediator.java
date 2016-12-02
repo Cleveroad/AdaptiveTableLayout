@@ -43,11 +43,13 @@ public class ScrollMediator implements
 
     @Override
     public void onLongTouch(int x, int y) {
-        isDragging = true;
-        dragAndDropStart.set(x, y);
-        dragAndDropEnd.set(-100, -100);
-        if (mDraggableView != null) {
-            mDraggableView.onDragAndDropStart(x, y);
+        if (mScrollMediatorListener.canStartDragging(x, y)) {
+            isDragging = true;
+            dragAndDropStart.set(x, y);
+            dragAndDropEnd.set(-100, -100);
+            if (mDraggableView != null) {
+                mDraggableView.onDragAndDropStart(x, y);
+            }
         }
     }
 

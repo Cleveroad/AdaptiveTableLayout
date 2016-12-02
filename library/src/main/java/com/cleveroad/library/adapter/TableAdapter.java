@@ -34,6 +34,9 @@ public interface TableAdapter<VH extends TableAdapter.ViewHolder> extends TableD
      */
     void unregisterDataSetObserver(@NonNull TableDataSetObserver observer);
 
+
+    void changeColumns(int columnIndex, int columnToIndex);
+
     /**
      * How many rows are in the data table represented by this Adapter.
      *

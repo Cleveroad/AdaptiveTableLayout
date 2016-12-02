@@ -45,6 +45,11 @@ public class TableAdapter extends BaseTableAdapter<TableAdapter.ViewHolder>{
     }
 
     @Override
+    public void changeColumns(int rowIndex, int rowToIndex) {
+
+    }
+
+    @Override
     public int getRowCount() {
         return MOCK_CATEGORIES.length + ROW_COUNT * MOCK_CATEGORIES.length;
     }

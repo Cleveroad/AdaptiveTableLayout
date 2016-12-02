@@ -59,7 +59,15 @@ class DragAndDropScrollHelper {
         if (mCurrentY == -100) {
             mCurrentY = (int) event.getRawY();
         }
+        int diffX = (int) (mCurrentX - event.getRawX());
+        int diffY = (int) (mCurrentY - event.getRawY());
 
+        if (mCurrentX == 0) {
+            diffX = 0;
+        }
+        if (mCurrentY == 0) {
+            diffY = 0;
+        }
         mCurrentX = (int) event.getRawX();
         mCurrentY = (int) event.getRawY();
 

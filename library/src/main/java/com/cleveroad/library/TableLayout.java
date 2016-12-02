@@ -1,11 +1,16 @@
 package com.cleveroad.library;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -41,7 +46,8 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
     protected static final String EXTRA_SUPER_STATE = "EXTRA_SUPER_STATE";
     protected static final String EXTRA_SCROLL_X = "EXTRA_SCROLL_X";
     protected static final String EXTRA_SCROLL_Y = "EXTRA_SCROLL_Y";
-
+    static final String[] MIMETYPES_TEXT_PLAIN = new String[]{
+            ClipDescription.MIMETYPE_TEXT_PLAIN};
     private final LazyIntArrayCalc mWidthCalc;
     private final LazyIntArrayCalc mHeightCalc;
     private final TableLayoutSettings mSettings;
@@ -53,23 +59,29 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
     private TableAdapter mTableAdapter;
     private int mScrollX, mScrollY;
     private int mFirstRow, mFirstColumn;
-
-    @SuppressWarnings("unused")
-    private ViewHolder mHeadViewHolder;
+    //    @SuppressWarnings("unused")
+//    private ViewHolder mHeadViewHolder;
     private ViewHolder mDragAndDropHolder;
 
     private List<ViewHolder> mFixedRowViewHolderList;
     private List<ViewHolder> mFixedColumnViewHolderList;
     private List<List<ViewHolder>> mBodyViewHolderTable; //rows<columns>
-
     private int mRowCount, mColumnCount;
     //    private int mWidth, mHeight;
     private TableDataSetObserver mTableAdapterDataSetObserver;
     private boolean mNeedRelayout = true;
-
     private int mFixedRowTop = 0;
     private int mFixedColumnLeft = 0;
-
+    /**
+     * Coordinates for drag and drop column which user select by long tap
+     */
+    private Rect mSelectedRect;
+    private int mSelectedColumn = -1;
+    /**
+     * Coordinates for drag and drop column which user select by drag and drop scroll
+     */
+    private Rect mSelectedToRect;
+    private int mSelectedToColumn = -1;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -101,7 +113,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
         mWidthCalc = new LazyIntArrayCalc();
         mHeightCalc = new LazyIntArrayCalc();
 
-        mHeadViewHolder = null;
+//        mHeadViewHolder = null;
         mFixedRowViewHolderList = new LinkedList<>();
         mFixedColumnViewHolderList = new LinkedList<>();
         mBodyViewHolderTable = new LinkedList<>();
@@ -149,9 +161,9 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
             this.mTableAdapter.unregisterDataSetObserver(mTableAdapterDataSetObserver);
         }
 
-        this.mTableAdapter = tableAdapter;
+        mTableAdapter = tableAdapter;
         mTableAdapterDataSetObserver = new TableAdapterDataSetObserver();
-        this.mTableAdapter.registerDataSetObserver(mTableAdapterDataSetObserver);
+        mTableAdapter.registerDataSetObserver(mTableAdapterDataSetObserver);
 
         mScrollX = 0;
         mScrollY = 0;
@@ -166,15 +178,13 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
         return mSettings;
     }
 
-    //TODO Need catch header long click!!!
-//    @Override
-//    public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        if (mScrollMediator != null) {
-//            return mScrollMediator.onTouchEvent(ev, getActualScrollX(), getActualScrollY());
-//        } else {
-//            return false;
-//        }
-//    }
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (mScrollMediator != null) {
+            mScrollMediator.onTouchEvent(ev, getActualScrollX(), getActualScrollY());
+        }
+        return false;
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -213,7 +223,9 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
         if (mScrollX == 0) {
             // no op
         } else if (mScrollX > 0) {
+            // loop for all elements in left and are needed to destroy
             while (mWidthCalc.getItem(mFirstColumn + 1) < mScrollX) {
+
                 if (!mFixedRowViewHolderList.isEmpty()) {
                     removeLeft();
                 }
@@ -337,6 +349,14 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
 
     public int getActualScrollY() {
         return mScrollY + mHeightCalc.getArraySum(1, mFirstRow);
+    }
+
+    @Override
+    public boolean canStartDragging(int x, int y) {
+        if (mDragAndDropHolder == null) {
+            mDragAndDropHolder = findColumnHeaderViewHolder(x, y);
+        }
+        return mDragAndDropHolder != null;
     }
 
     @Override
@@ -525,17 +545,24 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
 
         if (mTableAdapter != null) {
             if (mNeedRelayout) {
-                this.mRowCount = mTableAdapter.getRowCount();
-                this.mColumnCount = mTableAdapter.getColumnCount();
+                // get row and columns count
+                mRowCount = mTableAdapter.getRowCount();
+                mColumnCount = mTableAdapter.getColumnCount();
 
+                // prepare width array
                 int widths[] = new int[mColumnCount + 1];
+                // -1 header index in the adapter // TODO Need To fix this!!
                 for (int i = -1; i < mColumnCount; i++) {
+                    // calculate and save width for each column item
                     widths[i + 1] += mTableAdapter.getItemWidth(i);
                 }
                 mWidthCalc.setArray(widths);
 
+                // prepare width array
                 int heights[] = new int[mRowCount + 1];
+                // -1 header index in the adapter // TODO Need To fix this!!
                 for (int i = -1; i < mRowCount; i++) {
+                    // calculate and save width for each row item
                     heights[i + 1] += mTableAdapter.getItemHeight(i);
                 }
                 mHeightCalc.setArray(heights);
@@ -550,6 +577,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
                 if (mNeedRelayout) {
                     int sumArray = mWidthCalc.getArraySum();
                     if (sumArray < widthSize) {
+                        // multiply width by scaleFactor.
                         final float factor = widthSize / (float) sumArray;
                         int firstColumnWidth = widthSize;
                         for (int i = 1; i < mWidthCalc.getSize(); i++) {
@@ -599,6 +627,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
         Log.e("TableLay", "onLayout");
         if (mNeedRelayout || changed) {
             mNeedRelayout = false;
+            // clear all data
             resetTable();
 
             if (mTableAdapter != null) {
@@ -607,7 +636,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
 
                 int left, top, right, bottom;
 
-                mHeadViewHolder = makeAndSetup(FIXED_ROW_INDEX, FIXED_COLUMN_INDEX, 0, 0, mWidthCalc.getItem(0), mHeightCalc.getItem(0));
+//                mHeadViewHolder = makeAndSetup(FIXED_ROW_INDEX, FIXED_COLUMN_INDEX, 0, 0, mWidthCalc.getItem(0), mHeightCalc.getItem(0));
 
                 scrollBounds();
                 adjustFirstCellsAndScroll();
@@ -642,9 +671,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
                     mBodyViewHolderTable.add(list);
                     top = bottom;
                 }
-
             }
-
         }
     }
 
@@ -704,8 +731,11 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
         }
     }
 
+    /**
+     * Clear view holders, remove all views
+     */
     private void resetTable() {
-        mHeadViewHolder = null;
+//        mHeadViewHolder = null;
         mFixedRowViewHolderList.clear();
         mFixedColumnViewHolderList.clear();
         mBodyViewHolderTable.clear();
@@ -768,14 +798,27 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
         if (mScrollMediator != null && mScrollMediator.isDragging()) {
             if (mDragAndDropHolder != null) {
                 View view = mDragAndDropHolder.getItemView();
+                if (mSelectedRect == null) {
+                    mSelectedRect = new Rect(view.getLeft(), view.getTop(),
+                            view.getRight(), mSettings.getLayoutHeight());
+                }
                 Paint myPaint = new Paint();
-                myPaint.setColor(Color.argb(90, 0, 0, 0));
-                myPaint.setStrokeWidth(10);
-                myPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-                canvas.drawRect(view.getLeft(),
-                        view.getTop(), view.getRight(), mSettings.getLayoutHeight(), myPaint);
+                myPaint.setColor(Color.argb(95, 100, 100, 100));
+                myPaint.setStyle(Paint.Style.FILL);
+
+                canvas.drawRect(mSelectedRect.left, mSelectedRect.top,
+                        mSelectedRect.right, mSelectedRect.bottom, myPaint);
+
+
+                if (mSelectedToRect != null) {
+                    Paint myPaintTo = new Paint();
+                    myPaintTo.setColor(Color.GREEN);
+                    myPaintTo.setStrokeWidth(10);
+                    myPaintTo.setStyle(Paint.Style.STROKE);
+                    canvas.drawRect(mSelectedToRect.left, mSelectedToRect.top,
+                            mSelectedToRect.right, mSelectedToRect.bottom, myPaintTo);
+                }
             }
-//            canvas.drawColor(Color.argb(90, 0, 0, 0));
         }
     }
 
@@ -830,20 +873,65 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
         return viewHolder;
     }
 
+    /**
+     * find header view holder
+     *
+     * @param x touch x
+     * @param y touch y
+     * @return header view holder. Can be null.
+     */
     @Nullable
-    private ViewHolder findFixedRowViewHolder(int x, int y) {
+    private ViewHolder findColumnHeaderViewHolder(int x, int y) {
         for (ViewHolder vh : mFixedRowViewHolderList) {
             View view = vh.getItemView();
             float viewX = view.getX();
-            float viewY = view.getY();
-
-//            if (y >= viewY && y <= viewY + view.getHeight()) {
-            if (x >= viewX && x <= viewX + view.getWidth()) {
-                return vh;
+            float viewY = getTop();
+            if (y >= viewY && y <= viewY + view.getHeight()) {
+                if (x >= viewX && x <= viewX + view.getWidth()) {
+                    return vh;
+                }
             }
-//            }
         }
         return null;
+    }
+
+    /**
+     * find column by x,y which entered into column area.
+     *
+     * @param x touch x
+     * @param y ouch y
+     * @return Column rec or null
+     */
+    @Nullable
+    private Rect getColumnRect(int x, int y) {
+        for (ViewHolder vh : mFixedRowViewHolderList) {
+            View view = vh.getItemView();
+            float viewX = view.getX();
+            if (x >= viewX && x <= viewX + view.getWidth()) {
+                return new Rect(view.getLeft(), view.getTop(),
+                        view.getRight(), mSettings.getLayoutHeight());
+            }
+        }
+        return null;
+    }
+
+    /**
+     * find column by x,y which entered into column area.
+     *
+     * @param x touch x
+     * @param y ouch y
+     * @return Column rec or null
+     */
+    @Nullable
+    private int getColumnIndex(int x, int y) {
+        for (ViewHolder vh : mFixedRowViewHolderList) {
+            View view = vh.getItemView();
+            float viewX = view.getX();
+            if (x >= viewX && x <= viewX + view.getWidth()) {
+                return vh.getColumnIndex();
+            }
+        }
+        return -1;
     }
 
     private void addTableView(View view, int row, int column) {
@@ -858,20 +946,116 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
 
     @Override
     public void onDragAndDropStart(int x, int y) {
-        mDragAndDropHolder = findFixedRowViewHolder(x, y);
+        if (mDragAndDropHolder == null) {
+            mDragAndDropHolder = findColumnHeaderViewHolder(x, y);
+        }
+        if (mDragAndDropHolder != null) {
+            mSelectedColumn = mDragAndDropHolder.getColumnIndex();
+        }
         invalidate();
     }
 
     @Override
     public void onDragAndDropScroll(int x, int y) {
+        Log.e("DragAndDrop", "x = " + x + " | y = " + y);
+        if (mSelectedRect != null) {
+            int halfWidth = mSelectedRect.width() / 2;
+            mSelectedRect.left = x - halfWidth;
+            mSelectedRect.right = x + halfWidth;
+            mSelectedToRect = getColumnRect(x, y);
+        }
         invalidate();
     }
 
     @Override
     public void onDragAndDropEnd(int x, int y) {
+
+        if (mSelectedToRect != null) {
+            mSelectedToColumn = getColumnIndex(x, y);
+        }
+
+        if (mSelectedColumn != -1 && mSelectedToColumn != -1) {
+            int[] locationOnScreen = new int[2];
+            int[] locationToOnScreen = new int[2];
+            mBodyViewHolderTable.get(0).get(mSelectedColumn).getItemView().getLocationOnScreen(locationOnScreen);
+            mBodyViewHolderTable.get(0).get(mSelectedToColumn).getItemView().getLocationInWindow(locationToOnScreen);
+
+            for (int i = 0; i < mBodyViewHolderTable.size(); i++) {
+                View view = mBodyViewHolderTable.get(i).get(mSelectedColumn).getItemView();
+                view.bringToFront();
+            }
+
+
+            ValueAnimator animator = new ValueAnimator();
+            animator.setIntValues(0, locationToOnScreen[0] - locationOnScreen[0]);
+            animator.setDuration(500);
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    int value = (int) animation.getAnimatedValue();
+                    for (int i = 0; i < mBodyViewHolderTable.size(); i++) {
+                        View view = mBodyViewHolderTable.get(i).get(mSelectedColumn).getItemView();
+                        view.setTranslationX(value);
+                    }
+                    mTableAdapter.notifyDataSetChanged();
+                }
+            });
+
+            ValueAnimator animatorTo = new ValueAnimator();
+            animatorTo.setIntValues(0, locationOnScreen[0] - locationToOnScreen[0]);
+            animatorTo.setDuration(500);
+            animatorTo.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    int value = (int) animation.getAnimatedValue();
+                    for (int i = 0; i < mBodyViewHolderTable.size(); i++) {
+                        View view = mBodyViewHolderTable.get(i).get(mSelectedToColumn).getItemView();
+                        view.setTranslationX(value);
+                    }
+                    mTableAdapter.notifyDataSetChanged();
+                }
+            });
+
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(animator, animatorTo);
+            set.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mTableAdapter.changeColumns(mSelectedColumn, mSelectedToColumn);
+                    for (int i = 0; i < mBodyViewHolderTable.size(); i++) {
+                        View view = mBodyViewHolderTable.get(i).get(mSelectedColumn).getItemView();
+                        view.setTranslationX(0);
+                    }
+                    for (int i = 0; i < mBodyViewHolderTable.size(); i++) {
+                        View view = mBodyViewHolderTable.get(i).get(mSelectedToColumn).getItemView();
+                        view.setTranslationX(0);
+                    }
+                    mTableAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+            set.start();
+        }
         mDragAndDropHolder = null;
+        mSelectedRect = null;
+        mSelectedToRect = null;
         invalidate();
     }
+
 
     private class TableAdapterDataSetObserver implements TableDataSetObserver {
 
@@ -974,7 +1158,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
 
         @Override
         public void notifyHeadViewChanged() {
-            mHeadViewHolder = makeAndSetup(FIXED_ROW_INDEX, FIXED_COLUMN_INDEX, 0, 0, mWidthCalc.getItem(0), mHeightCalc.getItem(0));
+//            mHeadViewHolder = makeAndSetup(FIXED_ROW_INDEX, FIXED_COLUMN_INDEX, 0, 0, mWidthCalc.getItem(0), mHeightCalc.getItem(0));
         }
     }
 }
