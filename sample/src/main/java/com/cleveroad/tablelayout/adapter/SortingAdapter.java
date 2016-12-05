@@ -71,7 +71,7 @@ public class SortingAdapter extends BaseTableAdapter<SortingAdapter.ViewHolder> 
         } else if (columnIndex > columnToIndex) {
             // from right to left
 
-            for (int i = columnToIndex; i > columnIndex + 1; i--) {
+            for (int i = columnIndex; i > columnToIndex + 1; i--) {
                 switchTwoColumns(i, i - 1);
             }
         }
@@ -137,8 +137,10 @@ public class SortingAdapter extends BaseTableAdapter<SortingAdapter.ViewHolder> 
         final int width;
         if (column == TableLayout.FIXED_COLUMN_INDEX) {
             width = 0;
+        } else if (column % 3 == 0) {
+            width = 60;
         } else {
-            width = 80;
+            width = 120;
         }
         return Math.round(width * mDensity);
     }

@@ -916,6 +916,43 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
     }
 
     /**
+     *
+     * @param position column position
+     * @return Column rec or null
+     */
+    @NonNull
+    private List<ViewHolder> getColumnViewHolders(int position) {
+        final List<ViewHolder> viewHolders = new ArrayList<>();
+        for (List<ViewHolder> vhs : mBodyViewHolderTable) {
+            for (ViewHolder vh : vhs) {
+                if (vh.getColumnIndex() == position) {
+                    viewHolders.add(vh);
+                }
+            }
+        }
+        return viewHolders;
+    }
+
+
+    /**
+     * find column by x,y which entered into column area.
+     *
+     * @param position column position
+     * @return Column rec or null
+     */
+    @Nullable
+    private Rect getColumnRect(int position) {
+        for (ViewHolder vh : mFixedRowViewHolderList) {
+            if (vh.getColumnIndex() == position) {
+                View view = vh.getItemView();
+                return new Rect(view.getLeft(), view.getTop(),
+                        view.getRight(), mSettings.getLayoutHeight());
+            }
+        }
+        return null;
+    }
+
+    /**
      * find column by x,y which entered into column area.
      *
      * @param x touch x
@@ -975,44 +1012,46 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
         }
 
         if (mSelectedColumn != -1 && mSelectedToColumn != -1) {
-            int[] locationOnScreen = new int[2];
-            int[] locationToOnScreen = new int[2];
-            mBodyViewHolderTable.get(0).get(mSelectedColumn).getItemView().getLocationOnScreen(locationOnScreen);
-            mBodyViewHolderTable.get(0).get(mSelectedToColumn).getItemView().getLocationInWindow(locationToOnScreen);
+            Rect locationOnScreen = getColumnRect(mSelectedColumn);
+            Rect locationToOnScreen = getColumnRect(mSelectedToColumn);
 
-            for (int i = 0; i < mBodyViewHolderTable.size(); i++) {
-                View view = mBodyViewHolderTable.get(i).get(mSelectedColumn).getItemView();
+            for (ViewHolder viewHolder : getColumnViewHolders(mSelectedColumn)) {
+                View view = viewHolder.getItemView();
                 view.bringToFront();
             }
 
-
             ValueAnimator animator = new ValueAnimator();
-            animator.setIntValues(0, locationToOnScreen[0] - locationOnScreen[0]);
+            animator.setIntValues(0, locationToOnScreen == null ? 0 : locationToOnScreen.left -
+                    (locationOnScreen == null ? 0 : locationOnScreen.left));
             animator.setDuration(500);
             animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
                     int value = (int) animation.getAnimatedValue();
-                    for (int i = 0; i < mBodyViewHolderTable.size(); i++) {
-                        View view = mBodyViewHolderTable.get(i).get(mSelectedColumn).getItemView();
+                    for (ViewHolder viewHolder : getColumnViewHolders(mSelectedColumn)) {
+                        View view = viewHolder.getItemView();
                         view.setTranslationX(value);
                     }
-                    mTableAdapter.notifyDataSetChanged();
                 }
             });
 
             ValueAnimator animatorTo = new ValueAnimator();
-            animatorTo.setIntValues(0, locationOnScreen[0] - locationToOnScreen[0]);
+            animatorTo.setIntValues(0, (int) Math.signum(mSelectedColumn - mSelectedToColumn) * mWidthCalc.getItem(mSelectedColumn + 1));
             animatorTo.setDuration(500);
             animatorTo.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
                     int value = (int) animation.getAnimatedValue();
-                    for (int i = 0; i < mBodyViewHolderTable.size(); i++) {
-                        View view = mBodyViewHolderTable.get(i).get(mSelectedToColumn).getItemView();
-                        view.setTranslationX(value);
+                    for (List<ViewHolder> vhs : mBodyViewHolderTable) {
+                        for (ViewHolder viewHolder : vhs) {
+                            int column = viewHolder.getColumnIndex();
+                            if ((column > mSelectedColumn && column <= mSelectedToColumn) ||
+                                    (column >= mSelectedToColumn && column < mSelectedColumn)) {
+                                View view = viewHolder.getItemView();
+                                view.setTranslationX(value);
+                            }
+                        }
                     }
-                    mTableAdapter.notifyDataSetChanged();
                 }
             });
 
@@ -1027,13 +1066,11 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mTableAdapter.changeColumns(mSelectedColumn, mSelectedToColumn);
-                    for (int i = 0; i < mBodyViewHolderTable.size(); i++) {
-                        View view = mBodyViewHolderTable.get(i).get(mSelectedColumn).getItemView();
-                        view.setTranslationX(0);
-                    }
-                    for (int i = 0; i < mBodyViewHolderTable.size(); i++) {
-                        View view = mBodyViewHolderTable.get(i).get(mSelectedToColumn).getItemView();
-                        view.setTranslationX(0);
+                    for (List<ViewHolder> vhs : mBodyViewHolderTable) {
+                        for (ViewHolder viewHolder : vhs) {
+                            View view = viewHolder.getItemView();
+                            view.setTranslationX(0);
+                        }
                     }
                     mTableAdapter.notifyDataSetChanged();
                 }
