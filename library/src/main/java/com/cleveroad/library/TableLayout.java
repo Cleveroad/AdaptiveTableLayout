@@ -1,8 +1,6 @@
 package com.cleveroad.library;
 
 import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ClipDescription;
@@ -25,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.cleveroad.library.adapter.TableAdapter;
+import com.cleveroad.library.animations.AnimationHelper;
 import com.cleveroad.library.scroll.DraggableView;
 import com.cleveroad.library.scroll.ScrollMediator;
 import com.cleveroad.library.scroll.ScrollMediatorListener;
@@ -39,7 +38,8 @@ import static com.cleveroad.library.adapter.TableAdapter.ViewHolder;
  * This view shows a table which can scroll in both directions. Also still
  * leaves the headers fixed.
  */
-public class TableLayout extends ViewGroup implements DraggableView, ScrollMediatorListener {
+public class TableLayout extends ViewGroup implements DraggableView, ScrollMediatorListener,
+        AnimationHelper.AnimatorHelperListener {
     public static final int FIXED_COLUMN_INDEX = -1;
     public static final int FIXED_ROW_INDEX = -1;
 
@@ -82,6 +82,8 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
      */
     private Rect mSelectedToRect;
     private int mSelectedToColumn = -1;
+
+    private AnimationHelper mAnimationHelper;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -135,7 +137,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
                         .withScrollableView(this)
                         .withScrollMediatorListener(this)
                         .build();
-
+        mAnimationHelper = new AnimationHelper(this);
 
         setWillNotDraw(false);
     }
@@ -534,7 +536,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
     @SuppressLint("DrawAllocation")
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.e("TableLay", "onMeasure");
+
         final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
@@ -545,6 +547,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
 
         if (mTableAdapter != null) {
             if (mNeedRelayout) {
+                Log.e("TableLay", "onMeasure");
                 // get row and columns count
                 mRowCount = mTableAdapter.getRowCount();
                 mColumnCount = mTableAdapter.getColumnCount();
@@ -624,8 +627,9 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
     @SuppressLint("DrawAllocation")
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        Log.e("TableLay", "onLayout");
+
         if (mNeedRelayout || changed) {
+            Log.e("TableLay", "onLayout");
             mNeedRelayout = false;
             // clear all data
             resetTable();
@@ -916,7 +920,6 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
     }
 
     /**
-     *
      * @param position column position
      * @return Column rec or null
      */
@@ -994,7 +997,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
 
     @Override
     public void onDragAndDropScroll(int x, int y) {
-        Log.e("DragAndDrop", "x = " + x + " | y = " + y);
+//        Log.e("DragAndDrop", "x = " + x + " | y = " + y);
         if (mSelectedRect != null) {
             int halfWidth = mSelectedRect.width() / 2;
             mSelectedRect.left = x - halfWidth;
@@ -1012,85 +1015,40 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
         }
 
         if (mSelectedColumn != -1 && mSelectedToColumn != -1) {
-            Rect locationOnScreen = getColumnRect(mSelectedColumn);
-            Rect locationToOnScreen = getColumnRect(mSelectedToColumn);
-
-            for (ViewHolder viewHolder : getColumnViewHolders(mSelectedColumn)) {
-                View view = viewHolder.getItemView();
-                view.bringToFront();
-            }
-
-            ValueAnimator animator = new ValueAnimator();
-            animator.setIntValues(0, locationToOnScreen == null ? 0 : locationToOnScreen.left -
-                    (locationOnScreen == null ? 0 : locationOnScreen.left));
-            animator.setDuration(500);
-            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    int value = (int) animation.getAnimatedValue();
-                    for (ViewHolder viewHolder : getColumnViewHolders(mSelectedColumn)) {
-                        View view = viewHolder.getItemView();
-                        view.setTranslationX(value);
-                    }
-                }
-            });
-
-            ValueAnimator animatorTo = new ValueAnimator();
-            animatorTo.setIntValues(0, (int) Math.signum(mSelectedColumn - mSelectedToColumn) * mWidthCalc.getItem(mSelectedColumn + 1));
-            animatorTo.setDuration(500);
-            animatorTo.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    int value = (int) animation.getAnimatedValue();
-                    for (List<ViewHolder> vhs : mBodyViewHolderTable) {
-                        for (ViewHolder viewHolder : vhs) {
-                            int column = viewHolder.getColumnIndex();
-                            if ((column > mSelectedColumn && column <= mSelectedToColumn) ||
-                                    (column >= mSelectedToColumn && column < mSelectedColumn)) {
-                                View view = viewHolder.getItemView();
-                                view.setTranslationX(value);
+            mAnimationHelper.changeColumns(mBodyViewHolderTable, mFixedRowViewHolderList, mSelectedColumn, mSelectedToColumn,
+                    new SimpleAnimatorListener() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mTableAdapter.changeColumns(mSelectedColumn, mSelectedToColumn);
+                            for (List<ViewHolder> vhs : mBodyViewHolderTable) {
+                                for (ViewHolder viewHolder : vhs) {
+                                    View view = viewHolder.getItemView();
+                                    view.setTranslationX(0);
+                                }
                             }
+
+                            for (ViewHolder viewHolder : mFixedRowViewHolderList) {
+                                View view = viewHolder.getItemView();
+                                view.setTranslationX(0);
+                            }
+                            mTableAdapter.notifyLayoutChanged();
                         }
-                    }
-                }
-            });
-
-            AnimatorSet set = new AnimatorSet();
-            set.playTogether(animator, animatorTo);
-            set.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mTableAdapter.changeColumns(mSelectedColumn, mSelectedToColumn);
-                    for (List<ViewHolder> vhs : mBodyViewHolderTable) {
-                        for (ViewHolder viewHolder : vhs) {
-                            View view = viewHolder.getItemView();
-                            view.setTranslationX(0);
-                        }
-                    }
-                    mTableAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {
-
-                }
-            });
-            set.start();
+                    });
         }
         mDragAndDropHolder = null;
         mSelectedRect = null;
         mSelectedToRect = null;
         invalidate();
+    }
+
+    @Override
+    public int getColumnWidth(int position) {
+        return mWidthCalc.getArraySum(position, 1);
+    }
+
+    @Override
+    public int getColumnsWidth(int startPosition, int count) {
+        return mWidthCalc.getArraySum(startPosition, count);
     }
 
 
