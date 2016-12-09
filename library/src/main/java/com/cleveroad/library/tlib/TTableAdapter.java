@@ -63,7 +63,6 @@ public interface TTableAdapter<VH extends TTableAdapter.ViewHolder> extends TTab
     VH onCreateViewHolder(@NonNull ViewGroup parent, int itemType);
 
 
-
     @NonNull
     VH onCreateColumnHeaderViewHolder(@NonNull ViewGroup parent);
 
@@ -167,13 +166,8 @@ public interface TTableAdapter<VH extends TTableAdapter.ViewHolder> extends TTab
          */
         void setColumnIndex(int columnIndex);
 
+        boolean isDragging();
 
-        int getLeft();
-
-        void setLeft(int left);
-
-        int getTop();
-
-        void setTop(int top);
+        void setIsDragging(boolean isDragging);
     }
 }

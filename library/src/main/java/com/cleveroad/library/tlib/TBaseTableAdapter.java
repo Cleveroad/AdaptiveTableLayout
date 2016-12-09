@@ -124,8 +124,7 @@ public abstract class TBaseTableAdapter<VH extends TBaseTableAdapter.ViewHolderI
         private int mRowIndex;
         private int mColIndex;
         private int mItemType;
-        private int mLeft;
-        private int mTop;
+        private boolean mIsDragging;
 
         public ViewHolderImpl(@NonNull View itemView) {
             mItemView = itemView;
@@ -176,20 +175,14 @@ public abstract class TBaseTableAdapter<VH extends TBaseTableAdapter.ViewHolderI
             return vh.getColumnIndex() == this.getColumnIndex() && vh.getRowIndex() == this.getRowIndex();
         }
 
-        public int getLeft() {
-            return mLeft;
+        @Override
+        public boolean isDragging() {
+            return mIsDragging;
         }
 
-        public void setLeft(int left) {
-            mLeft = left;
-        }
-
-        public int getTop() {
-            return mTop;
-        }
-
-        public void setTop(int top) {
-            mTop = top;
+        @Override
+        public void setIsDragging(boolean isDragging) {
+            mIsDragging = isDragging;
         }
     }
 

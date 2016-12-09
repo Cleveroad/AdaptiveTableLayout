@@ -47,6 +47,19 @@ public class TSparseMatrix<TObj> {
         }
     }
 
+    @Nullable
+    public Collection<TObj> getColumnItems(int column) {
+        Collection<TObj> result = new LinkedList<>();
+        Set<Integer> keys = mData.keySet();
+        for (int key : keys) {
+            TObj columnObj = mData.get(key).get(column);
+            if (columnObj != null) {
+                result.add(columnObj);
+            }
+        }
+        return result;
+    }
+
     @NonNull
     public Collection<TObj> getAll() {
         Collection<TObj> result = new LinkedList<>();
