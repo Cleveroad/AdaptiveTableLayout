@@ -72,7 +72,7 @@ class DragAndDropScrollHelper {
         mCurrentY = (int) event.getRawY();
 
 
-        Log.e("DragAndDrop", "actionMove " + mCurrentX + " | " + mCurrentY);
+//        Log.e("DragAndDrop", "actionMove " + mCurrentX + " | " + mCurrentY);
 
 
         mDragAndDropScrollRunnable.touch(mCurrentX, mCurrentY);

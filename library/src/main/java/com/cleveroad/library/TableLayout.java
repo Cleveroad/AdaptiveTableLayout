@@ -1030,6 +1030,7 @@ public class TableLayout extends ViewGroup implements DraggableView, ScrollMedia
                             for (ViewHolder viewHolder : mFixedRowViewHolderList) {
                                 View view = viewHolder.getItemView();
                                 view.setTranslationX(0);
+                                mTableAdapter.notifyColumnChanged(viewHolder.getColumnIndex());
                             }
                             mTableAdapter.notifyLayoutChanged();
                         }
