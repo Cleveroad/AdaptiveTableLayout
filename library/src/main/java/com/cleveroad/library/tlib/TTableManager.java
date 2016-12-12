@@ -74,11 +74,11 @@ public class TTableManager {
     }
 
     public long getFullWidth() {
-        return mFullWidth;
+        return mFullWidth + mHeaderRowWidth;
     }
 
     public long getFullHeight() {
-        return mFullHeight;
+        return mFullHeight + mHeaderColumnHeight;
     }
 
     /**
@@ -89,6 +89,7 @@ public class TTableManager {
      */
     public int getColumnByX(int x) {
         int sum = 0;
+        x -= mHeaderRowWidth;
         if (x <= sum) {
             return 0;
         }
@@ -112,6 +113,7 @@ public class TTableManager {
      */
     public int getRowByY(int y) {
         int sum = 0;
+        y -= mHeaderColumnHeight;
         if (y <= sum) {
             return 0;
         }
@@ -142,5 +144,11 @@ public class TTableManager {
 
     public void setHeaderRowWidth(int headerRowWidth) {
         mHeaderRowWidth = headerRowWidth;
+    }
+
+    void switchTwoColumns(int columnIndex, int columnToIndex) {
+        int cellData = mColumnWidths[columnToIndex];
+        mColumnWidths[columnToIndex] = mColumnWidths[columnIndex];
+        mColumnWidths[columnIndex] = cellData;
     }
 }

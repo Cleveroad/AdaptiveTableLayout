@@ -2,6 +2,7 @@ package com.cleveroad.library.tlib;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
@@ -21,20 +22,23 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelperListener {
+public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelperListener, TAnimationHelper.TAnimatorHelperListener {
     public static final int HOLDER_TYPE = 0;
     public static final int HOLDER_HEADER_COLUMN_TYPE = 1;
     public static final int HOLDER_HEADER_ROW_TYPE = 2;
     public static final String TAG = "TTableLayout";
+    private static final int SHIFT_VIEWS_THRESHOLD = 25; // TODO SIMPLE FILTER. CHANGE TO MORE SPECIFIC...
     private final TSparseMatrix<TBaseTableAdapter.ViewHolder> mViewHolders = new TSparseMatrix<>();
     private final HashMap<Integer, TBaseTableAdapter.ViewHolder> mHeaderColumnViewHolders = new HashMap<>();
     private final HashMap<Integer, TBaseTableAdapter.ViewHolder> mHeaderRowViewHolders = new HashMap<>();
 
-    private final Point mTouchPoint = new Point();
-
+    private final TDragAndDropPoints mTDragAndDropPoints = new TDragAndDropPoints();
 
     private final TTableState mState = new TTableState();
     private final TTableManager mManager = new TTableManager();
+    // need to fix columns bounce when dragging column
+    private final Point mLastSwitchColumnsPoint = new Point();
+
     @Nullable
     private TTableAdapter<TTableAdapter.ViewHolder> mAdapter;
     private TRecycler mRecycler;
@@ -88,6 +92,7 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
 
         mScrollHelper = new TScrollHelper(context);
         mScrollHelper.setListener(this);
+
     }
 
     private void initItems() {
@@ -110,8 +115,9 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
 
         mManager.invalidate();
 
-        addViews(new Rect(0, 0, mSettings.getLayoutWidth(), mSettings.getLayoutHeight()));
-//        invalidate();
+        addViews(new Rect(mState.getScrollX(), mState.getScrollY(),
+                mState.getScrollX() + mSettings.getLayoutWidth(),
+                mState.getScrollY() + mSettings.getLayoutHeight()));
     }
 
     public void setAdapter(@Nullable TTableAdapter adapter) {
@@ -159,6 +165,7 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
         if (x == 0 && y == 0) {
             return;
         }
+
         if (mAdapter != null) {
             recycleViews();
             addViews(new Rect(mState.getScrollX(), mState.getScrollY(), mState.getScrollX() + mSettings.getLayoutWidth(), mState.getScrollY() + mSettings.getLayoutHeight()));
@@ -167,6 +174,7 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
     }
 
     private void refreshLayouts() {
+
         if (mAdapter != null) {
             for (TTableAdapter.ViewHolder holder : mViewHolders.getAll()) {
                 if (holder != null) {
@@ -176,8 +184,7 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
 
             for (TTableAdapter.ViewHolder holder : mHeaderColumnViewHolders.values()) {
                 if (holder != null) {
-                    View view = holder.getItemView();
-                    refreshHeaderColumn(holder.getColumnIndex(), view);
+                    refreshHeaderColumn(holder.getColumnIndex(), holder);
                 }
             }
 
@@ -193,19 +200,32 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
     private void refreshLayout(int row, int column, TTableAdapter.ViewHolder holder) {
         int left = mManager.getColumnsWidth(0, Math.max(0, column));
         int top = mManager.getRowsHeight(0, Math.max(0, row));
-        if (holder.isDragging()) {
-            left += mTouchPoint.x;
-            top += mTouchPoint.y;
-        }
         View view = holder.getItemView();
+        if (holder.isDragging() && mTDragAndDropPoints.getOffset().x > 0) {
+            left = mState.getScrollX() + mTDragAndDropPoints.getOffset().x - view.getWidth() / 2 - mManager.getHeaderRowWidth();
+            view.bringToFront();
+            view.setBackgroundColor(Color.BLUE);
+        } else {
+            view.setBackgroundColor(Color.YELLOW);
+        }
         view.layout(left - mState.getScrollX() + mManager.getHeaderRowWidth(),
                 top - mState.getScrollY() + mManager.getHeaderColumnHeight(),
                 left + mManager.getColumnWidth(column) - mState.getScrollX() + mManager.getHeaderRowWidth(),
                 top + mManager.getRowHeight(row) - mState.getScrollY() + mManager.getHeaderColumnHeight());
     }
 
-    private void refreshHeaderColumn(int column, View view) {
+    private void refreshHeaderColumn(int column, TTableAdapter.ViewHolder holder) {
         int left = mManager.getColumnsWidth(0, Math.max(0, column)) + mManager.getHeaderRowWidth();
+        View view = holder.getItemView();
+
+        if (holder.isDragging() && mTDragAndDropPoints.getOffset().x > 0) {
+            left = mState.getScrollX() + mTDragAndDropPoints.getOffset().x - view.getWidth() / 2;
+            view.bringToFront();
+            view.setBackgroundColor(Color.RED);
+        } else {
+            view.setBackgroundColor(Color.GREEN);
+        }
+
         view.layout(left - mState.getScrollX(),
                 0,
                 left + mManager.getColumnWidth(column) - mState.getScrollX(),
@@ -214,6 +234,7 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
 
     private void refreshHeaderRow(int row, View view) {
         int top = mManager.getRowsHeight(0, Math.max(0, row)) + mManager.getHeaderColumnHeight();
+        //TODO implement drag and drop rows
         view.layout(0,
                 top - mState.getScrollY(),
                 mManager.getHeaderRowWidth(),
@@ -227,7 +248,7 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
         }
 
         for (TTableAdapter.ViewHolder holder : mViewHolders.getAll()) {
-            if (holder != null) {
+            if (holder != null && !holder.isDragging()) {
                 View view = holder.getItemView();
                 if (view.getRight() < 0 || view.getLeft() > mSettings.getLayoutWidth() ||
                         view.getBottom() < 0 || view.getTop() > mSettings.getLayoutHeight()) {
@@ -324,7 +345,6 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
                 view.measure(
                         MeasureSpec.makeMeasureSpec(mManager.getHeaderRowWidth(), MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(mManager.getRowHeight(i), MeasureSpec.EXACTLY));
-
                 refreshHeaderRow(i, view);
                 //row header holders
 //                TTableAdapter.ViewHolder header = mHeaderColumnViewHolders.get(i);
@@ -355,7 +375,7 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
                         MeasureSpec.makeMeasureSpec(mManager.getColumnWidth(i), MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(mManager.getHeaderColumnHeight(), MeasureSpec.EXACTLY));
 
-                refreshHeaderColumn(i, view);
+                refreshHeaderColumn(i, viewHolder);
             }
         }
     }
@@ -368,13 +388,113 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        mTouchPoint.offset((int) event.getX(), (int) event.getY());
-        if (mScrollHelper.isDragging() && event.getAction() != MotionEvent.ACTION_UP) {
+        if (mScrollHelper.isDragging()) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                mTDragAndDropPoints.setEnd((int) (mState.getScrollX() + event.getX()), 0);
+                return mScrollHelper.onTouch(event);
+            }
+
+            int toColumn = 0;
+            int fromColumn = 0;
+            int absoluteX = (int) (mState.getScrollX() + event.getX());
+            if (Math.abs(absoluteX - mLastSwitchColumnsPoint.x) > SHIFT_VIEWS_THRESHOLD) {
+                for (TTableAdapter.ViewHolder header : mHeaderColumnViewHolders.values()) {
+                    if (header.isDragging()) {
+                        fromColumn = header.getColumnIndex();
+                        toColumn = mManager.getColumnByX(absoluteX);
+                        break;
+                    }
+                }
+
+                if (fromColumn != toColumn) {
+                    mLastSwitchColumnsPoint.x = absoluteX;
+                    if (Math.abs(fromColumn - toColumn) > 1) {
+                        Log.e("SHIFT", "FOREACH START from = " + fromColumn + " || to = " + toColumn);
+                    }
+                    if (fromColumn < toColumn) {
+                        for (int i = fromColumn; i < toColumn; i++) {
+                            shiftColumnsViews(i, i + 1);
+                        }
+                    } else {
+
+                        for (int i = fromColumn; i > toColumn; i--) {
+                            shiftColumnsViews(i - 1, i);
+                        }
+                    }
+                    if (Math.abs(fromColumn - toColumn) > 1) {
+                        Log.e("SHIFT", "FOREACH END from = " + fromColumn + " || to = " + toColumn);
+                    }
+
+                }
+            }
+
+            mTDragAndDropPoints.setOffset((int) (event.getX()), 0);
+
             mScrollerDragAndDropRunnable.touch((int) event.getX(), (int) event.getY());
-//            scrollBy((int) event.getX(), (int) event.getY());
+
+            refreshLayouts();
+
             return true;
         }
         return mScrollHelper.onTouch(event);
+    }
+
+    private void shiftColumnsViews(final int fromColumn, final int toColumn) {
+        Log.e("SHIFT", " from = " + fromColumn + " || to = " + toColumn);
+        if (mAdapter != null) {
+            mAdapter.changeColumns(fromColumn, toColumn);
+            TTableAdapter.ViewHolder fromVh = mHeaderColumnViewHolders.get(fromColumn);
+
+            if (fromVh != null) {
+                mHeaderColumnViewHolders.remove(fromVh.getColumnIndex());
+                fromVh.setColumnIndex(toColumn);
+            }
+
+            TTableAdapter.ViewHolder toVh = mHeaderColumnViewHolders.get(toColumn);
+            if (toVh != null) {
+                mHeaderColumnViewHolders.remove(toVh.getColumnIndex());
+                toVh.setColumnIndex(fromColumn);
+            }
+
+            if (fromVh != null) {
+                mHeaderColumnViewHolders.put(toColumn, fromVh);
+            }
+
+            if (toVh != null) {
+                mHeaderColumnViewHolders.put(fromColumn, toVh);
+            }
+
+            mManager.switchTwoColumns(fromColumn, toColumn);
+
+            Collection<TTableAdapter.ViewHolder> fromHolders = mViewHolders.getColumnItems(fromColumn);
+            Collection<TTableAdapter.ViewHolder> toHolders = mViewHolders.getColumnItems(toColumn);
+
+            removeViewHolders(fromHolders);
+            removeViewHolders(toHolders);
+
+            if (fromHolders != null) {
+                for (TTableAdapter.ViewHolder holder : fromHolders) {
+                    holder.setColumnIndex(toColumn);
+                    mViewHolders.put(holder.getRowIndex(), holder.getColumnIndex(), holder);
+                }
+            }
+
+            if (toHolders != null) {
+                for (TTableAdapter.ViewHolder holder : toHolders) {
+                    holder.setColumnIndex(fromColumn);
+                    mViewHolders.put(holder.getRowIndex(), holder.getColumnIndex(), holder);
+                }
+            }
+        }
+
+    }
+
+    private void removeViewHolders(@Nullable Collection<TTableAdapter.ViewHolder> toRemove) {
+        if (toRemove != null) {
+            for (TTableAdapter.ViewHolder holder : toRemove) {
+                mViewHolders.remove(holder.getRowIndex(), holder.getColumnIndex());
+            }
+        }
     }
 
     @Override
@@ -425,9 +545,10 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
     public boolean onLongPress(MotionEvent e) {
         TTableAdapter.ViewHolder viewHolder = getViewHolderByPosition((int) e.getX(), (int) e.getY());
         if (viewHolder != null) {
+            mTDragAndDropPoints.setStart((int) (mState.getScrollX() + e.getX()), 0);
             if (viewHolder.getItemType() == HOLDER_HEADER_COLUMN_TYPE) {
-                mTouchPoint.set(0, 0);
                 setDraggingToColumn(viewHolder.getColumnIndex(), true);
+                refreshLayouts();
             }
         }
         return viewHolder != null;
@@ -440,6 +561,11 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
                 holder.setIsDragging(isDragging);
             }
         }
+
+        TTableAdapter.ViewHolder holder = mHeaderColumnViewHolders.get(column);
+        if (holder != null) {
+            holder.setIsDragging(isDragging);
+        }
     }
 
     @Override
@@ -447,10 +573,21 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
         if (!mScrollerDragAndDropRunnable.isFinished()) {
             mScrollerDragAndDropRunnable.stop();
         }
+
+
         Collection<TTableAdapter.ViewHolder> holders = mViewHolders.getAll();
         for (TTableAdapter.ViewHolder holder : holders) {
             holder.setIsDragging(false);
         }
+
+        for (TTableAdapter.ViewHolder holder : mHeaderColumnViewHolders.values()) {
+            holder.setIsDragging(false);
+        }
+
+        mTDragAndDropPoints.setStart(0, 0);
+        mTDragAndDropPoints.setOffset(0, 0);
+        mTDragAndDropPoints.setEnd(0, 0);
+        refreshLayouts();
         return true;
     }
 
@@ -470,7 +607,6 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
             int row = mManager.getRowByY(y + mState.getScrollY() - mManager.getHeaderColumnHeight());
             viewHolder = mViewHolders.get(row, column);
         }
-
         return viewHolder;
     }
 
@@ -496,5 +632,15 @@ public class TTableLayout extends ViewGroup implements TScrollHelper.ScrollHelpe
             );
         }
         return true;
+    }
+
+    @Override
+    public int getColumnWidth(int position) {
+        return mManager.getColumnWidth(position);
+    }
+
+    @Override
+    public int getColumnsWidth(int startPosition, int count) {
+        return mManager.getColumnsWidth(startPosition, count);
     }
 }

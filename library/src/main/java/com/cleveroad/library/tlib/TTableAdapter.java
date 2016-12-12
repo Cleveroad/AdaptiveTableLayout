@@ -26,6 +26,8 @@ public interface TTableAdapter<VH extends TTableAdapter.ViewHolder> extends TTab
 
     void changeColumns(int columnIndex, int columnToIndex);
 
+    void changeRows(int rowIndex, int rowToIndex);
+
     /**
      * How many rows are in the data table represented by this Adapter.
      *

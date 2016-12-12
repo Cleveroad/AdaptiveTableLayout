@@ -16,14 +16,64 @@ public class TSampleTableAdapter extends TBaseTableAdapter<TBaseTableAdapter.Vie
     public static final int COLUMNS = 20;
     private final LayoutInflater mLayoutInflater;
 
+    private final String mData[][] = new String[ROWS][COLUMNS];
+    private final String mColumns[] = new String[COLUMNS];
+    private final String mRows[] = new String[ROWS];
 
     public TSampleTableAdapter(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
+
+        for (int columns = COLUMNS, i = 0; i < columns; i++) {
+            String columnText = "C" + (i + 1);
+            mColumns[i] = columnText;
+            for (int rows = ROWS, j = 0; j < rows; j++) {
+                String rowText = "R" + (j + 1);
+                mRows[j] = "R" + (j + 1);
+                mData[j][i] = rowText + columnText;
+
+            }
+        }
     }
 
     @Override
     public void changeColumns(int columnIndex, int columnToIndex) {
+        switchTwoColumns(columnIndex, columnToIndex);
+        switchTwoColumnHeaders(columnIndex, columnToIndex);
+    }
 
+    void switchTwoColumns(int columnIndex, int columnToIndex) {
+        for (int i = 0; i < mData.length; i++) {
+            String cellData = mData[i][columnToIndex];
+            mData[i][columnToIndex] = mData[i][columnIndex];
+            mData[i][columnIndex] = cellData;
+        }
+    }
+
+    void switchTwoColumnHeaders(int columnIndex, int columnToIndex) {
+        String cellData = mColumns[columnToIndex];
+        mColumns[columnToIndex] = mColumns[columnIndex];
+        mColumns[columnIndex] = cellData;
+    }
+
+
+    @Override
+    public void changeRows(int rowIndex, int rowToIndex) {
+        switchTwoRows(rowIndex, rowToIndex);
+        switchTwoRowHeaders(rowIndex, rowToIndex);
+    }
+
+    void switchTwoRows(int rowIndex, int rowToIndex) {
+        for (int i = 0; i < mData.length; i++) {
+            String cellData = mData[rowToIndex][i];
+            mData[rowToIndex][i] = mData[rowIndex][i];
+            mData[rowIndex][i] = cellData;
+        }
+    }
+
+    void switchTwoRowHeaders(int rowIndex, int rowToIndex) {
+        String cellData = mRows[rowToIndex];
+        mRows[rowToIndex] = mRows[rowIndex];
+        mRows[rowIndex] = cellData;
     }
 
     @Override
@@ -51,14 +101,14 @@ public class TSampleTableAdapter extends TBaseTableAdapter<TBaseTableAdapter.Vie
     @NonNull
     @Override
     public ViewHolderImpl onCreateRowHeaderViewHolder(@NonNull ViewGroup parent) {
-        return new TTestHeaderColumnViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
+        return new TTestHeaderRowViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
         if (viewHolder instanceof TTestViewHolder) {
             TTestViewHolder vh = (TTestViewHolder) viewHolder;
-            vh.tvText.setText("R" + row + "C" + column);
+            vh.tvText.setText(mData[row][column]);
         }
     }
 
@@ -66,12 +116,15 @@ public class TSampleTableAdapter extends TBaseTableAdapter<TBaseTableAdapter.Vie
     public void onBindHeaderColumnViewHolder(@NonNull ViewHolderImpl viewHolder, int column) {
         if (viewHolder instanceof TTestHeaderColumnViewHolder) {
             TTestHeaderColumnViewHolder vh = (TTestHeaderColumnViewHolder) viewHolder;
-            vh.tvText.setText("HC " + column);
+            vh.tvText.setText(mColumns[column]);
         }
     }
 
     public void onBindHeaderRowViewHolder(@NonNull ViewHolderImpl viewHolder, int row) {
-
+        if (viewHolder instanceof TTestHeaderRowViewHolder) {
+            TTestHeaderRowViewHolder vh = (TTestHeaderRowViewHolder) viewHolder;
+            vh.tvText.setText(mRows[row]);
+        }
     }
 
     @Override
@@ -95,7 +148,7 @@ public class TSampleTableAdapter extends TBaseTableAdapter<TBaseTableAdapter.Vie
 
     @Override
     public int getHeaderRowWidth() {
-        return 0;
+        return 160;
     }
 
     public static class TTestViewHolder extends TBaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
@@ -125,6 +178,21 @@ public class TSampleTableAdapter extends TBaseTableAdapter<TBaseTableAdapter.Vie
         @Override
         public void onClick(View v) {
             Log.e("ViewHolder", "Header onClick " + tvText.getText().toString());
+        }
+    }
+
+    public static class TTestHeaderRowViewHolder extends TBaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+        TextView tvText;
+
+        public TTestHeaderRowViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvText = (TextView) itemView.findViewById(R.id.tvText);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Log.e("ViewHolder", "Header Row onClick " + tvText.getText().toString());
         }
     }
 }
