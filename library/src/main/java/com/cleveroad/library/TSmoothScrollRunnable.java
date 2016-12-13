@@ -1,26 +1,26 @@
-package com.cleveroad.library.scroll;
+package com.cleveroad.library;
 
-import android.content.Context;
+import android.util.Log;
+import android.view.View;
 import android.widget.Scroller;
 
 /**
  * {@see http://stackoverflow.com/a/6219382/842697 }
  */
-class SmoothScrollRunnable implements Runnable {
-    private final ScrollableView mView;
-    private final Scroller mScroller;
+class TSmoothScrollRunnable implements Runnable {
+    private final View mView;
+    private Scroller mScroller;
 
     private int mLastX;
     private int mLastY;
 
-    SmoothScrollRunnable(Context context, ScrollableView view) {
+    TSmoothScrollRunnable(View view) {
         mView = view;
-        mScroller = new Scroller(context);
+        mScroller = new Scroller(view.getContext());
     }
 
     void start(int initX, int initY, int initialVelocityX, int initialVelocityY, int maxX, int maxY) {
         mScroller.fling(initX, initY, initialVelocityX, initialVelocityY, 0, maxX, 0, maxY);
-
         mLastX = initX;
         mLastY = initY;
         mView.post(this);

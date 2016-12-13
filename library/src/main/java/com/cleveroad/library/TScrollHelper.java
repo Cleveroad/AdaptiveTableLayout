@@ -1,4 +1,4 @@
-package com.cleveroad.library.tlib;
+package com.cleveroad.library;
 
 import android.content.Context;
 import android.support.annotation.Nullable;

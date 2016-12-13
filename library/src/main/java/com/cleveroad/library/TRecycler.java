@@ -1,10 +1,8 @@
-package com.cleveroad.library.tlib;
+package com.cleveroad.library;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
-
-import com.cleveroad.library.ItemType;
 
 import java.util.Stack;
 
@@ -20,7 +18,7 @@ class TRecycler {
      */
     @SuppressWarnings("unchecked")
     TRecycler() {
-        mViewHolders = new SparseArray<>(ItemType.TYPES_COUNT);
+        mViewHolders = new SparseArray<>(3);
     }
 
     /**

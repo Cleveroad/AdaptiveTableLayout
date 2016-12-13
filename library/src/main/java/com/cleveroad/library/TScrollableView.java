@@ -1,4 +1,4 @@
-package com.cleveroad.library.tlib;
+package com.cleveroad.library;
 
 public interface TScrollableView {
     boolean removeCallbacks(Runnable action);

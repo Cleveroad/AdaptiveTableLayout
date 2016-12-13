@@ -13,7 +13,7 @@
         app:title="@string/app_name"
         app:titleTextColor="@android:color/white"/>
 
-    <com.cleveroad.library.tlib.TTableLayout
+    <com.cleveroad.library.TTableLayout
         android:id="@+id/ttable"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

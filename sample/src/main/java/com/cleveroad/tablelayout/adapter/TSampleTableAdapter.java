@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cleveroad.library.tlib.TBaseTableAdapter;
+import com.cleveroad.library.TBaseTableAdapter;
 import com.cleveroad.tablelayout.R;
 
 public class TSampleTableAdapter extends TBaseTableAdapter<TBaseTableAdapter.ViewHolderImpl> {

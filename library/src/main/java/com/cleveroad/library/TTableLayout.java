@@ -1,4 +1,4 @@
-package com.cleveroad.library.tlib;
+package com.cleveroad.library;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -12,8 +12,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-
-import com.cleveroad.library.R;
 
 import java.util.Collection;
 import java.util.HashMap;

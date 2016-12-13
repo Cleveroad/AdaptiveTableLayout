@@ -1,19 +1,15 @@
-package com.cleveroad.library.tlib;
+package com.cleveroad.library;
 
 import android.support.annotation.NonNull;
 import android.view.View;
-
-import com.cleveroad.library.ItemType;
-import com.cleveroad.library.TableLayout;
-import com.cleveroad.library.adapter.TableAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * {@inheritDoc}
- * Common base class of common implementation for an {@link TableAdapter} that
- * can be used in {@link TableLayout}.
+ * Common base class of common implementation for an {@link TTableAdapter} that
+ * can be used in {@link TTableLayout}.
  */
 public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> implements TTableAdapter<VH> {
     private final List<TTableDataSetObserver> mTableDataSetObservers = new ArrayList<>();
@@ -162,7 +158,7 @@ public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> im
         }
 
         @Override
-        public void setItemType(@ItemType int itemType) {
+        public void setItemType(int itemType) {
             mItemType = itemType;
         }
 
