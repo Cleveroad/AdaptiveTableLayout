@@ -6,8 +6,6 @@ import android.view.View;
  * {@see http://stackoverflow.com/a/6219382/842697 }
  */
 class DragAndDropScrollRunnable implements Runnable {
-    static final int ORIENTATION_VERTICAL = 0;
-    static final int ORIENTATION_HORIZONTAL = 1;
     private View mView;
     private boolean isFinished = true;
 
@@ -18,13 +16,13 @@ class DragAndDropScrollRunnable implements Runnable {
         mView = view;
     }
 
-    synchronized void touch(int touchX, int touchY, int orientation) {
+    synchronized void touch(int touchX, int touchY, @ScrollType int orientation) {
 
         int partOfWidth = mView.getWidth() / 4;
         int partOfHeight = mView.getHeight() / 4;
 
 
-        if (orientation == ORIENTATION_HORIZONTAL) {
+        if (orientation == ScrollType.SCROLL_HORIZONTAL) {
             if (touchX < partOfWidth) {
                 start(touchX - partOfWidth, 0);
             } else if (touchX > mView.getWidth() - partOfWidth) {
@@ -33,7 +31,7 @@ class DragAndDropScrollRunnable implements Runnable {
                 mDiffX = 0;
                 mDiffY = 0;
             }
-        } else if (orientation == ORIENTATION_VERTICAL) {
+        } else if (orientation == ScrollType.SCROLL_VERTICAL) {
             if (touchY < partOfHeight) {
                 start(0, touchY - partOfHeight);
             } else if (touchY > mView.getHeight() - partOfHeight) {

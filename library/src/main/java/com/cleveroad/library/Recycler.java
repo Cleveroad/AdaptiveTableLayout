@@ -28,7 +28,7 @@ class Recycler {
      * @param viewHolder A viewHolder to add to the Recycler. It can no longer be used.
      * @param type       the type of the view.
      */
-    void pushRecycledView(@NonNull TableAdapter.TViewHolder viewHolder, int type) {
+    void pushRecycledView(@NonNull TableAdapter.TViewHolder viewHolder, @ItemType int type) {
         Stack<TableAdapter.TViewHolder> stack = mViewHolders.get(type);
         if (stack == null) {
             stack = new Stack<>();
@@ -45,7 +45,7 @@ class Recycler {
      * not found.
      */
     @Nullable
-    TableAdapter.TViewHolder popRecycledViewHolder(int itemType) {
+    TableAdapter.TViewHolder popRecycledViewHolder(@ItemType int itemType) {
         Stack<TableAdapter.TViewHolder> stack = mViewHolders.get(itemType);
         return stack == null || stack.isEmpty() ? null : stack.pop();
     }

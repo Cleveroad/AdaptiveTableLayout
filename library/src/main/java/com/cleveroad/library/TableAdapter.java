@@ -132,6 +132,7 @@ public interface TableAdapter<VH extends TableAdapter.TViewHolder> extends Table
         /**
          * @return the type of the View
          */
+        @ItemType
         int getItemType();
 
         /**
