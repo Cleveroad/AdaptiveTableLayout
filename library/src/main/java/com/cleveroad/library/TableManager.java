@@ -1,6 +1,6 @@
 package com.cleveroad.library;
 
-public class TTableManager {
+public class TableManager {
     private long mFullWidth;
     private long mFullHeight;
     private int[] mColumnWidths;
@@ -97,7 +97,7 @@ public class TTableManager {
             int nextSum = sum + mColumnWidths[i];
             if (x > sum && x < nextSum) {
                 return i;
-            } else if (x < sum && x < nextSum) {
+            } else if (x < nextSum) {
                 return i - 1;
             }
             sum = nextSum;
@@ -122,7 +122,7 @@ public class TTableManager {
 
             if (y > sum && y < nextSum) {
                 return i;
-            } else if (y < sum && y < nextSum) {
+            } else if (y < nextSum) {
                 return i - 1;
             }
             sum = nextSum;

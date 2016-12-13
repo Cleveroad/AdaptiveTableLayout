@@ -2,7 +2,7 @@ package com.cleveroad.library;
 
 import android.graphics.Point;
 
-public class TDragAndDropPoints {
+public class DragAndDropPoints {
     private final Point mStart = new Point();
     private final Point mOffset = new Point();
     private final Point mEnd = new Point();

@@ -8,16 +8,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cleveroad.library.TBaseTableAdapter;
+import com.cleveroad.library.BaseTableAdapter;
 import com.cleveroad.tablelayout.R;
 
-public class TSampleTableAdapter extends TBaseTableAdapter<TBaseTableAdapter.ViewHolderImpl> {
+public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHolderImpl> {
     public static final int ROWS = 2_000_000;
     public static final int COLUMNS = 2_000_000;
     private final LayoutInflater mLayoutInflater;
 
 
-    public TSampleTableAdapter(Context context) {
+    public SampleTableAdapter(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
     }
 
@@ -96,7 +96,7 @@ public class TSampleTableAdapter extends TBaseTableAdapter<TBaseTableAdapter.Vie
         return 160;
     }
 
-    public static class TTestViewHolder extends TBaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+    public static class TTestViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
         TextView tvText;
 
         public TTestViewHolder(@NonNull View itemView) {
@@ -111,7 +111,7 @@ public class TSampleTableAdapter extends TBaseTableAdapter<TBaseTableAdapter.Vie
         }
     }
 
-    public static class TTestHeaderColumnViewHolder extends TBaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+    public static class TTestHeaderColumnViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
         TextView tvText;
 
         public TTestHeaderColumnViewHolder(@NonNull View itemView) {
@@ -126,7 +126,7 @@ public class TSampleTableAdapter extends TBaseTableAdapter<TBaseTableAdapter.Vie
         }
     }
 
-    public static class TTestHeaderRowViewHolder extends TBaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+    public static class TTestHeaderRowViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
         TextView tvText;
 
         public TTestHeaderRowViewHolder(@NonNull View itemView) {

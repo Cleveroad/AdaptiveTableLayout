@@ -1,9 +1,9 @@
 package com.cleveroad.library;
 
-public interface TTableDataSetObserver {
+public interface TableDataSetObserver {
     /**
      * Notify any registered observers that the data set has changed.
-     * If you change the size of the data set, you must call {@link TTableDataSetObserver#notifyLayoutChanged()} instead
+     * If you change the size of the data set, you must call {@link TableDataSetObserver#notifyLayoutChanged()} instead
      */
     void notifyDataSetChanged();
 

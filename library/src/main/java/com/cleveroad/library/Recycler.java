@@ -9,15 +9,15 @@ import java.util.Stack;
 /**
  * The Recycler facilitates reuse of mViewHolders across layouts.
  */
-class TRecycler {
+class Recycler {
 
-    private SparseArray<Stack<TTableAdapter.TViewHolder>> mViewHolders;
+    private SparseArray<Stack<TableAdapter.TViewHolder>> mViewHolders;
 
     /**
      * Constructor
      */
     @SuppressWarnings("unchecked")
-    TRecycler() {
+    Recycler() {
         mViewHolders = new SparseArray<>(3);
     }
 
@@ -28,8 +28,8 @@ class TRecycler {
      * @param viewHolder A viewHolder to add to the Recycler. It can no longer be used.
      * @param type       the type of the view.
      */
-    void pushRecycledView(@NonNull TTableAdapter.TViewHolder viewHolder, int type) {
-        Stack<TTableAdapter.TViewHolder> stack = mViewHolders.get(type);
+    void pushRecycledView(@NonNull TableAdapter.TViewHolder viewHolder, int type) {
+        Stack<TableAdapter.TViewHolder> stack = mViewHolders.get(type);
         if (stack == null) {
             stack = new Stack<>();
             mViewHolders.put(type, stack);
@@ -45,8 +45,8 @@ class TRecycler {
      * not found.
      */
     @Nullable
-    TTableAdapter.TViewHolder popRecycledViewHolder(int itemType) {
-        Stack<TTableAdapter.TViewHolder> stack = mViewHolders.get(itemType);
+    TableAdapter.TViewHolder popRecycledViewHolder(int itemType) {
+        Stack<TableAdapter.TViewHolder> stack = mViewHolders.get(itemType);
         return stack == null || stack.isEmpty() ? null : stack.pop();
     }
 }

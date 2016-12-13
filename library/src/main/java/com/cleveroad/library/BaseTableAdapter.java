@@ -8,11 +8,11 @@ import java.util.List;
 
 /**
  * {@inheritDoc}
- * Common base class of common implementation for an {@link TTableAdapter} that
- * can be used in {@link TTableLayout}.
+ * Common base class of common implementation for an {@link TableAdapter} that
+ * can be used in {@link TableLayout}.
  */
-public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> implements TTableAdapter<VH> {
-    private final List<TTableDataSetObserver> mTableDataSetObservers = new ArrayList<>();
+public abstract class BaseTableAdapter<VH extends TableAdapter.TViewHolder> implements TableAdapter<VH> {
+    private final List<TableDataSetObserver> mTableDataSetObservers = new ArrayList<>();
 
     /**
      * {@inheritDoc}
@@ -20,7 +20,7 @@ public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> im
      * @param observer the object that gets notified when the data set changes.
      */
     @Override
-    public void registerDataSetObserver(@NonNull TTableDataSetObserver observer) {
+    public void registerDataSetObserver(@NonNull TableDataSetObserver observer) {
         mTableDataSetObservers.add(observer);
     }
 
@@ -30,7 +30,7 @@ public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> im
      * @param observer the object to unregister.
      */
     @Override
-    public void unregisterDataSetObserver(@NonNull TTableDataSetObserver observer) {
+    public void unregisterDataSetObserver(@NonNull TableDataSetObserver observer) {
         mTableDataSetObservers.remove(observer);
     }
 
@@ -39,7 +39,7 @@ public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> im
      */
     @Override
     public void notifyDataSetChanged() {
-        for (TTableDataSetObserver observer : mTableDataSetObservers) {
+        for (TableDataSetObserver observer : mTableDataSetObservers) {
             observer.notifyDataSetChanged();
         }
     }
@@ -52,7 +52,7 @@ public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> im
      */
     @Override
     public void notifyItemChanged(int rowIndex, int columnIndex) {
-        for (TTableDataSetObserver observer : mTableDataSetObservers) {
+        for (TableDataSetObserver observer : mTableDataSetObservers) {
             observer.notifyItemChanged(rowIndex, columnIndex);
         }
     }
@@ -64,7 +64,7 @@ public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> im
      */
     @Override
     public void notifyRowChanged(int rowIndex) {
-        for (TTableDataSetObserver observer : mTableDataSetObservers) {
+        for (TableDataSetObserver observer : mTableDataSetObservers) {
             observer.notifyRowChanged(rowIndex);
         }
     }
@@ -76,7 +76,7 @@ public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> im
      */
     @Override
     public void notifyColumnChanged(int columnIndex) {
-        for (TTableDataSetObserver observer : mTableDataSetObservers) {
+        for (TableDataSetObserver observer : mTableDataSetObservers) {
             observer.notifyColumnChanged(columnIndex);
         }
     }
@@ -86,7 +86,7 @@ public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> im
      */
     @Override
     public void notifyHeadViewChanged() {
-        for (TTableDataSetObserver observer : mTableDataSetObservers) {
+        for (TableDataSetObserver observer : mTableDataSetObservers) {
             observer.notifyHeadViewChanged();
         }
     }
@@ -96,7 +96,7 @@ public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> im
      */
     @Override
     public void notifyLayoutChanged() {
-        for (TTableDataSetObserver observer : mTableDataSetObservers) {
+        for (TableDataSetObserver observer : mTableDataSetObservers) {
             observer.notifyLayoutChanged();
         }
     }

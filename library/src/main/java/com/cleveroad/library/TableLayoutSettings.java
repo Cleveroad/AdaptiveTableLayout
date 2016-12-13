@@ -1,6 +1,6 @@
 package com.cleveroad.library;
 
-public class TTableLayoutSettings {
+public class TableLayoutSettings {
 
     private int mMinimumVelocity;
     private int mMaximumVelocity;
@@ -9,14 +9,14 @@ public class TTableLayoutSettings {
     private int mLayoutHeight;
 
 
-    public TTableLayoutSettings() {
+    public TableLayoutSettings() {
     }
 
     public int getMinimumVelocity() {
         return mMinimumVelocity;
     }
 
-    public TTableLayoutSettings setMinimumVelocity(int minimumVelocity) {
+    public TableLayoutSettings setMinimumVelocity(int minimumVelocity) {
         mMinimumVelocity = minimumVelocity;
         return this;
     }
@@ -25,7 +25,7 @@ public class TTableLayoutSettings {
         return mMaximumVelocity;
     }
 
-    public TTableLayoutSettings setMaximumVelocity(int maximumVelocity) {
+    public TableLayoutSettings setMaximumVelocity(int maximumVelocity) {
         mMaximumVelocity = maximumVelocity;
         return this;
     }
@@ -34,7 +34,7 @@ public class TTableLayoutSettings {
         return mLayoutWidth;
     }
 
-    public TTableLayoutSettings setLayoutWidth(int layoutWidth) {
+    public TableLayoutSettings setLayoutWidth(int layoutWidth) {
         mLayoutWidth = layoutWidth;
         return this;
     }
@@ -43,7 +43,7 @@ public class TTableLayoutSettings {
         return mLayoutHeight;
     }
 
-    public TTableLayoutSettings setLayoutHeight(int layoutHeight) {
+    public TableLayoutSettings setLayoutHeight(int layoutHeight) {
         mLayoutHeight = layoutHeight;
         return this;
     }

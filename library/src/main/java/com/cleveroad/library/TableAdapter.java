@@ -5,14 +5,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-public interface TTableAdapter<VH extends TTableAdapter.TViewHolder> extends TTableDataSetObserver {
+public interface TableAdapter<VH extends TableAdapter.TViewHolder> extends TableDataSetObserver {
     /**
      * Register an observer that is called when changes happen to the data used
      * by this adapter.
      *
      * @param observer the object that gets notified when the data set changes.
      */
-    void registerDataSetObserver(@NonNull TTableDataSetObserver observer);
+    void registerDataSetObserver(@NonNull TableDataSetObserver observer);
 
     /**
      * Unregister an observer that has previously been registered with this
@@ -20,7 +20,7 @@ public interface TTableAdapter<VH extends TTableAdapter.TViewHolder> extends TTa
      *
      * @param observer the object to unregister.
      */
-    void unregisterDataSetObserver(@NonNull TTableDataSetObserver observer);
+    void unregisterDataSetObserver(@NonNull TableDataSetObserver observer);
 
 
     /**
@@ -38,7 +38,7 @@ public interface TTableAdapter<VH extends TTableAdapter.TViewHolder> extends TTa
     int getColumnCount();
 
     /**
-     * Called when {@link TTableLayout} needs a new {@link TTableAdapter.TViewHolder} of the given type to represent
+     * Called when {@link TableLayout} needs a new {@link TableAdapter.TViewHolder} of the given type to represent
      * an item.
      * <p>
      * This new ViewHolder should be constructed with a new View that can represent the items
@@ -46,7 +46,7 @@ public interface TTableAdapter<VH extends TTableAdapter.TViewHolder> extends TTa
      * layout file.
      * <p>
      * The new ViewHolder will be used to display items of the adapter using
-     * {@link #onBindViewHolder(TTableAdapter.TViewHolder, int, int)}. Since it will be re-used to display
+     * {@link #onBindViewHolder(TableAdapter.TViewHolder, int, int)}. Since it will be re-used to display
      * different items in the data set, it is a good idea to cache references to sub views of
      * the View to avoid unnecessary {@link View#findViewById(int)} calls.
      *
@@ -54,7 +54,7 @@ public interface TTableAdapter<VH extends TTableAdapter.TViewHolder> extends TTa
      *                 an adapter position.
      * @param itemType The view type of the new View.
      * @return A new ViewHolder that holds a View of the given view type.
-     * @see #onBindViewHolder(TTableAdapter.TViewHolder, int, int)
+     * @see #onBindViewHolder(TableAdapter.TViewHolder, int, int)
      */
     @NonNull
     VH onCreateViewHolder(@NonNull ViewGroup parent, int itemType);
@@ -67,11 +67,11 @@ public interface TTableAdapter<VH extends TTableAdapter.TViewHolder> extends TTa
     VH onCreateRowHeaderViewHolder(@NonNull ViewGroup parent);
 
     /**
-     * Called by {@link TTableLayout} to display the data at the specified position. This method should
-     * update the contents of the {@link TTableAdapter.TViewHolder#getItemView()} to reflect the item at the given
+     * Called by {@link TableLayout} to display the data at the specified position. This method should
+     * update the contents of the {@link TableAdapter.TViewHolder#getItemView()} to reflect the item at the given
      * position.
      *
-     * @param viewHolder The {@link TTableAdapter.TViewHolder} which should be updated to represent the contents of the
+     * @param viewHolder The {@link TableAdapter.TViewHolder} which should be updated to represent the contents of the
      *                   item at the given position in the data set.
      * @param row        The row index of the item within the adapter's data set.
      * @param column     The column index of the item within the adapter's data set.
@@ -85,17 +85,17 @@ public interface TTableAdapter<VH extends TTableAdapter.TViewHolder> extends TTa
     /**
      * Called when a view created by this adapter has been recycled.
      * <p>
-     * <p>A view is recycled when a {@link TTableLayout} decides that it no longer
+     * <p>A view is recycled when a {@link TableLayout} decides that it no longer
      * needs to be attached. This can be because it has
      * fallen out of visibility or a set of cached views represented by views still
      * attached to the parent RecyclerView. If an item view has large or expensive data
      * bound to it such as large bitmaps, this may be a good place to release those
      * resources.</p>
      * <p>
-     * {@link TTableLayout} calls this method right before clearing ViewHolder's internal data and
+     * {@link TableLayout} calls this method right before clearing ViewHolder's internal data and
      * sending it to Recycler.
      *
-     * @param viewHolder The {@link TTableAdapter.TViewHolder} for the view being recycled
+     * @param viewHolder The {@link TableAdapter.TViewHolder} for the view being recycled
      */
     void onViewHolderRecycled(@NonNull VH viewHolder);
 
@@ -120,11 +120,11 @@ public interface TTableAdapter<VH extends TTableAdapter.TViewHolder> extends TTa
     int getHeaderRowWidth();
 
     /**
-     * A {@link TTableAdapter.TViewHolder} describes an item view and metadata about its place within the {@link TTableLayout}.
+     * A {@link TableAdapter.TViewHolder} describes an item view and metadata about its place within the {@link TableLayout}.
      */
     interface TViewHolder {
         /**
-         * @return item represents the item of the {@link TTableLayout}
+         * @return item represents the item of the {@link TableLayout}
          */
         @NonNull
         View getItemView();

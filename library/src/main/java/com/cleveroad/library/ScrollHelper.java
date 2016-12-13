@@ -8,22 +8,19 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 
 
-public class TScrollHelper implements GestureDetector.OnGestureListener {
-    static final String TAG = "TScrollHelper";
-    private final Context mContext;
+class ScrollHelper implements GestureDetector.OnGestureListener {
+    static final String TAG = "ScrollHelper";
     private final GestureDetectorCompat mGestureDetectorCompat;
     private final GestureDetectorCompat mGestureDetectorLongPressCompat;
     private boolean isDragging = false;
     @Nullable
     private ScrollHelperListener mListener;
 
-    public TScrollHelper(Context context) {
-        mContext = context;
-        mGestureDetectorCompat = new GestureDetectorCompat(mContext, this);
-        mGestureDetectorLongPressCompat = new GestureDetectorCompat(mContext, new GestureDetector.SimpleOnGestureListener() {
+    ScrollHelper(Context context) {
+        mGestureDetectorCompat = new GestureDetectorCompat(context, this);
+        mGestureDetectorLongPressCompat = new GestureDetectorCompat(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public void onLongPress(MotionEvent e) {
-                Log.e(TAG, "onLongPress");
                 if (mListener != null) {
                     isDragging = mListener.onLongPress(e);
                 }
@@ -33,7 +30,7 @@ public class TScrollHelper implements GestureDetector.OnGestureListener {
         mGestureDetectorLongPressCompat.setIsLongpressEnabled(true);
     }
 
-    public void setListener(@Nullable ScrollHelperListener listener) {
+    void setListener(@Nullable ScrollHelperListener listener) {
         mListener = listener;
     }
 
@@ -48,18 +45,12 @@ public class TScrollHelper implements GestureDetector.OnGestureListener {
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
-        if (mListener != null) {
-            return mListener.onSingleTapUp(e);
-        }
-        return false;
+        return mListener != null && mListener.onSingleTapUp(e);
     }
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        if (mListener != null) {
-            return mListener.onScroll(e1, e2, distanceX, distanceY);
-        }
-        return false;
+        return mListener != null && mListener.onScroll(e1, e2, distanceX, distanceY);
     }
 
     @Override
@@ -69,14 +60,10 @@ public class TScrollHelper implements GestureDetector.OnGestureListener {
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        Log.e(TAG, "onFling");
-        if (mListener != null) {
-            return mListener.onFling(e1, e2, velocityX, velocityY);
-        }
-        return true;
+        return mListener == null || mListener.onFling(e1, e2, velocityX, velocityY);
     }
 
-    public boolean onTouch(MotionEvent event) {
+    boolean onTouch(MotionEvent event) {
         mGestureDetectorLongPressCompat.onTouchEvent(event);
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -90,13 +77,11 @@ public class TScrollHelper implements GestureDetector.OnGestureListener {
     }
 
 
-    public boolean isDragging() {
+    boolean isDragging() {
         return isDragging;
     }
 
     interface ScrollHelperListener {
-
-//        boolean onDown(MotionEvent e);
 
         boolean onSingleTapUp(MotionEvent e);
 

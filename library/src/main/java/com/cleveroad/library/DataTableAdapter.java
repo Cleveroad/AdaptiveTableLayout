@@ -1,6 +1,6 @@
 package com.cleveroad.library;
 
-public interface TDataTableAdapter<VH extends TTableAdapter.TViewHolder> extends TTableAdapter<VH> {
+interface DataTableAdapter<VH extends TableAdapter.TViewHolder> extends TableAdapter<VH> {
 
     void changeColumns(int columnIndex, int columnToIndex);
 

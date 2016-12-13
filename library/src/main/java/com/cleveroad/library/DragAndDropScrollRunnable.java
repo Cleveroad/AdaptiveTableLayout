@@ -5,43 +5,38 @@ import android.view.View;
 /**
  * {@see http://stackoverflow.com/a/6219382/842697 }
  */
-class TDragAndDropScrollRunnable implements Runnable {
-    public static final int ORIENTATION_VERTICAL = 0;
-    public static final int ORIENTATION_HORIZONTAL = 1;
+class DragAndDropScrollRunnable implements Runnable {
+    static final int ORIENTATION_VERTICAL = 0;
+    static final int ORIENTATION_HORIZONTAL = 1;
     private View mView;
     private boolean isFinished = true;
-
-    private int mTouchX;
-    private int mTouchY; // for future!!
 
     private int mDiffX;
     private int mDiffY;
 
-    TDragAndDropScrollRunnable(View view) {
+    DragAndDropScrollRunnable(View view) {
         mView = view;
     }
 
     synchronized void touch(int touchX, int touchY, int orientation) {
-        mTouchX = touchX;
-        mTouchY = touchY;
 
         int partOfWidth = mView.getWidth() / 4;
         int partOfHeight = mView.getHeight() / 4;
 
 
         if (orientation == ORIENTATION_HORIZONTAL) {
-            if (mTouchX < partOfWidth) {
+            if (touchX < partOfWidth) {
                 start(touchX - partOfWidth, 0);
-            } else if (mTouchX > mView.getWidth() - partOfWidth) {
+            } else if (touchX > mView.getWidth() - partOfWidth) {
                 start(touchX - mView.getWidth() + partOfWidth, 0);
             } else {
                 mDiffX = 0;
                 mDiffY = 0;
             }
         } else if (orientation == ORIENTATION_VERTICAL) {
-            if (mTouchY < partOfHeight) {
+            if (touchY < partOfHeight) {
                 start(0, touchY - partOfHeight);
-            } else if (mTouchY > mView.getHeight() - partOfHeight) {
+            } else if (touchY > mView.getHeight() - partOfHeight) {
                 start(0, touchY - mView.getHeight() + partOfHeight);
             } else {
                 mDiffX = 0;
@@ -52,7 +47,7 @@ class TDragAndDropScrollRunnable implements Runnable {
 
     }
 
-    synchronized void start(int diffX, int diffY) {
+    private synchronized void start(int diffX, int diffY) {
         mDiffX = diffX;
         mDiffY = diffY;
         if (isFinished) {
@@ -61,6 +56,7 @@ class TDragAndDropScrollRunnable implements Runnable {
         }
     }
 
+    @Override
     public void run() {
         int shiftDistanceX = mDiffX / 5;
         int shiftDistanceY = mDiffY / 5;
@@ -80,7 +76,7 @@ class TDragAndDropScrollRunnable implements Runnable {
         isFinished = true;
     }
 
-    public boolean isFinished() {
+    boolean isFinished() {
         return isFinished;
     }
 }

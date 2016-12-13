@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
 
-public class TSparseMatrix<TObj> {
+class SparseMatrix<TObj> {
     private final HashMap<Integer, HashMap<Integer, TObj>> mData = new HashMap<>();
 
-    public void put(int row, int column, TObj item) {
+    void put(int row, int column, TObj item) {
         HashMap<Integer, TObj> map = mData.get(row);
         if (map == null) {
             map = new HashMap<>();
@@ -23,7 +23,7 @@ public class TSparseMatrix<TObj> {
     }
 
     @Nullable
-    public TObj get(int row, int column) {
+    TObj get(int row, int column) {
         HashMap<Integer, TObj> map = mData.get(row);
         if (map == null) {
             return null;
@@ -38,7 +38,7 @@ public class TSparseMatrix<TObj> {
     }
 
     @NonNull
-    public Collection<TObj> getRowItems(int row) {
+    Collection<TObj> getRowItems(int row) {
         Collection<TObj> result = new LinkedList<>();
         HashMap<Integer, TObj> map = mData.get(row);
         if (map != null) {
@@ -48,7 +48,7 @@ public class TSparseMatrix<TObj> {
     }
 
     @NonNull
-    public Collection<TObj> getColumnItems(int column) {
+    Collection<TObj> getColumnItems(int column) {
         Collection<TObj> result = new LinkedList<>();
         Set<Integer> keys = mData.keySet();
         for (int key : keys) {
@@ -61,7 +61,7 @@ public class TSparseMatrix<TObj> {
     }
 
     @NonNull
-    public Collection<TObj> getAll() {
+    Collection<TObj> getAll() {
         Collection<TObj> result = new LinkedList<>();
         Set<Integer> keys = mData.keySet();
         for (int key : keys) {
@@ -71,11 +71,9 @@ public class TSparseMatrix<TObj> {
         return result;
     }
 
-    public void remove(int row, int column) {
+    void remove(int row, int column) {
         HashMap<Integer, TObj> map = mData.get(row);
-        if (map == null) {
-            return;
-        } else {
+        if (map != null) {
             map.remove(column);
         }
     }

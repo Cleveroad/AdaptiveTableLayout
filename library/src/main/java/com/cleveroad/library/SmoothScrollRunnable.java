@@ -1,20 +1,19 @@
 package com.cleveroad.library;
 
-import android.util.Log;
 import android.view.View;
 import android.widget.Scroller;
 
 /**
  * {@see http://stackoverflow.com/a/6219382/842697 }
  */
-class TSmoothScrollRunnable implements Runnable {
+class SmoothScrollRunnable implements Runnable {
     private final View mView;
     private Scroller mScroller;
 
     private int mLastX;
     private int mLastY;
 
-    TSmoothScrollRunnable(View view) {
+    SmoothScrollRunnable(View view) {
         mView = view;
         mScroller = new Scroller(view.getContext());
     }
@@ -26,6 +25,7 @@ class TSmoothScrollRunnable implements Runnable {
         mView.post(this);
     }
 
+    @Override
     public void run() {
         if (mScroller.isFinished()) {
             return;

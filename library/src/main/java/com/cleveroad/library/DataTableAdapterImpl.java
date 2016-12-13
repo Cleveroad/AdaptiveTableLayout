@@ -3,12 +3,12 @@ package com.cleveroad.library;
 import android.support.annotation.NonNull;
 import android.view.ViewGroup;
 
-public class TDataTableAdapterImpl<VH extends TTableAdapter.TViewHolder> extends TBaseTableAdapter<VH> implements TDataTableAdapter<VH> {
-    private final TTableAdapter<VH> mInner;
+class DataTableAdapterImpl<VH extends TableAdapter.TViewHolder> extends BaseTableAdapter<VH> implements DataTableAdapter<VH> {
+    private final TableAdapter<VH> mInner;
     private final int[] mColumnIds;
     private final int[] mRowIds;
 
-    public TDataTableAdapterImpl(@NonNull TTableAdapter<VH> inner) {
+    public DataTableAdapterImpl(@NonNull TableAdapter<VH> inner) {
         mInner = inner;
         mColumnIds = new int[getColumnCount()];
         mRowIds = new int[getRowCount()];
