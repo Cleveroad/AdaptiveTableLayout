@@ -9,6 +9,9 @@ public class TTableState {
     private int mScrollX;
     private int mScrollY;
 
+    private boolean mIsRowDragging;
+    private boolean mIsColumnDragging;
+
     public int getLeftColumn() {
         return mLeftColumn;
     }
@@ -57,5 +60,19 @@ public class TTableState {
         mScrollY = scrollY;
     }
 
+    public boolean isRowDragging() {
+        return mIsRowDragging;
+    }
 
+    public void setRowDragging(boolean rowDragging) {
+        mIsRowDragging = rowDragging;
+    }
+
+    public boolean isColumnDragging() {
+        return mIsColumnDragging;
+    }
+
+    public void setColumnDragging(boolean columnDragging) {
+        mIsColumnDragging = columnDragging;
+    }
 }

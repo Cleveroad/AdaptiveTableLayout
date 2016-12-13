@@ -151,4 +151,10 @@ public class TTableManager {
         mColumnWidths[columnToIndex] = mColumnWidths[columnIndex];
         mColumnWidths[columnIndex] = cellData;
     }
+
+    void switchTwoRows(int rowIndex, int rowToIndex) {
+        int cellData = mRowHeights[rowToIndex];
+        mRowHeights[rowToIndex] = mRowHeights[rowIndex];
+        mRowHeights[rowIndex] = cellData;
+    }
 }

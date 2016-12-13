@@ -37,17 +37,17 @@ public class TSparseMatrix<TObj> {
         return mData.keySet();
     }
 
-    @Nullable
+    @NonNull
     public Collection<TObj> getRowItems(int row) {
+        Collection<TObj> result = new LinkedList<>();
         HashMap<Integer, TObj> map = mData.get(row);
-        if (map == null) {
-            return null;
-        } else {
-            return map.values();
+        if (map != null) {
+            result.addAll(map.values());
         }
+        return result;
     }
 
-    @Nullable
+    @NonNull
     public Collection<TObj> getColumnItems(int column) {
         Collection<TObj> result = new LinkedList<>();
         Set<Integer> keys = mData.keySet();

@@ -15,7 +15,7 @@ import java.util.List;
  * Common base class of common implementation for an {@link TableAdapter} that
  * can be used in {@link TableLayout}.
  */
-public abstract class TBaseTableAdapter<VH extends TBaseTableAdapter.ViewHolderImpl> implements TTableAdapter<VH> {
+public abstract class TBaseTableAdapter<VH extends TTableAdapter.TViewHolder> implements TTableAdapter<VH> {
     private final List<TTableDataSetObserver> mTableDataSetObservers = new ArrayList<>();
 
     /**
@@ -109,7 +109,7 @@ public abstract class TBaseTableAdapter<VH extends TBaseTableAdapter.ViewHolderI
     /**
      * {@inheritDoc}
      *
-     * @param viewHolder The {@link ViewHolder} for the view being recycled
+     * @param viewHolder The {@link TViewHolder} for the view being recycled
      */
     @Override
     public void onViewHolderRecycled(@NonNull VH viewHolder) {
@@ -119,7 +119,7 @@ public abstract class TBaseTableAdapter<VH extends TBaseTableAdapter.ViewHolderI
     /**
      * {@inheritDoc}
      */
-    public static abstract class ViewHolderImpl implements ViewHolder {
+    public static abstract class ViewHolderImpl implements TViewHolder {
         private final View mItemView;
         private int mRowIndex;
         private int mColIndex;
@@ -168,10 +168,10 @@ public abstract class TBaseTableAdapter<VH extends TBaseTableAdapter.ViewHolderI
 
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof ViewHolder)) {
+            if (!(obj instanceof TViewHolder)) {
                 return false;
             }
-            ViewHolder vh = ((ViewHolder) obj);
+            TViewHolder vh = ((TViewHolder) obj);
             return vh.getColumnIndex() == this.getColumnIndex() && vh.getRowIndex() == this.getRowIndex();
         }
 

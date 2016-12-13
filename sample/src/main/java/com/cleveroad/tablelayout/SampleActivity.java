@@ -15,13 +15,8 @@ public class SampleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
 
-//        TableLayoutOld tableLayout = (TableLayoutOld) findViewById(R.id.tableOld);
-//        TableLayout tableLayout = (TableLayout) findViewById(R.id.table);
         TTableLayout tableLayout = (TTableLayout) findViewById(R.id.ttable);
 
-//        tableLayout.setTableAdapter(new SortingAdapter(this));
-//        tableLayout.setTableAdapter(new SortingAdapter(this));
         tableLayout.setAdapter(new TSampleTableAdapter(this));
-//        tableLayout.setFixedRowScrollEnabled(true);
     }
 }
