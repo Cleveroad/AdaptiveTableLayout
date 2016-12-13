@@ -11,7 +11,7 @@ import java.util.Stack;
  */
 class Recycler {
 
-    private SparseArray<Stack<TableAdapter.TViewHolder>> mViewHolders;
+    private SparseArray<Stack<TableAdapter.ViewHolder>> mViewHolders;
 
     /**
      * Constructor
@@ -28,8 +28,8 @@ class Recycler {
      * @param viewHolder A viewHolder to add to the Recycler. It can no longer be used.
      * @param type       the type of the view.
      */
-    void pushRecycledView(@NonNull TableAdapter.TViewHolder viewHolder, int type) {
-        Stack<TableAdapter.TViewHolder> stack = mViewHolders.get(type);
+    void pushRecycledView(@NonNull TableAdapter.ViewHolder viewHolder, int type) {
+        Stack<TableAdapter.ViewHolder> stack = mViewHolders.get(type);
         if (stack == null) {
             stack = new Stack<>();
             mViewHolders.put(type, stack);
@@ -45,8 +45,8 @@ class Recycler {
      * not found.
      */
     @Nullable
-    TableAdapter.TViewHolder popRecycledViewHolder(int itemType) {
-        Stack<TableAdapter.TViewHolder> stack = mViewHolders.get(itemType);
+    TableAdapter.ViewHolder popRecycledViewHolder(int itemType) {
+        Stack<TableAdapter.ViewHolder> stack = mViewHolders.get(itemType);
         return stack == null || stack.isEmpty() ? null : stack.pop();
     }
 }

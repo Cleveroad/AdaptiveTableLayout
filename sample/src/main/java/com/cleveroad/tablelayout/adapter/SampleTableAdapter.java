@@ -34,40 +34,40 @@ public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHo
     @NonNull
     @Override
     public ViewHolderImpl onCreateViewHolder(@NonNull ViewGroup parent, int itemType) {
-        return new TTestViewHolder(mLayoutInflater.inflate(R.layout.item_card, parent, false));
+        return new TestViewHolder(mLayoutInflater.inflate(R.layout.item_card, parent, false));
     }
 
     @NonNull
     @Override
     public ViewHolderImpl onCreateColumnHeaderViewHolder(@NonNull ViewGroup parent) {
-        return new TTestHeaderColumnViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
+        return new TestHeaderColumnViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
     }
 
     @NonNull
     @Override
     public ViewHolderImpl onCreateRowHeaderViewHolder(@NonNull ViewGroup parent) {
-        return new TTestHeaderRowViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
+        return new TestHeaderRowViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
-        if (viewHolder instanceof TTestViewHolder) {
-            TTestViewHolder vh = (TTestViewHolder) viewHolder;
+        if (viewHolder instanceof TestViewHolder) {
+            TestViewHolder vh = (TestViewHolder) viewHolder;
             vh.tvText.setText("R" + row + "C" + column);
         }
     }
 
     @Override
     public void onBindHeaderColumnViewHolder(@NonNull ViewHolderImpl viewHolder, int column) {
-        if (viewHolder instanceof TTestHeaderColumnViewHolder) {
-            TTestHeaderColumnViewHolder vh = (TTestHeaderColumnViewHolder) viewHolder;
+        if (viewHolder instanceof TestHeaderColumnViewHolder) {
+            TestHeaderColumnViewHolder vh = (TestHeaderColumnViewHolder) viewHolder;
             vh.tvText.setText("C" + column);
         }
     }
 
     public void onBindHeaderRowViewHolder(@NonNull ViewHolderImpl viewHolder, int row) {
-        if (viewHolder instanceof TTestHeaderRowViewHolder) {
-            TTestHeaderRowViewHolder vh = (TTestHeaderRowViewHolder) viewHolder;
+        if (viewHolder instanceof TestHeaderRowViewHolder) {
+            TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
             vh.tvText.setText("R" + row);
         }
     }
@@ -96,10 +96,10 @@ public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHo
         return 160;
     }
 
-    public static class TTestViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+    public static class TestViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
         TextView tvText;
 
-        public TTestViewHolder(@NonNull View itemView) {
+        public TestViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
             itemView.setOnClickListener(this);
@@ -111,10 +111,10 @@ public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHo
         }
     }
 
-    public static class TTestHeaderColumnViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+    public static class TestHeaderColumnViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
         TextView tvText;
 
-        public TTestHeaderColumnViewHolder(@NonNull View itemView) {
+        public TestHeaderColumnViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
             itemView.setOnClickListener(this);
@@ -126,10 +126,10 @@ public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHo
         }
     }
 
-    public static class TTestHeaderRowViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+    public static class TestHeaderRowViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
         TextView tvText;
 
-        public TTestHeaderRowViewHolder(@NonNull View itemView) {
+        public TestHeaderRowViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
             itemView.setOnClickListener(this);

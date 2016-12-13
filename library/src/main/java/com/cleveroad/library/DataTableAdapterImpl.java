@@ -3,7 +3,7 @@ package com.cleveroad.library;
 import android.support.annotation.NonNull;
 import android.view.ViewGroup;
 
-class DataTableAdapterImpl<VH extends TableAdapter.TViewHolder> extends BaseTableAdapter<VH> implements DataTableAdapter<VH> {
+class DataTableAdapterImpl<VH extends TableAdapter.ViewHolder> extends BaseTableAdapter<VH> implements DataTableAdapter<VH> {
     private final TableAdapter<VH> mInner;
     private final int[] mColumnIds;
     private final int[] mRowIds;

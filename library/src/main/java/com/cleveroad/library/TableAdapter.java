@@ -5,7 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-public interface TableAdapter<VH extends TableAdapter.TViewHolder> extends TableDataSetObserver {
+public interface TableAdapter<VH extends TableAdapter.ViewHolder> extends TableDataSetObserver {
     /**
      * Register an observer that is called when changes happen to the data used
      * by this adapter.
@@ -38,7 +38,7 @@ public interface TableAdapter<VH extends TableAdapter.TViewHolder> extends Table
     int getColumnCount();
 
     /**
-     * Called when {@link TableLayout} needs a new {@link TableAdapter.TViewHolder} of the given type to represent
+     * Called when {@link TableLayout} needs a new {@link ViewHolder} of the given type to represent
      * an item.
      * <p>
      * This new ViewHolder should be constructed with a new View that can represent the items
@@ -46,7 +46,7 @@ public interface TableAdapter<VH extends TableAdapter.TViewHolder> extends Table
      * layout file.
      * <p>
      * The new ViewHolder will be used to display items of the adapter using
-     * {@link #onBindViewHolder(TableAdapter.TViewHolder, int, int)}. Since it will be re-used to display
+     * {@link #onBindViewHolder(ViewHolder, int, int)}. Since it will be re-used to display
      * different items in the data set, it is a good idea to cache references to sub views of
      * the View to avoid unnecessary {@link View#findViewById(int)} calls.
      *
@@ -54,7 +54,7 @@ public interface TableAdapter<VH extends TableAdapter.TViewHolder> extends Table
      *                 an adapter position.
      * @param itemType The view type of the new View.
      * @return A new ViewHolder that holds a View of the given view type.
-     * @see #onBindViewHolder(TableAdapter.TViewHolder, int, int)
+     * @see #onBindViewHolder(ViewHolder, int, int)
      */
     @NonNull
     VH onCreateViewHolder(@NonNull ViewGroup parent, int itemType);
@@ -68,10 +68,10 @@ public interface TableAdapter<VH extends TableAdapter.TViewHolder> extends Table
 
     /**
      * Called by {@link TableLayout} to display the data at the specified position. This method should
-     * update the contents of the {@link TableAdapter.TViewHolder#getItemView()} to reflect the item at the given
+     * update the contents of the {@link ViewHolder#getItemView()} to reflect the item at the given
      * position.
      *
-     * @param viewHolder The {@link TableAdapter.TViewHolder} which should be updated to represent the contents of the
+     * @param viewHolder The {@link ViewHolder} which should be updated to represent the contents of the
      *                   item at the given position in the data set.
      * @param row        The row index of the item within the adapter's data set.
      * @param column     The column index of the item within the adapter's data set.
@@ -95,7 +95,7 @@ public interface TableAdapter<VH extends TableAdapter.TViewHolder> extends Table
      * {@link TableLayout} calls this method right before clearing ViewHolder's internal data and
      * sending it to Recycler.
      *
-     * @param viewHolder The {@link TableAdapter.TViewHolder} for the view being recycled
+     * @param viewHolder The {@link ViewHolder} for the view being recycled
      */
     void onViewHolderRecycled(@NonNull VH viewHolder);
 
@@ -120,9 +120,9 @@ public interface TableAdapter<VH extends TableAdapter.TViewHolder> extends Table
     int getHeaderRowWidth();
 
     /**
-     * A {@link TableAdapter.TViewHolder} describes an item view and metadata about its place within the {@link TableLayout}.
+     * A {@link ViewHolder} describes an item view and metadata about its place within the {@link TableLayout}.
      */
-    interface TViewHolder {
+    interface ViewHolder {
         /**
          * @return item represents the item of the {@link TableLayout}
          */
