@@ -132,6 +132,16 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         }
     }
 
+    public void setAdapter(@Nullable DataTableAdapter adapter) {
+        mAdapter = adapter;
+        if (mAdapter != null) {
+            mManager.init(mAdapter.getRowCount(), mAdapter.getColumnCount());
+            if (mSettings.getLayoutHeight() != 0 && mSettings.getLayoutWidth() != 0) {
+                initItems();
+            }
+        }
+    }
+
     @Override
     public void scrollBy(int x, int y) {
         // block scroll one axle
