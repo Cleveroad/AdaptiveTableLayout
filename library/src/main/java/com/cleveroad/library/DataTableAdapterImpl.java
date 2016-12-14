@@ -59,6 +59,12 @@ class DataTableAdapterImpl<VH extends TableAdapter.ViewHolder> extends BaseTable
         return mInner.onCreateRowHeaderViewHolder(parent);
     }
 
+    @NonNull
+    @Override
+    public VH onCreateLeftTopHeaderViewHolder(@NonNull ViewGroup parent) {
+        return mInner.onCreateLeftTopHeaderViewHolder(parent);
+    }
+
     @Override
     public void onBindViewHolder(@NonNull VH viewHolder, int row, int column) {
         mInner.onBindViewHolder(viewHolder, mRowIds[row], mColumnIds[column]);
@@ -72,6 +78,11 @@ class DataTableAdapterImpl<VH extends TableAdapter.ViewHolder> extends BaseTable
     @Override
     public void onBindHeaderRowViewHolder(@NonNull VH viewHolder, int row) {
         mInner.onBindHeaderRowViewHolder(viewHolder, mRowIds[row]);
+    }
+
+    @Override
+    public void onBindLeftTopHeaderViewHolder(@NonNull VH viewHolder) {
+        mInner.onBindLeftTopHeaderViewHolder(viewHolder);
     }
 
     @Override

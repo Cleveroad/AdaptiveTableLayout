@@ -49,6 +49,12 @@ public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHo
         return new TestHeaderRowViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
     }
 
+    @NonNull
+    @Override
+    public ViewHolderImpl onCreateLeftTopHeaderViewHolder(@NonNull ViewGroup parent) {
+        return new TestHeaderLeftTopViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
         if (viewHolder instanceof TestViewHolder) {
@@ -69,6 +75,14 @@ public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHo
         if (viewHolder instanceof TestHeaderRowViewHolder) {
             TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
             vh.tvText.setText("R" + row);
+        }
+    }
+
+    @Override
+    public void onBindLeftTopHeaderViewHolder(@NonNull ViewHolderImpl viewHolder) {
+        if (viewHolder instanceof TestHeaderLeftTopViewHolder) {
+            TestHeaderLeftTopViewHolder vh = (TestHeaderLeftTopViewHolder) viewHolder;
+            vh.tvText.setText("LeftTop");
         }
     }
 
@@ -130,6 +144,21 @@ public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHo
         TextView tvText;
 
         public TestHeaderRowViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvText = (TextView) itemView.findViewById(R.id.tvText);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Log.e("ViewHolder", "Header Row onClick " + tvText.getText().toString());
+        }
+    }
+
+    public static class TestHeaderLeftTopViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+        TextView tvText;
+
+        public TestHeaderLeftTopViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
             itemView.setOnClickListener(this);

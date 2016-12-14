@@ -26,18 +26,20 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     public static final String TAG = "TTableLayout";
     private static final int SHIFT_VIEWS_THRESHOLD = 25; // TODO SIMPLE FILTER. CHANGE TO MORE SPECIFIC...
 
-    private final SparseMatrix<TableAdapter.ViewHolder> mViewHolders = new SparseMatrix<>();
+    private final MapMatrix<TableAdapter.ViewHolder> mViewHolders = new MapMatrix<>();
     private final HashMap<Integer, TableAdapter.ViewHolder> mHeaderColumnViewHolders = new HashMap<>();
     private final HashMap<Integer, TableAdapter.ViewHolder> mHeaderRowViewHolders = new HashMap<>();
-
     private final DragAndDropPoints mDragAndDropPoints = new DragAndDropPoints();
-
     private final TableState mState = new TableState();
     private final TableManager mManager = new TableManager();
-
     // need to fix columns bounce when dragging column
     private final Point mLastSwitchColumnsPoint = new Point();
     private final Rect mVisibleArea = new Rect();
+    /**
+     * View holder in the left top corner.
+     */
+    @Nullable
+    private TableAdapter.ViewHolder mLeftTopViewHolder;
     private DataTableAdapter<TableAdapter.ViewHolder> mAdapter;
     private Recycler mRecycler;
     private TableLayoutSettings mSettings;
@@ -339,6 +341,22 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             if (viewHolder == null && mAdapter != null) {
                 addViews(0, i, HOLDER_HEADER_COLUMN_TYPE);
             }
+        }
+
+        // add view left top view.
+        if (mLeftTopViewHolder == null && mAdapter != null) {
+            mLeftTopViewHolder = mAdapter.onCreateLeftTopHeaderViewHolder(TableLayout.this);
+            View view = mLeftTopViewHolder.getItemView();
+            view.setTag(R.id.tag_view_holder, mLeftTopViewHolder);
+            addView(view, 0);
+            mAdapter.onBindLeftTopHeaderViewHolder(mLeftTopViewHolder);
+            view.measure(
+                    MeasureSpec.makeMeasureSpec(mManager.getHeaderRowWidth(), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(mManager.getHeaderColumnHeight(), MeasureSpec.EXACTLY));
+            view.layout(0,
+                    0,
+                    mManager.getHeaderRowWidth(),
+                    mManager.getHeaderColumnHeight());
         }
     }
 

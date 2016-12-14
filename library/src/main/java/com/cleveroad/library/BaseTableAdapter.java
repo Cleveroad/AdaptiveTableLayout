@@ -167,7 +167,7 @@ public abstract class BaseTableAdapter<VH extends TableAdapter.ViewHolder> imple
             if (!(obj instanceof ViewHolder)) {
                 return false;
             }
-            ViewHolder vh = ((ViewHolder) obj);
+            ViewHolder vh = (ViewHolder) obj;
             return vh.getColumnIndex() == this.getColumnIndex() && vh.getRowIndex() == this.getRowIndex();
         }
 

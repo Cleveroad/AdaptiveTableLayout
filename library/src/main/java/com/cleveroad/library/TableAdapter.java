@@ -59,12 +59,15 @@ public interface TableAdapter<VH extends TableAdapter.ViewHolder> extends TableD
     @NonNull
     VH onCreateViewHolder(@NonNull ViewGroup parent, int itemType);
 
-
     @NonNull
     VH onCreateColumnHeaderViewHolder(@NonNull ViewGroup parent);
 
     @NonNull
     VH onCreateRowHeaderViewHolder(@NonNull ViewGroup parent);
+
+    @NonNull
+    VH onCreateLeftTopHeaderViewHolder(@NonNull ViewGroup parent);
+
 
     /**
      * Called by {@link TableLayout} to display the data at the specified position. This method should
@@ -81,6 +84,8 @@ public interface TableAdapter<VH extends TableAdapter.ViewHolder> extends TableD
     void onBindHeaderColumnViewHolder(@NonNull VH viewHolder, int column);
 
     void onBindHeaderRowViewHolder(@NonNull VH viewHolder, int row);
+
+    void onBindLeftTopHeaderViewHolder(@NonNull VH viewHolder);
 
     /**
      * Called when a view created by this adapter has been recycled.

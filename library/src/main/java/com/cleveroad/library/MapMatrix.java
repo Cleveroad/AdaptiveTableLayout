@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
 
-class SparseMatrix<TObj> {
+class MapMatrix<TObj> {
     private final HashMap<Integer, HashMap<Integer, TObj>> mData = new HashMap<>();
 
     void put(int row, int column, TObj item) {
