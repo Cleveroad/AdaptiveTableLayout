@@ -2,23 +2,41 @@ package com.cleveroad.tablelayout.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cleveroad.library.BaseTableAdapter;
+import com.cleveroad.library.adapter.BaseDataTableLayoutAdapter;
+import com.cleveroad.library.adapter.ViewHolderImpl;
 import com.cleveroad.tablelayout.R;
 
-public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHolderImpl> {
-    public static final int ROWS = 2_000_000;
-    public static final int COLUMNS = 2_000_000;
+public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<ViewHolderImpl> {
+    static final int ROWS = 200;
+    static final int COLUMNS = 200;
     private final LayoutInflater mLayoutInflater;
 
+    private final String mData[][] = new String[ROWS][COLUMNS];
+    private final String mColumns[] = new String[COLUMNS];
+    private final String mRows[] = new String[ROWS];
 
-    public SampleTableAdapter(Context context) {
+    public SampleDataTableLayoutAdapter(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
+
+        for (int columns = COLUMNS, i = 0; i < columns; i++) {
+            String columnText = "C" + (i + 1);
+            mColumns[i] = columnText;
+            for (int rows = ROWS, j = 0; j < rows; j++) {
+                String rowText = "R" + (j + 1);
+                mRows[j] = "R" + (j + 1);
+                mData[j][i] = rowText + columnText;
+            }
+        }
+    }
+
+    public void putItem(int row, int column, String item) {
+        mData[row][column] = item;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -59,7 +77,7 @@ public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
         if (viewHolder instanceof TestViewHolder) {
             TestViewHolder vh = (TestViewHolder) viewHolder;
-            vh.tvText.setText("R" + row + "C" + column);
+            vh.tvText.setText(mData[row][column]);
         }
     }
 
@@ -67,14 +85,14 @@ public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHo
     public void onBindHeaderColumnViewHolder(@NonNull ViewHolderImpl viewHolder, int column) {
         if (viewHolder instanceof TestHeaderColumnViewHolder) {
             TestHeaderColumnViewHolder vh = (TestHeaderColumnViewHolder) viewHolder;
-            vh.tvText.setText("C" + column);
+            vh.tvText.setText(mColumns[column]);
         }
     }
 
     public void onBindHeaderRowViewHolder(@NonNull ViewHolderImpl viewHolder, int row) {
         if (viewHolder instanceof TestHeaderRowViewHolder) {
             TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
-            vh.tvText.setText("R" + row);
+            vh.tvText.setText(mRows[row]);
         }
     }
 
@@ -110,63 +128,56 @@ public class SampleTableAdapter extends BaseTableAdapter<BaseTableAdapter.ViewHo
         return 160;
     }
 
-    public static class TestViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+    @Override
+    protected Object[][] getItems() {
+        return mData;
+    }
+
+    @Override
+    protected Object[] getRowHeaders() {
+        return mRows;
+    }
+
+    @Override
+    protected Object[] getColumnHeaders() {
+        return mColumns;
+    }
+
+    static class TestViewHolder extends ViewHolderImpl {
         TextView tvText;
 
         public TestViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
-            itemView.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View v) {
-            Log.e("ViewHolder", "onClick " + tvText.getText().toString());
-        }
     }
 
-    public static class TestHeaderColumnViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+    static class TestHeaderColumnViewHolder extends ViewHolderImpl {
         TextView tvText;
 
         public TestHeaderColumnViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
-            itemView.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View v) {
-            Log.e("ViewHolder", "Header onClick " + tvText.getText().toString());
-        }
     }
 
-    public static class TestHeaderRowViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+    static class TestHeaderRowViewHolder extends ViewHolderImpl {
         TextView tvText;
 
         public TestHeaderRowViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            Log.e("ViewHolder", "Header Row onClick " + tvText.getText().toString());
         }
     }
 
-    public static class TestHeaderLeftTopViewHolder extends BaseTableAdapter.ViewHolderImpl implements View.OnClickListener {
+    static class TestHeaderLeftTopViewHolder extends ViewHolderImpl {
         TextView tvText;
 
         public TestHeaderLeftTopViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            Log.e("ViewHolder", "Header Row onClick " + tvText.getText().toString());
         }
     }
 }

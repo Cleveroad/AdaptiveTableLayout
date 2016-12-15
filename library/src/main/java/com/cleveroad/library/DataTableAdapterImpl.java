@@ -3,7 +3,12 @@ package com.cleveroad.library;
 import android.support.annotation.NonNull;
 import android.view.ViewGroup;
 
-class DataTableAdapterImpl<VH extends TableAdapter.ViewHolder> extends BaseTableAdapter<VH> implements DataTableAdapter<VH> {
+import com.cleveroad.library.adapter.DataTableLayoutAdapter;
+import com.cleveroad.library.adapter.LinkedTableAdapter;
+import com.cleveroad.library.adapter.TableAdapter;
+import com.cleveroad.library.adapter.ViewHolder;
+
+class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH> implements DataTableLayoutAdapter<VH> {
     private final TableAdapter<VH> mInner;
     private final int[] mColumnIds;
     private final int[] mRowIds;

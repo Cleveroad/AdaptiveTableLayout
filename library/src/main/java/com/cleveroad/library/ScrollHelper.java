@@ -36,11 +36,12 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
 
     @Override
     public boolean onDown(MotionEvent e) {
-        return true;
+        return mListener == null || mListener.onDown(e);
     }
 
     @Override
     public void onShowPress(MotionEvent e) {
+
     }
 
     @Override
@@ -82,6 +83,8 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
     }
 
     interface ScrollHelperListener {
+
+        boolean onDown(MotionEvent e);
 
         boolean onSingleTapUp(MotionEvent e);
 

@@ -1,11 +1,25 @@
-package com.cleveroad.library;
+package com.cleveroad.library.adapter;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.cleveroad.library.TableDataSetObserver;
+import com.cleveroad.library.TableLayout;
 
-public interface TableAdapter<VH extends TableAdapter.ViewHolder> extends TableDataSetObserver {
+
+public interface TableAdapter<VH extends ViewHolder> extends TableDataSetObserver {
+    @Nullable
+    OnItemClickListener getOnItemClickListener();
+
+    void setOnItemClickListener(OnItemClickListener onItemClickListener);
+
+    @Nullable
+    OnItemLongClickListener getOnItemLongClickListener();
+
+    void setOnItemLongClickListener(@Nullable OnItemLongClickListener onItemLongClickListener);
+
     /**
      * Register an observer that is called when changes happen to the data used
      * by this adapter.
@@ -124,52 +138,4 @@ public interface TableAdapter<VH extends TableAdapter.ViewHolder> extends TableD
 
     int getHeaderRowWidth();
 
-    /**
-     * A {@link ViewHolder} describes an item view and metadata about its place within the {@link TableLayout}.
-     */
-    interface ViewHolder {
-        /**
-         * @return item represents the item of the {@link TableLayout}
-         */
-        @NonNull
-        View getItemView();
-
-        /**
-         * @return the type of the View
-         */
-        int getItemType();
-
-        /**
-         * @param itemType is the type of the View
-         */
-        void setItemType(int itemType);
-
-        /**
-         * @return the row index.
-         */
-        int getRowIndex();
-
-        /**
-         * @param rowIndex the row index.
-         * @return the row index.
-         * int getRowIndex();
-         * <p>
-         * /**
-         */
-        void setRowIndex(int rowIndex);
-
-        /**
-         * @return the column index.
-         */
-        int getColumnIndex();
-
-        /**
-         * @param columnIndex the column index.
-         */
-        void setColumnIndex(int columnIndex);
-
-        boolean isDragging();
-
-        void setIsDragging(boolean isDragging);
-    }
 }

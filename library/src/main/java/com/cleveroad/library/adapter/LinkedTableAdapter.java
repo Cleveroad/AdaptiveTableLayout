@@ -1,7 +1,11 @@
-package com.cleveroad.library;
+package com.cleveroad.library.adapter;
 
 import android.support.annotation.NonNull;
-import android.view.View;
+import android.support.annotation.Nullable;
+import android.widget.AdapterView;
+
+import com.cleveroad.library.TableDataSetObserver;
+import com.cleveroad.library.TableLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +15,39 @@ import java.util.List;
  * Common base class of common implementation for an {@link TableAdapter} that
  * can be used in {@link TableLayout}.
  */
-public abstract class BaseTableAdapter<VH extends TableAdapter.ViewHolder> implements TableAdapter<VH> {
+public abstract class LinkedTableAdapter<VH extends ViewHolder> implements TableAdapter<VH> {
     private final List<TableDataSetObserver> mTableDataSetObservers = new ArrayList<>();
+
+    @Nullable
+    protected OnItemClickListener mOnItemClickListener;
+    @Nullable
+    protected OnItemLongClickListener mOnItemLongClickListener;
+
+    @Override
+    @Nullable
+    public OnItemClickListener getOnItemClickListener() {
+        return mOnItemClickListener;
+    }
+
+    @Override
+    public void setOnItemClickListener(@Nullable OnItemClickListener onItemLongClickListener) {
+        mOnItemClickListener = onItemLongClickListener;
+    }
+
+    @Override
+    @Nullable
+    public OnItemLongClickListener getOnItemLongClickListener() {
+        return mOnItemLongClickListener;
+    }
+
+    @Override
+    public void setOnItemLongClickListener(@Nullable OnItemLongClickListener onItemLongClickListener) {
+        mOnItemLongClickListener = onItemLongClickListener;
+    }
+
+    public List<TableDataSetObserver> getTableDataSetObservers() {
+        return mTableDataSetObservers;
+    }
 
     /**
      * {@inheritDoc}
@@ -110,76 +145,6 @@ public abstract class BaseTableAdapter<VH extends TableAdapter.ViewHolder> imple
     @Override
     public void onViewHolderRecycled(@NonNull VH viewHolder) {
         //do nothing
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public static abstract class ViewHolderImpl implements ViewHolder {
-        private final View mItemView;
-        private int mRowIndex;
-        private int mColIndex;
-        private int mItemType;
-        private boolean mIsDragging;
-
-        public ViewHolderImpl(@NonNull View itemView) {
-            mItemView = itemView;
-        }
-
-        @NonNull
-        @Override
-        public View getItemView() {
-            return mItemView;
-        }
-
-        @Override
-        public int getRowIndex() {
-            return mRowIndex;
-        }
-
-        @Override
-        public void setRowIndex(int rowIndex) {
-            mRowIndex = rowIndex;
-        }
-
-        @Override
-        public int getColumnIndex() {
-            return mColIndex;
-        }
-
-        @Override
-        public void setColumnIndex(int columnIndex) {
-            mColIndex = columnIndex;
-        }
-
-        @Override
-        public int getItemType() {
-            return mItemType;
-        }
-
-        @Override
-        public void setItemType(int itemType) {
-            mItemType = itemType;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof ViewHolder)) {
-                return false;
-            }
-            ViewHolder vh = (ViewHolder) obj;
-            return vh.getColumnIndex() == this.getColumnIndex() && vh.getRowIndex() == this.getRowIndex();
-        }
-
-        @Override
-        public boolean isDragging() {
-            return mIsDragging;
-        }
-
-        @Override
-        public void setIsDragging(boolean isDragging) {
-            mIsDragging = isDragging;
-        }
     }
 
 
