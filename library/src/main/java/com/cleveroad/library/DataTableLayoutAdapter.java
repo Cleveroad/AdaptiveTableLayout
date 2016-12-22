@@ -1,6 +1,6 @@
-package com.cleveroad.library.adapter;
+package com.cleveroad.library;
 
-public interface DataTableLayoutAdapter<VH extends ViewHolder> extends TableAdapter<VH> {
+interface DataTableLayoutAdapter<VH extends ViewHolder> extends TableAdapter<VH> {
     /**
      * Method calls when need to need to switch 2 columns with each other in the data matrix
      *

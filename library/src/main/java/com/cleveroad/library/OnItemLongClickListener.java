@@ -1,4 +1,4 @@
-package com.cleveroad.library.adapter;
+package com.cleveroad.library;
 
 public interface OnItemLongClickListener {
     /**

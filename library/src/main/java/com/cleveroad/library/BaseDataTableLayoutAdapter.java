@@ -1,4 +1,4 @@
-package com.cleveroad.library.adapter;
+package com.cleveroad.library;
 
 public abstract class BaseDataTableLayoutAdapter<VH extends ViewHolder> extends LinkedTableAdapter<VH> implements
         DataTableLayoutAdapter<VH> {

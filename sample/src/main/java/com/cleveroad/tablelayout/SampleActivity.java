@@ -5,8 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.cleveroad.library.TableLayout;
-import com.cleveroad.library.adapter.OnItemClickListener;
-import com.cleveroad.library.adapter.OnItemLongClickListener;
+import com.cleveroad.library.OnItemClickListener;
+import com.cleveroad.library.OnItemLongClickListener;
 import com.cleveroad.tablelayout.adapter.SampleDataTableLayoutAdapter;
 
 //import com.cleveroad.library.TableLayoutOld;

@@ -12,7 +12,7 @@ import java.lang.annotation.RetentionPolicy;
         ItemType.ITEM
 })
 @Retention(RetentionPolicy.SOURCE)
-public @interface ItemType {
+@interface ItemType {
     /**
      * Top left header
      */

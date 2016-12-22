@@ -1,4 +1,4 @@
-package com.cleveroad.library.adapter;
+package com.cleveroad.library;
 
 import android.support.annotation.NonNull;
 import android.view.View;

@@ -4,8 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
 
-import com.cleveroad.library.adapter.ViewHolder;
-
 import java.util.Stack;
 
 /**

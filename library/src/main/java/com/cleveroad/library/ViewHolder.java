@@ -1,14 +1,12 @@
-package com.cleveroad.library.adapter;
+package com.cleveroad.library;
 
 import android.support.annotation.NonNull;
 import android.view.View;
 
-import com.cleveroad.library.TableLayout;
-
 /**
  * A {@link ViewHolder} describes an item view and metadata about its place within the {@link TableLayout}.
  */
-public interface ViewHolder {
+interface ViewHolder {
     /**
      * @return item represents the item of the {@link TableLayout}
      */

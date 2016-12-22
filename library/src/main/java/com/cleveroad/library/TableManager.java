@@ -1,6 +1,6 @@
 package com.cleveroad.library;
 
-public class TableManager {
+class TableManager {
     private long mFullWidth;
     private long mFullHeight;
     private int[] mColumnWidths;
@@ -9,12 +9,12 @@ public class TableManager {
     private int mHeaderColumnHeight;
     private int mHeaderRowWidth;
 
-    public void init(int rowCount, int columnCount) {
+    void init(int rowCount, int columnCount) {
         mRowHeights = new int[rowCount];
         mColumnWidths = new int[columnCount];
     }
 
-    public void invalidate() {
+    void invalidate() {
         mFullWidth = 0;
         for (int itemWidth : mColumnWidths) {
             mFullWidth += itemWidth;
@@ -26,15 +26,15 @@ public class TableManager {
         }
     }
 
-    public int getColumnWidth(int column) {
+    int getColumnWidth(int column) {
         return mColumnWidths[column];
     }
 
-    public void putColumnWidth(int column, int width) {
+    void putColumnWidth(int column, int width) {
         mColumnWidths[column] = width;
     }
 
-    public int getColumnsWidth(int from, int to) {
+    int getColumnsWidth(int from, int to) {
         int width = 0;
         for (int i = from; i < to && mColumnWidths != null; i++) {
             width += mColumnWidths[i];
@@ -42,23 +42,23 @@ public class TableManager {
         return width;
     }
 
-    public int getColumnCount() {
+    int getColumnCount() {
         if (mColumnWidths != null) {
             return mColumnWidths.length;
         }
         return 0;
     }
 
-    public int getRowHeight(int row) {
+    int getRowHeight(int row) {
         return mRowHeights[row];
     }
 
-    public void putRowHeight(int row, int height) {
+    void putRowHeight(int row, int height) {
         mRowHeights[row] = height;
 
     }
 
-    public int getRowsHeight(int from, int to) {
+    int getRowsHeight(int from, int to) {
         int height = 0;
         for (int i = from; i < to && mRowHeights != null; i++) {
             height += mRowHeights[i];
@@ -66,18 +66,18 @@ public class TableManager {
         return height;
     }
 
-    public int getRowCount() {
+    int getRowCount() {
         if (mRowHeights != null) {
             return mRowHeights.length;
         }
         return 0;
     }
 
-    public long getFullWidth() {
+    long getFullWidth() {
         return mFullWidth + mHeaderRowWidth;
     }
 
-    public long getFullHeight() {
+    long getFullHeight() {
         return mFullHeight + mHeaderColumnHeight;
     }
 
@@ -87,7 +87,7 @@ public class TableManager {
      * @param x coordinate
      * @return column number
      */
-    public int getColumnByX(int x) {
+    int getColumnByX(int x) {
         int sum = 0;
         x -= mHeaderRowWidth;
         if (x <= sum) {
@@ -111,7 +111,7 @@ public class TableManager {
      * @param y coordinate
      * @return row number
      */
-    public int getRowByY(int y) {
+    int getRowByY(int y) {
         int sum = 0;
         y -= mHeaderColumnHeight;
         if (y <= sum) {
@@ -130,19 +130,19 @@ public class TableManager {
         return mRowHeights.length - 1;
     }
 
-    public int getHeaderColumnHeight() {
+    int getHeaderColumnHeight() {
         return mHeaderColumnHeight;
     }
 
-    public void setHeaderColumnHeight(int headerColumnHeight) {
+    void setHeaderColumnHeight(int headerColumnHeight) {
         mHeaderColumnHeight = headerColumnHeight;
     }
 
-    public int getHeaderRowWidth() {
+    int getHeaderRowWidth() {
         return mHeaderRowWidth;
     }
 
-    public void setHeaderRowWidth(int headerRowWidth) {
+    void setHeaderRowWidth(int headerRowWidth) {
         mHeaderRowWidth = headerRowWidth;
     }
 

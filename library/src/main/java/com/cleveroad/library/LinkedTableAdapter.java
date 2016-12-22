@@ -1,10 +1,7 @@
-package com.cleveroad.library.adapter;
+package com.cleveroad.library;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import com.cleveroad.library.TableDataSetObserver;
-import com.cleveroad.library.TableLayout;
 
 import java.util.ArrayList;
 import java.util.List;

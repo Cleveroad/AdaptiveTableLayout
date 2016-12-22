@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cleveroad.library.adapter.BaseDataTableLayoutAdapter;
-import com.cleveroad.library.adapter.ViewHolderImpl;
+import com.cleveroad.library.BaseDataTableLayoutAdapter;
+import com.cleveroad.library.ViewHolderImpl;
 import com.cleveroad.tablelayout.R;
 
 public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<ViewHolderImpl> {

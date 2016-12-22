@@ -14,12 +14,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
-import com.cleveroad.library.adapter.DataTableLayoutAdapter;
-import com.cleveroad.library.adapter.OnItemClickListener;
-import com.cleveroad.library.adapter.OnItemLongClickListener;
-import com.cleveroad.library.adapter.TableAdapter;
-import com.cleveroad.library.adapter.ViewHolder;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;

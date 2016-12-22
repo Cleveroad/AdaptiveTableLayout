@@ -3,11 +3,6 @@ package com.cleveroad.library;
 import android.support.annotation.NonNull;
 import android.view.ViewGroup;
 
-import com.cleveroad.library.adapter.DataTableLayoutAdapter;
-import com.cleveroad.library.adapter.LinkedTableAdapter;
-import com.cleveroad.library.adapter.TableAdapter;
-import com.cleveroad.library.adapter.ViewHolder;
-
 /**
  * This is TableAdapter decorator (wrapper).
  * It makes it possible to change the rows and columns without data mutations.

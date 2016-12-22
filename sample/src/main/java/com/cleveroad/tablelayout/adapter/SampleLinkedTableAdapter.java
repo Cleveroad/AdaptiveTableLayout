@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cleveroad.library.adapter.LinkedTableAdapter;
-import com.cleveroad.library.adapter.ViewHolderImpl;
+import com.cleveroad.library.LinkedTableAdapter;
+import com.cleveroad.library.ViewHolderImpl;
 import com.cleveroad.tablelayout.R;
 
 public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
