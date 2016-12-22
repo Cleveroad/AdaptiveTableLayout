@@ -2,6 +2,10 @@ package com.cleveroad.library;
 
 import android.graphics.Point;
 
+/**
+ * Helps implement dragging feature.
+ * Contains start, offset and end point in drag and drop mode.
+ */
 class DragAndDropPoints {
     /**
      * Start dragging touch point
@@ -23,7 +27,7 @@ class DragAndDropPoints {
         mEnd = new Point();
     }
 
-     Point getStart() {
+    Point getStart() {
         return mStart;
     }
 
@@ -31,19 +35,19 @@ class DragAndDropPoints {
         return mOffset;
     }
 
-     Point getEnd() {
+    Point getEnd() {
         return mEnd;
     }
 
-     void setStart(int x, int y) {
+    void setStart(int x, int y) {
         mStart.set(x, y);
     }
 
-     void setOffset(int x, int y) {
+    void setOffset(int x, int y) {
         mOffset.set(x, y);
     }
 
-     void setEnd(int x, int y) {
+    void setEnd(int x, int y) {
         mEnd.set(x, y);
     }
 

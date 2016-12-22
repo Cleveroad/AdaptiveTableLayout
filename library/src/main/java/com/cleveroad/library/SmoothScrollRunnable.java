@@ -8,7 +8,13 @@ import android.widget.Scroller;
  * {@see http://stackoverflow.com/a/6219382/842697 }
  */
 class SmoothScrollRunnable implements Runnable {
+    /**
+     * Scrollable view
+     */
     private final View mView;
+    /**
+     * Need to calculate offset.
+     */
     private Scroller mScroller;
 
     private int mLastX;
@@ -20,9 +26,14 @@ class SmoothScrollRunnable implements Runnable {
     }
 
     void start(int initX, int initY, int initialVelocityX, int initialVelocityY, int maxX, int maxY) {
+        // start smooth scrolling
         mScroller.fling(initX, initY, initialVelocityX, initialVelocityY, 0, maxX, 0, maxY);
+
+        // save new data
         mLastX = initX;
         mLastY = initY;
+
+        // run self
         mView.post(this);
     }
 
@@ -31,7 +42,7 @@ class SmoothScrollRunnable implements Runnable {
         if (mScroller.isFinished()) {
             return;
         }
-
+        // calculate offset
         boolean more = mScroller.computeScrollOffset();
         int x = mScroller.getCurrX();
         int y = mScroller.getCurrY();
@@ -44,6 +55,7 @@ class SmoothScrollRunnable implements Runnable {
         }
 
         if (more) {
+            // run self
             mView.post(this);
         }
     }

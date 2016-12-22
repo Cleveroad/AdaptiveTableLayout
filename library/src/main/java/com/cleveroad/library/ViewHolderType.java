@@ -6,13 +6,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @IntDef({
-        ItemType.FIRST_HEADER,
-        ItemType.ROW_HEADER,
-        ItemType.COLUMN_HEADER,
-        ItemType.ITEM
+        ViewHolderType.FIRST_HEADER,
+        ViewHolderType.ROW_HEADER,
+        ViewHolderType.COLUMN_HEADER,
+        ViewHolderType.ITEM
 })
+/**
+ * Type of adapter's ViewHolders
+ */
 @Retention(RetentionPolicy.SOURCE)
-@interface ItemType {
+@interface ViewHolderType {
     /**
      * Top left header
      */

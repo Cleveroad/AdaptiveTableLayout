@@ -72,12 +72,13 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
     boolean onTouch(MotionEvent event) {
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
+            // stop drag and drop mode
             isDragging = false;
             if (mListener != null) {
                 mListener.onActionUp(event);
             }
         }
-
+        // connect GestureDetector with our touch events
         return mGestureDetectorCompat.onTouchEvent(event);
     }
 
@@ -92,7 +93,7 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
         boolean onSingleTapUp(MotionEvent e);
 
         /**
-         * @param e
+         * @param e MotionEvent
          * @return true if need to start dragging mode
          */
         boolean onLongPress(MotionEvent e);

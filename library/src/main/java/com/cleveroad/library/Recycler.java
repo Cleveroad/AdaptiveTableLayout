@@ -4,14 +4,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 /**
  * The Recycler facilitates reuse of mViewHolders across layouts.
  */
 class Recycler {
 
-    private SparseArray<Stack<ViewHolder>> mViewHolders;
+    private SparseArray<Deque<ViewHolder>> mViewHolders;
 
     /**
      * Constructor
@@ -29,12 +30,12 @@ class Recycler {
      * @param type       the type of the view.
      */
     void pushRecycledView(@NonNull ViewHolder viewHolder, int type) {
-        Stack<ViewHolder> stack = mViewHolders.get(type);
-        if (stack == null) {
-            stack = new Stack<>();
-            mViewHolders.put(type, stack);
+        Deque<ViewHolder> deque = mViewHolders.get(type);
+        if (deque == null) {
+            deque = new ArrayDeque<>();
+            mViewHolders.put(type, deque);
         }
-        stack.push(viewHolder);
+        deque.push(viewHolder);
     }
 
     /**
@@ -46,7 +47,7 @@ class Recycler {
      */
     @Nullable
     ViewHolder popRecycledViewHolder(int itemType) {
-        Stack<ViewHolder> stack = mViewHolders.get(itemType);
-        return stack == null || stack.isEmpty() ? null : stack.pop();
+        Deque<ViewHolder> deque = mViewHolders.get(itemType);
+        return deque == null || deque.isEmpty() ? null : deque.pop();
     }
 }
