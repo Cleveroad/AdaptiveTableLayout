@@ -2,16 +2,32 @@ package com.cleveroad.library;
 
 import android.graphics.Point;
 
-public class DragAndDropPoints {
-    private final Point mStart = new Point();
-    private final Point mOffset = new Point();
-    private final Point mEnd = new Point();
+class DragAndDropPoints {
+    /**
+     * Start dragging touch point
+     */
+    private final Point mStart;
+    /**
+     * Screen offset (touch position)
+     */
+    private final Point mOffset;
+
+    /**
+     * End dragging touch point
+     */
+    private final Point mEnd;
+
+    DragAndDropPoints() {
+        mStart = new Point();
+        mOffset = new Point();
+        mEnd = new Point();
+    }
 
     public Point getStart() {
         return mStart;
     }
 
-    public Point getOffset() {
+    Point getOffset() {
         return mOffset;
     }
 
@@ -24,13 +40,11 @@ public class DragAndDropPoints {
     }
 
     public void setOffset(int x, int y) {
-        mOffset.x = x;
-        mOffset.y = y;
+        mOffset.set(x, y);
     }
 
     public void setEnd(int x, int y) {
-        mEnd.x = x;
-        mEnd.y = y;
+        mEnd.set(x, y);
     }
 
 }
