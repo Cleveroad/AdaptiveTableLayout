@@ -1,8 +1,0 @@
-package com.cleveroad.library;
-
-interface DataTableAdapter<VH extends TableAdapter.TViewHolder> extends TableAdapter<VH> {
-
-    void changeColumns(int columnIndex, int columnToIndex);
-
-    void changeRows(int rowIndex, int rowToIndex);
-}

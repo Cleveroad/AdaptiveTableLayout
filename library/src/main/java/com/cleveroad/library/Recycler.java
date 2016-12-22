@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
 
+import com.cleveroad.library.adapter.ViewHolder;
+
 import java.util.Stack;
 
 /**
@@ -11,7 +13,7 @@ import java.util.Stack;
  */
 class Recycler {
 
-    private SparseArray<Stack<TableAdapter.TViewHolder>> mViewHolders;
+    private SparseArray<Stack<ViewHolder>> mViewHolders;
 
     /**
      * Constructor
@@ -28,8 +30,8 @@ class Recycler {
      * @param viewHolder A viewHolder to add to the Recycler. It can no longer be used.
      * @param type       the type of the view.
      */
-    void pushRecycledView(@NonNull TableAdapter.TViewHolder viewHolder, @ItemType int type) {
-        Stack<TableAdapter.TViewHolder> stack = mViewHolders.get(type);
+    void pushRecycledView(@NonNull ViewHolder viewHolder, int type) {
+        Stack<ViewHolder> stack = mViewHolders.get(type);
         if (stack == null) {
             stack = new Stack<>();
             mViewHolders.put(type, stack);
@@ -45,8 +47,8 @@ class Recycler {
      * not found.
      */
     @Nullable
-    TableAdapter.TViewHolder popRecycledViewHolder(@ItemType int itemType) {
-        Stack<TableAdapter.TViewHolder> stack = mViewHolders.get(itemType);
+    ViewHolder popRecycledViewHolder(int itemType) {
+        Stack<ViewHolder> stack = mViewHolders.get(itemType);
         return stack == null || stack.isEmpty() ? null : stack.pop();
     }
 }
