@@ -36,10 +36,5 @@ public interface TableDataSetObserver {
      */
     void notifyColumnChanged(int columnIndex);
 
-    /**
-     * Notify any registered observers that the item at
-     */
-    void notifyHeadViewChanged();
-
 
 }

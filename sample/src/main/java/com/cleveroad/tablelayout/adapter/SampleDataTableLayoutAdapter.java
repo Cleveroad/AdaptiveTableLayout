@@ -36,7 +36,7 @@ public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<Vie
 
     public void putItem(int row, int column, String item) {
         mData[row][column] = item;
-        notifyDataSetChanged();
+        notifyItemChanged(row, column);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<Vie
 
     @NonNull
     @Override
-    public ViewHolderImpl onCreateViewHolder(@NonNull ViewGroup parent, int itemType) {
+    public ViewHolderImpl onCreateViewHolder(@NonNull ViewGroup parent) {
         return new TestViewHolder(mLayoutInflater.inflate(R.layout.item_card, parent, false));
     }
 
@@ -126,6 +126,11 @@ public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<Vie
     @Override
     public int getHeaderRowWidth() {
         return 160;
+    }
+
+    @Override
+    public void onViewHolderRecycled(@NonNull ViewHolderImpl viewHolder) {
+
     }
 
     @Override

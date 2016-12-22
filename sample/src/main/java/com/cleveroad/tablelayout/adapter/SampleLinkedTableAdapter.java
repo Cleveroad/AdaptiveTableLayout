@@ -16,7 +16,6 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     public static final int COLUMNS = 2_000_000;
     private final LayoutInflater mLayoutInflater;
 
-
     public SampleLinkedTableAdapter(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
     }
@@ -33,7 +32,7 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     @NonNull
     @Override
-    public ViewHolderImpl onCreateViewHolder(@NonNull ViewGroup parent, int itemType) {
+    public ViewHolderImpl onCreateViewHolder(@NonNull ViewGroup parent) {
         return new TestViewHolder(mLayoutInflater.inflate(R.layout.item_card, parent, false));
     }
 
@@ -110,7 +109,12 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
         return 160;
     }
 
-    static class TestViewHolder extends ViewHolderImpl {
+    @Override
+    public void onViewHolderRecycled(@NonNull ViewHolderImpl viewHolder) {
+
+    }
+
+    private static class TestViewHolder extends ViewHolderImpl {
         TextView tvText;
 
         public TestViewHolder(@NonNull View itemView) {
@@ -119,7 +123,7 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
         }
     }
 
-    static class TestHeaderColumnViewHolder extends ViewHolderImpl {
+    private static class TestHeaderColumnViewHolder extends ViewHolderImpl {
         TextView tvText;
 
         public TestHeaderColumnViewHolder(@NonNull View itemView) {
@@ -129,20 +133,20 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     }
 
-    static class TestHeaderRowViewHolder extends ViewHolderImpl {
+    private static class TestHeaderRowViewHolder extends ViewHolderImpl {
         TextView tvText;
 
-        public TestHeaderRowViewHolder(@NonNull View itemView) {
+        TestHeaderRowViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
 
     }
 
-    static class TestHeaderLeftTopViewHolder extends ViewHolderImpl {
+    private static class TestHeaderLeftTopViewHolder extends ViewHolderImpl {
         TextView tvText;
 
-        public TestHeaderLeftTopViewHolder(@NonNull View itemView) {
+        TestHeaderLeftTopViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }

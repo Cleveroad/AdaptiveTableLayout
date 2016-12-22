@@ -3,31 +3,29 @@ package com.cleveroad.library;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v4.view.GestureDetectorCompat;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
 
 class ScrollHelper implements GestureDetector.OnGestureListener {
-    static final String TAG = "ScrollHelper";
+    /**
+     * Gesture detector -> Scroll, Fling, Tap, LongPress, ...
+     * Using when user need to scroll table
+     */
     private final GestureDetectorCompat mGestureDetectorCompat;
-    private final GestureDetectorCompat mGestureDetectorLongPressCompat;
+
+    /**
+     * ScrollHelper's dragging state.
+     * Change when user emit LongPress on column or row.
+     */
     private boolean isDragging = false;
+
     @Nullable
     private ScrollHelperListener mListener;
 
     ScrollHelper(Context context) {
         mGestureDetectorCompat = new GestureDetectorCompat(context, this);
-        mGestureDetectorLongPressCompat = new GestureDetectorCompat(context, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public void onLongPress(MotionEvent e) {
-                if (mListener != null) {
-                    isDragging = mListener.onLongPress(e);
-                }
-            }
-        });
-        mGestureDetectorCompat.setIsLongpressEnabled(false);
-        mGestureDetectorLongPressCompat.setIsLongpressEnabled(true);
+        mGestureDetectorCompat.setIsLongpressEnabled(true);
     }
 
     void setListener(@Nullable ScrollHelperListener listener) {
@@ -36,36 +34,42 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
 
     @Override
     public boolean onDown(MotionEvent e) {
+        // catch down action
         return mListener == null || mListener.onDown(e);
     }
 
     @Override
     public void onShowPress(MotionEvent e) {
-
+        // nothing to do
     }
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
+        // catch click action
         return mListener != null && mListener.onSingleTapUp(e);
     }
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        // catch scroll action
         return mListener != null && mListener.onScroll(e1, e2, distanceX, distanceY);
     }
 
     @Override
     public void onLongPress(MotionEvent e) {
-        Log.e(TAG, "onLongPress");
+        // catch long click action
+        if (mListener != null) {
+            isDragging = mListener.onLongPress(e);
+        }
     }
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        // catch fling action
         return mListener == null || mListener.onFling(e1, e2, velocityX, velocityY);
     }
 
     boolean onTouch(MotionEvent event) {
-        mGestureDetectorLongPressCompat.onTouchEvent(event);
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
             isDragging = false;
@@ -77,7 +81,6 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
         return mGestureDetectorCompat.onTouchEvent(event);
     }
 
-
     boolean isDragging() {
         return isDragging;
     }
@@ -88,6 +91,10 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
 
         boolean onSingleTapUp(MotionEvent e);
 
+        /**
+         * @param e
+         * @return true if need to start dragging mode
+         */
         boolean onLongPress(MotionEvent e);
 
         boolean onActionUp(MotionEvent e);

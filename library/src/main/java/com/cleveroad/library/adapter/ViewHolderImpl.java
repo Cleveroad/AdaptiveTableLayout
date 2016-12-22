@@ -7,10 +7,25 @@ import android.view.View;
  * {@inheritDoc}
  */
 public abstract class ViewHolderImpl implements ViewHolder {
+    /**
+     * Holder view
+     */
     private final View mItemView;
+    /**
+     * ViewHolder's table row index
+     */
     private int mRowIndex;
+    /**
+     * ViewHolder's table column index
+     */
     private int mColIndex;
+    /**
+     * ViewHolder's table item type param
+     */
     private int mItemType;
+    /**
+     * ViewHolder's dragging flag
+     */
     private boolean mIsDragging;
 
     public ViewHolderImpl(@NonNull View itemView) {
@@ -51,6 +66,16 @@ public abstract class ViewHolderImpl implements ViewHolder {
     @Override
     public void setItemType(int itemType) {
         mItemType = itemType;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mItemView.hashCode();
+        result = 31 * result + mRowIndex;
+        result = 31 * result + mColIndex;
+        result = 31 * result + mItemType;
+        result = 31 * result + (mIsDragging ? 1 : 0);
+        return result;
     }
 
     @Override

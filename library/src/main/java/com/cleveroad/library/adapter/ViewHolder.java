@@ -45,7 +45,14 @@ public interface ViewHolder {
      */
     void setColumnIndex(int columnIndex);
 
+
+    /**
+     * @return dragging flag
+     */
     boolean isDragging();
 
+    /**
+     * @param isDragging dragging param
+     */
     void setIsDragging(boolean isDragging);
 }

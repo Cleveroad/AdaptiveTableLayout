@@ -2,22 +2,41 @@ package com.cleveroad.library.adapter;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.cleveroad.library.TableDataSetObserver;
 import com.cleveroad.library.TableLayout;
 
-
+/**
+ * Base TableAdapter Interface for TableLayout's adapter.
+ *
+ * @param <VH> Implementation of ViewHolder {@link ViewHolder}
+ */
 public interface TableAdapter<VH extends ViewHolder> extends TableDataSetObserver {
+    /**
+     * @return Item click listener
+     */
     @Nullable
     OnItemClickListener getOnItemClickListener();
 
-    void setOnItemClickListener(OnItemClickListener onItemClickListener);
+    /**
+     * Set new item click listener
+     *
+     * @param onItemClickListener new item click listener
+     */
+    void setOnItemClickListener(@Nullable OnItemClickListener onItemClickListener);
 
+    /**
+     * @return Item long click listener
+     */
     @Nullable
     OnItemLongClickListener getOnItemLongClickListener();
 
+    /**
+     * Set new item long click listener
+     *
+     * @param onItemLongClickListener new item long click listener
+     */
     void setOnItemLongClickListener(@Nullable OnItemLongClickListener onItemLongClickListener);
 
     /**
@@ -52,33 +71,46 @@ public interface TableAdapter<VH extends ViewHolder> extends TableDataSetObserve
     int getColumnCount();
 
     /**
-     * Called when {@link TableLayout} needs a new {@link ViewHolder} of the given type to represent
-     * an item.
-     * <p>
-     * This new ViewHolder should be constructed with a new View that can represent the items
-     * of the given type. You can either create a new View manually or inflate it from an XML
-     * layout file.
-     * <p>
-     * The new ViewHolder will be used to display items of the adapter using
-     * {@link #onBindViewHolder(ViewHolder, int, int)}. Since it will be re-used to display
-     * different items in the data set, it is a good idea to cache references to sub views of
-     * the View to avoid unnecessary {@link View#findViewById(int)} calls.
+     * Called when {@link TableLayout} needs a new ITEM {@link ViewHolder}
      *
-     * @param parent   The ViewGroup into which the new View will be added after it is bound to
-     *                 an adapter position.
-     * @param itemType The view type of the new View.
+     * @param parent The ViewGroup into which the new View will be added after it is bound to
+     *               an adapter position.
      * @return A new ViewHolder that holds a View of the given view type.
      * @see #onBindViewHolder(ViewHolder, int, int)
      */
     @NonNull
-    VH onCreateViewHolder(@NonNull ViewGroup parent, int itemType);
+    VH onCreateViewHolder(@NonNull ViewGroup parent);
 
+    /**
+     * Called when {@link TableLayout} needs a new COLUMN HEADER ITEM {@link ViewHolder}
+     *
+     * @param parent The ViewGroup into which the new View will be added after it is bound to
+     *               an adapter position.
+     * @return A new ViewHolder that holds a View of the given view type.
+     * @see #onBindHeaderColumnViewHolder(ViewHolder, int)
+     */
     @NonNull
     VH onCreateColumnHeaderViewHolder(@NonNull ViewGroup parent);
 
+    /**
+     * Called when {@link TableLayout} needs a new ROW HEADER ITEM {@link ViewHolder}
+     *
+     * @param parent The ViewGroup into which the new View will be added after it is bound to
+     *               an adapter position.
+     * @return A new ViewHolder that holds a View of the given view type.
+     * @see #onBindHeaderRowViewHolder(ViewHolder, int)
+     */
     @NonNull
     VH onCreateRowHeaderViewHolder(@NonNull ViewGroup parent);
 
+    /**
+     * Called when {@link TableLayout} needs a new LEFT TOP HEADER ITEM {@link ViewHolder}
+     *
+     * @param parent The ViewGroup into which the new View will be added after it is bound to
+     *               an adapter position.
+     * @return A new ViewHolder that holds a View of the given view type.
+     * @see #onBindLeftTopHeaderViewHolder(ViewHolder)
+     */
     @NonNull
     VH onCreateLeftTopHeaderViewHolder(@NonNull ViewGroup parent);
 
@@ -88,18 +120,76 @@ public interface TableAdapter<VH extends ViewHolder> extends TableDataSetObserve
      * update the contents of the {@link ViewHolder#getItemView()} to reflect the item at the given
      * position.
      *
-     * @param viewHolder The {@link ViewHolder} which should be updated to represent the contents of the
+     * @param viewHolder The ITEM {@link ViewHolder} which should be updated to represent the contents of the
      *                   item at the given position in the data set.
      * @param row        The row index of the item within the adapter's data set.
      * @param column     The column index of the item within the adapter's data set.
      */
     void onBindViewHolder(@NonNull VH viewHolder, int row, int column);
 
+    /**
+     * Called by {@link TableLayout} to display the data at the specified position. This method should
+     * update the contents of the {@link ViewHolder#getItemView()} to reflect the item at the given
+     * position.
+     *
+     * @param viewHolder The COLUMN HEADER ITEM {@link ViewHolder} which should be updated to represent the contents of the
+     *                   item at the given position in the data set.
+     * @param column     The column index of the item within the adapter's data set.
+     */
     void onBindHeaderColumnViewHolder(@NonNull VH viewHolder, int column);
 
+    /**
+     * Called by {@link TableLayout} to display the data at the specified position. This method should
+     * update the contents of the {@link ViewHolder#getItemView()} to reflect the item at the given
+     * position.
+     *
+     * @param viewHolder The ROW HEADER ITEM {@link ViewHolder} which should be updated to represent the contents of the
+     *                   item at the given position in the data set.
+     * @param row        The row index of the item within the adapter's data set.
+     */
     void onBindHeaderRowViewHolder(@NonNull VH viewHolder, int row);
 
+    /**
+     * Called by {@link TableLayout} to display the data at the specified position. This method should
+     * update the contents of the {@link ViewHolder#getItemView()} to reflect the item at the given
+     * position.
+     *
+     * @param viewHolder The TOP LEFT HEADER ITEM{@link ViewHolder} which should be updated to represent the contents of the
+     *                   item at the given position in the data set.
+     */
     void onBindLeftTopHeaderViewHolder(@NonNull VH viewHolder);
+
+
+    /**
+     * Return the width of the column.
+     *
+     * @param column the column index.
+     * @return The width of the column, in pixels.
+     */
+    int getColumnWidth(int column);
+
+
+    /**
+     * Return the header column height.
+     *
+     * @return The header height of the columns, in pixels.
+     */
+    int getHeaderColumnHeight();
+
+    /**
+     * Return the height of the row.
+     *
+     * @param row the row index.
+     * @return The height of the row, in pixels.
+     */
+    int getRowHeight(int row);
+
+    /**
+     * Return the header row width.
+     *
+     * @return The header width of the rows, in pixels.
+     */
+    int getHeaderRowWidth();
 
     /**
      * Called when a view created by this adapter has been recycled.
@@ -118,24 +208,5 @@ public interface TableAdapter<VH extends ViewHolder> extends TableDataSetObserve
      */
     void onViewHolderRecycled(@NonNull VH viewHolder);
 
-    /**
-     * Return the width of the column.
-     *
-     * @param column the column index.
-     * @return The width of the column, in pixels.
-     */
-    int getColumnWidth(int column);
-
-    int getHeaderColumnHeight();
-
-    /**
-     * Return the height of the row.
-     *
-     * @param row the row index.
-     * @return The height of the row, in pixels.
-     */
-    int getRowHeight(int row);
-
-    int getHeaderRowWidth();
 
 }

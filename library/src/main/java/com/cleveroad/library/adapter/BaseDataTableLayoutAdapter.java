@@ -1,19 +1,37 @@
 package com.cleveroad.library.adapter;
 
-public abstract class BaseDataTableLayoutAdapter<VH extends ViewHolder> extends LinkedTableAdapter<VH> implements DataTableLayoutAdapter<VH> {
+public abstract class BaseDataTableLayoutAdapter<VH extends ViewHolder> extends LinkedTableAdapter<VH> implements
+        DataTableLayoutAdapter<VH> {
 
+    /**
+     * @return data matrix
+     */
     protected abstract Object[][] getItems();
 
+    /**
+     * @return row's headers array
+     */
     protected abstract Object[] getRowHeaders();
 
+    /**
+     * @return column's headers array
+     */
     protected abstract Object[] getColumnHeaders();
 
     @Override
     public void changeColumns(int columnIndex, int columnToIndex) {
+        // switch data
         switchTwoColumns(columnIndex, columnToIndex);
+        // switch headers
         switchTwoColumnHeaders(columnIndex, columnToIndex);
     }
 
+    /**
+     * Switch 2 columns with data
+     *
+     * @param columnIndex   column from
+     * @param columnToIndex column to
+     */
     void switchTwoColumns(int columnIndex, int columnToIndex) {
         for (int i = 0; i < getRowCount(); i++) {
             Object cellData = getItems()[i][columnToIndex];
@@ -22,6 +40,12 @@ public abstract class BaseDataTableLayoutAdapter<VH extends ViewHolder> extends 
         }
     }
 
+    /**
+     * Switch 2 columns headers with data
+     *
+     * @param columnIndex   column header from
+     * @param columnToIndex column header to
+     */
     void switchTwoColumnHeaders(int columnIndex, int columnToIndex) {
         Object cellData = getColumnHeaders()[columnToIndex];
         getColumnHeaders()[columnToIndex] = getColumnHeaders()[columnIndex];
@@ -30,10 +54,19 @@ public abstract class BaseDataTableLayoutAdapter<VH extends ViewHolder> extends 
 
     @Override
     public void changeRows(int rowIndex, int rowToIndex) {
+        // switch data
         switchTwoRows(rowIndex, rowToIndex);
+        // switch headers
         switchTwoRowHeaders(rowIndex, rowToIndex);
     }
 
+
+    /**
+     * Switch 2 rows with data
+     *
+     * @param rowIndex   row from
+     * @param rowToIndex row to
+     */
     void switchTwoRows(int rowIndex, int rowToIndex) {
         for (int i = 0; i < getItems().length; i++) {
             Object cellData = getItems()[rowToIndex][i];
@@ -42,6 +75,12 @@ public abstract class BaseDataTableLayoutAdapter<VH extends ViewHolder> extends 
         }
     }
 
+    /**
+     * Switch 2 rows headers with data
+     *
+     * @param rowIndex   row header from
+     * @param rowToIndex row header to
+     */
     void switchTwoRowHeaders(int rowIndex, int rowToIndex) {
         Object cellData = getRowHeaders()[rowToIndex];
         getRowHeaders()[rowToIndex] = getRowHeaders()[rowIndex];

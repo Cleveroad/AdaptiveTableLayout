@@ -30,7 +30,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     public static final int HOLDER_TYPE = 11;
     public static final int HOLDER_HEADER_COLUMN_TYPE = 12;
     public static final int HOLDER_HEADER_ROW_TYPE = 13;
-    public static final String TAG = "TTableLayout";
     private static final int SHIFT_VIEWS_THRESHOLD = 25; // TODO SIMPLE FILTER. CHANGE TO MORE SPECIFIC...
 
     private final MapMatrix<ViewHolder> mViewHolders = new MapMatrix<>();
@@ -94,8 +93,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
         mSettings = new TableLayoutSettings();
         mSettings
-                .setMinimumVelocity(configuration.getScaledMinimumFlingVelocity())
-                .setMaximumVelocity(configuration.getScaledMaximumFlingVelocity());
+                .setMinVelocity(configuration.getScaledMinimumFlingVelocity())
+                .setMaxVelocity(configuration.getScaledMaximumFlingVelocity());
 
         mScrollHelper = new ScrollHelper(context);
         mScrollHelper.setListener(this);
@@ -117,8 +116,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             mManager.putRowHeight(i, item);
         }
 
-        mManager.setHeaderColumnHeight(mAdapter.getHeaderColumnHeight());
-        mManager.setHeaderRowWidth(mAdapter.getHeaderRowWidth());
+        mManager.setHeaderColumnHeight(Math.max(0, mAdapter.getHeaderColumnHeight()));
+        mManager.setHeaderRowWidth(Math.max(0, mAdapter.getHeaderRowWidth()));
 
         mManager.invalidate();
         mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
@@ -167,7 +166,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
         int diffX = x;
         int diffY = y;
-//        Log.e("DragAndDrop", "isRow = " + mIsRowDragging + " | isCol = " + mIsColumnDragging + " x = " + diffX + " | y = " + diffY);
         if (mState.getScrollX() + x < 0) {
             // scroll over view to the left
             diffX = mState.getScrollX();
@@ -422,13 +420,12 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderColumnHeight(), MeasureSpec.EXACTLY));
             refreshHeaderColumn(column, viewHolder);
         }
-
     }
 
     @Nullable
     private ViewHolder createViewHolder(@NonNull ViewGroup parent, int itemType) {
         if (itemType == HOLDER_TYPE) {
-            return mAdapter.onCreateViewHolder(parent, itemType);
+            return mAdapter.onCreateViewHolder(parent);
         } else if (itemType == HOLDER_HEADER_ROW_TYPE) {
             return mAdapter.onCreateRowHeaderViewHolder(TableLayout.this);
         } else if (itemType == HOLDER_HEADER_COLUMN_TYPE) {
@@ -631,6 +628,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         }
     }
 
+
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         final boolean result;
@@ -742,7 +740,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                         onItemClickListener.onLeftTopHeaderLongClick();
                     }
                 }
-                return true;
+                return false;
             }
 
         }
@@ -883,27 +881,42 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     @Override
     public void notifyLayoutChanged() {
-        // TODO Need to implement
+        recycleViews(true);
+        invalidate();
+        mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
+                mState.getScrollX() + mSettings.getLayoutWidth(),
+                mState.getScrollY() + mSettings.getLayoutHeight());
+        addViews(mVisibleArea);
     }
 
     @Override
     public void notifyItemChanged(int rowIndex, int columnIndex) {
-        // TODO Need to implement
+        ViewHolder holder = mViewHolders.get(rowIndex, columnIndex);
+        if (holder != null) {
+            viewHolderChanged(holder);
+        }
     }
 
     @Override
     public void notifyRowChanged(int rowIndex) {
-        // TODO Need to implement
+        Collection<ViewHolder> rowHolders = mViewHolders.getRowItems(rowIndex);
+        for (ViewHolder holder : rowHolders) {
+            viewHolderChanged(holder);
+        }
     }
 
     @Override
     public void notifyColumnChanged(int columnIndex) {
-        // TODO Need to implement
+        Collection<ViewHolder> columnHolders = mViewHolders.getColumnItems(columnIndex);
+        for (ViewHolder holder : columnHolders) {
+            viewHolderChanged(holder);
+        }
     }
 
-    @Override
-    public void notifyHeadViewChanged() {
-        // TODO Need to implement
+    private void viewHolderChanged(@NonNull ViewHolder holder) {
+        mViewHolders.remove(holder.getRowIndex(), holder.getColumnIndex());
+        recycleViewHolder(holder, holder.getItemType());
+        addViews(holder.getRowIndex(), holder.getColumnIndex(), holder.getItemType());
     }
 
 }

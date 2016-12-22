@@ -1,49 +1,57 @@
 package com.cleveroad.library;
 
-public class TableLayoutSettings {
-
-    private int mMinimumVelocity;
-    private int mMaximumVelocity;
+/**
+ * Settings keeper class.
+ */
+class TableLayoutSettings {
+    /**
+     * Minimum velocity var
+     */
+    private int mMinVelocity;
+    /**
+     * Maximum velocity var
+     */
+    private int mMaxVelocity;
 
     private int mLayoutWidth;
     private int mLayoutHeight;
 
 
-    public TableLayoutSettings() {
+    TableLayoutSettings() {
     }
 
-    public int getMinimumVelocity() {
-        return mMinimumVelocity;
+    public int getMinVelocity() {
+        return mMinVelocity;
     }
 
-    public TableLayoutSettings setMinimumVelocity(int minimumVelocity) {
-        mMinimumVelocity = minimumVelocity;
+    TableLayoutSettings setMinVelocity(int minVelocity) {
+        mMinVelocity = minVelocity;
         return this;
     }
 
-    public int getMaximumVelocity() {
-        return mMaximumVelocity;
+    int getMaxVelocity() {
+        return mMaxVelocity;
     }
 
-    public TableLayoutSettings setMaximumVelocity(int maximumVelocity) {
-        mMaximumVelocity = maximumVelocity;
+    TableLayoutSettings setMaxVelocity(int maxVelocity) {
+        mMaxVelocity = maxVelocity;
         return this;
     }
 
-    public int getLayoutWidth() {
+    int getLayoutWidth() {
         return mLayoutWidth;
     }
 
-    public TableLayoutSettings setLayoutWidth(int layoutWidth) {
+    TableLayoutSettings setLayoutWidth(int layoutWidth) {
         mLayoutWidth = layoutWidth;
         return this;
     }
 
-    public int getLayoutHeight() {
+    int getLayoutHeight() {
         return mLayoutHeight;
     }
 
-    public TableLayoutSettings setLayoutHeight(int layoutHeight) {
+    TableLayoutSettings setLayoutHeight(int layoutHeight) {
         mLayoutHeight = layoutHeight;
         return this;
     }

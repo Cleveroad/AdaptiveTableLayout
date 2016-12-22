@@ -8,10 +8,22 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
 
+/**
+ * Custom matrix realisation to hold Objects
+ *
+ * @param <TObj> Object
+ */
 class MapMatrix<TObj> {
     private final HashMap<Integer, HashMap<Integer, TObj>> mData = new HashMap<>();
 
-    void put(int row, int column, TObj item) {
+    /**
+     * Put item to the matrix in row, column position.
+     *
+     * @param row    item row position
+     * @param column item column  position
+     * @param item   Object
+     */
+    void put(int row, int column, @NonNull TObj item) {
         HashMap<Integer, TObj> map = mData.get(row);
         if (map == null) {
             map = new HashMap<>();
@@ -22,6 +34,13 @@ class MapMatrix<TObj> {
         }
     }
 
+    /**
+     * Get Object from matrix by row and column.
+     *
+     * @param row    item row position
+     * @param column item column position
+     * @return Object in row, column position in the matrix
+     */
     @Nullable
     TObj get(int row, int column) {
         HashMap<Integer, TObj> map = mData.get(row);
@@ -32,11 +51,12 @@ class MapMatrix<TObj> {
         }
     }
 
-    @Nullable
-    public Collection<Integer> getRowKeys() {
-        return mData.keySet();
-    }
-
+    /**
+     * Get all row's items
+     *
+     * @param row row index
+     * @return Collection with row's Objects
+     */
     @NonNull
     Collection<TObj> getRowItems(int row) {
         Collection<TObj> result = new LinkedList<>();
@@ -47,6 +67,12 @@ class MapMatrix<TObj> {
         return result;
     }
 
+    /**
+     * Get all column's items
+     *
+     * @param column column index
+     * @return Collection with column's Objects
+     */
     @NonNull
     Collection<TObj> getColumnItems(int column) {
         Collection<TObj> result = new LinkedList<>();
@@ -60,6 +86,11 @@ class MapMatrix<TObj> {
         return result;
     }
 
+    /**
+     * Get all matrix's items
+     *
+     * @return Collection with column's Objects
+     */
     @NonNull
     Collection<TObj> getAll() {
         Collection<TObj> result = new LinkedList<>();
@@ -71,6 +102,12 @@ class MapMatrix<TObj> {
         return result;
     }
 
+    /**
+     * Remove item in row, column position int the matrix
+     *
+     * @param row    item row position
+     * @param column item column position
+     */
     void remove(int row, int column) {
         HashMap<Integer, TObj> map = mData.get(row);
         if (map != null) {

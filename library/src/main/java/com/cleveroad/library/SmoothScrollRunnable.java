@@ -4,6 +4,7 @@ import android.view.View;
 import android.widget.Scroller;
 
 /**
+ * Fling table layout logic
  * {@see http://stackoverflow.com/a/6219382/842697 }
  */
 class SmoothScrollRunnable implements Runnable {

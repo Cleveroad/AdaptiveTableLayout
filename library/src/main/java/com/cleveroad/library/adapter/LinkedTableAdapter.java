@@ -2,7 +2,6 @@ package com.cleveroad.library.adapter;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.widget.AdapterView;
 
 import com.cleveroad.library.TableDataSetObserver;
 import com.cleveroad.library.TableLayout;
@@ -16,12 +15,23 @@ import java.util.List;
  * can be used in {@link TableLayout}.
  */
 public abstract class LinkedTableAdapter<VH extends ViewHolder> implements TableAdapter<VH> {
+    /**
+     * Set with observers
+     */
+    @NonNull
     private final List<TableDataSetObserver> mTableDataSetObservers = new ArrayList<>();
 
+    /**
+     * Need to throw item click action
+     */
     @Nullable
-    protected OnItemClickListener mOnItemClickListener;
+    private OnItemClickListener mOnItemClickListener;
+
+    /**
+     * Need to throw long item click action
+     */
     @Nullable
-    protected OnItemLongClickListener mOnItemLongClickListener;
+    private OnItemLongClickListener mOnItemLongClickListener;
 
     @Override
     @Nullable
@@ -45,6 +55,7 @@ public abstract class LinkedTableAdapter<VH extends ViewHolder> implements Table
         mOnItemLongClickListener = onItemLongClickListener;
     }
 
+    @NonNull
     public List<TableDataSetObserver> getTableDataSetObservers() {
         return mTableDataSetObservers;
     }
@@ -120,32 +131,10 @@ public abstract class LinkedTableAdapter<VH extends ViewHolder> implements Table
      * {@inheritDoc}
      */
     @Override
-    public void notifyHeadViewChanged() {
-        for (TableDataSetObserver observer : mTableDataSetObservers) {
-            observer.notifyHeadViewChanged();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void notifyLayoutChanged() {
         for (TableDataSetObserver observer : mTableDataSetObservers) {
             observer.notifyLayoutChanged();
         }
     }
-
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param viewHolder The {@link ViewHolder} for the view being recycled
-     */
-    @Override
-    public void onViewHolderRecycled(@NonNull VH viewHolder) {
-        //do nothing
-    }
-
 
 }

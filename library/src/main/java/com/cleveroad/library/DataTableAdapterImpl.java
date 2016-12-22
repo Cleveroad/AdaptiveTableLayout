@@ -8,20 +8,42 @@ import com.cleveroad.library.adapter.LinkedTableAdapter;
 import com.cleveroad.library.adapter.TableAdapter;
 import com.cleveroad.library.adapter.ViewHolder;
 
+/**
+ * This is TableAdapter decorator (wrapper).
+ * It makes it possible to change the rows and columns without data mutations.
+ *
+ * @param <VH> Adapter's ViewHolder class
+ */
 class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH> implements DataTableLayoutAdapter<VH> {
+    /**
+     * Decorated TableAdapter
+     */
     private final TableAdapter<VH> mInner;
+
+    /**
+     * Redirect column's ids
+     */
     private final int[] mColumnIds;
+
+    /**
+     * Redirect row's ids
+     */
     private final int[] mRowIds;
 
-    public DataTableAdapterImpl(@NonNull TableAdapter<VH> inner) {
+    DataTableAdapterImpl(@NonNull TableAdapter<VH> inner) {
         mInner = inner;
+
+        // init data
         mColumnIds = new int[getColumnCount()];
         mRowIds = new int[getRowCount()];
+
+        // fill data
         fill(mColumnIds);
         fill(mRowIds);
     }
 
     private void fill(int[] array) {
+        // filling its array indices
         for (int count = array.length, i = 0; i < count; i++) {
             array[i] = i;
         }
@@ -48,8 +70,8 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
 
     @NonNull
     @Override
-    public VH onCreateViewHolder(@NonNull ViewGroup parent, int itemType) {
-        return mInner.onCreateViewHolder(parent, itemType);
+    public VH onCreateViewHolder(@NonNull ViewGroup parent) {
+        return mInner.onCreateViewHolder(parent);
     }
 
     @NonNull
@@ -110,10 +132,23 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
         return mInner.getHeaderRowWidth();
     }
 
-    void switchTwoItems(int[] array, int columnIndex, int columnToIndex) {
-        int cellData = array[columnToIndex];
-        array[columnToIndex] = array[columnIndex];
-        array[columnIndex] = cellData;
+    @Override
+    public void onViewHolderRecycled(@NonNull VH viewHolder) {
+        mInner.onViewHolderRecycled(viewHolder);
+    }
+
+    /**
+     * Switched 2 values in the array
+     *
+     * @param array     array with values
+     * @param fromIndex first index
+     * @param toIndex   second index
+     */
+    void switchTwoItems(int[] array, int fromIndex, int toIndex) {
+
+        int cellData = array[toIndex];
+        array[toIndex] = array[fromIndex];
+        array[fromIndex] = cellData;
     }
 
 }

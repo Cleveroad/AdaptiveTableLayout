@@ -24,6 +24,7 @@ public class SampleActivity extends AppCompatActivity {
             @Override
             public void onItemClick(int row, int column) {
                 adapter.putItem(row, column, "" + System.currentTimeMillis());
+
                 Log.e("SampleActivity", "onItemClick = " + row + " | " + column);
             }
 
