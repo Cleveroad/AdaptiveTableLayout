@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperListener,TableDataSetObserver {
+public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperListener, TableDataSetObserver {
     private static final int SHIFT_VIEWS_THRESHOLD = 25; // TODO SIMPLE FILTER. CHANGE TO MORE SPECIFIC...
 
     private final MapMatrix<ViewHolder> mViewHolders = new MapMatrix<>();
@@ -358,7 +358,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         // add view left top view.
         if (mLeftTopViewHolder == null && mAdapter != null) {
             mLeftTopViewHolder = mAdapter.onCreateLeftTopHeaderViewHolder(TableLayout.this);
-            mLeftTopViewHolder.setItemType(HOLDER_HEADER_LEFT_TOP);
+            mLeftTopViewHolder.setItemType(ItemType.FIRST_HEADER);
             View view = mLeftTopViewHolder.getItemView();
             view.setTag(R.id.tag_view_holder, mLeftTopViewHolder);
             addView(view, 0);
@@ -394,21 +394,21 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
         addView(view, 0);
 
-        if (itemType == HOLDER_TYPE) {
+        if (itemType == ItemType.ITEM) {
             mViewHolders.put(row, column, viewHolder);
             mAdapter.onBindViewHolder(viewHolder, row, column);
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getColumnWidth(column), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mManager.getRowHeight(row), MeasureSpec.EXACTLY));
             refreshLayout(row, column, viewHolder);
-        } else if (itemType == HOLDER_HEADER_ROW_TYPE) {
+        } else if (itemType == ItemType.ROW_HEADER) {
             mHeaderRowViewHolders.put(row, viewHolder);
             mAdapter.onBindHeaderRowViewHolder(viewHolder, row);
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderRowWidth(), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mManager.getRowHeight(row), MeasureSpec.EXACTLY));
             refreshHeaderRow(row, viewHolder);
-        } else if (itemType == HOLDER_HEADER_COLUMN_TYPE) {
+        } else if (itemType == ItemType.COLUMN_HEADER) {
             mHeaderColumnViewHolders.put(column, viewHolder);
             mAdapter.onBindHeaderColumnViewHolder(viewHolder, column);
             view.measure(
@@ -420,11 +420,11 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     @Nullable
     private ViewHolder createViewHolder(@NonNull ViewGroup parent, int itemType) {
-        if (itemType == HOLDER_TYPE) {
+        if (itemType == ItemType.ITEM) {
             return mAdapter.onCreateViewHolder(parent);
-        } else if (itemType == HOLDER_HEADER_ROW_TYPE) {
+        } else if (itemType == ItemType.ROW_HEADER) {
             return mAdapter.onCreateRowHeaderViewHolder(TableLayout.this);
-        } else if (itemType == HOLDER_HEADER_COLUMN_TYPE) {
+        } else if (itemType == ItemType.COLUMN_HEADER) {
             return mAdapter.onCreateColumnHeaderViewHolder(TableLayout.this);
         }
         return null;
@@ -520,7 +520,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (mAdapter != null) {
 
             mAdapter.changeColumns(fromColumn, toColumn);
-            switchHeaders(mHeaderColumnViewHolders, fromColumn, toColumn, HOLDER_HEADER_COLUMN_TYPE);
+            switchHeaders(mHeaderColumnViewHolders, fromColumn, toColumn, ItemType.COLUMN_HEADER);
             mManager.switchTwoColumns(fromColumn, toColumn);
 
             Collection<ViewHolder> fromHolders = mViewHolders.getColumnItems(fromColumn);
@@ -551,7 +551,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (mAdapter != null) {
 
             mAdapter.changeRows(fromRow, toRow);
-            switchHeaders(mHeaderRowViewHolders, fromRow, toRow, HOLDER_HEADER_ROW_TYPE);
+            switchHeaders(mHeaderRowViewHolders, fromRow, toRow, ItemType.ROW_HEADER);
             mManager.switchTwoRows(fromRow, toRow);
 
             Collection<ViewHolder> fromHolders = mViewHolders.getRowItems(fromRow);
@@ -585,7 +585,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
         if (fromVh != null) {
             map.remove(fromIndex);
-            if (type == HOLDER_HEADER_COLUMN_TYPE) {
+            if (type == ItemType.COLUMN_HEADER) {
                 fromVh.setColumnIndex(toIndex);
             } else {
                 fromVh.setRowIndex(toIndex);
@@ -595,7 +595,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         ViewHolder toVh = map.get(toIndex);
         if (toVh != null) {
             map.remove(toIndex);
-            if (type == HOLDER_HEADER_COLUMN_TYPE) {
+            if (type == ItemType.COLUMN_HEADER) {
                 toVh.setColumnIndex(fromIndex);
             } else {
                 toVh.setRowIndex(fromIndex);
@@ -647,14 +647,14 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                     mManager.getHeaderColumnHeight(),
                     mManager.getHeaderRowWidth(),
                     mSettings.getLayoutHeight());
-        } else if (viewHolder.getItemType() == HOLDER_TYPE) {
+        } else if (viewHolder.getItemType() == ItemType.ITEM) {
             // prepare canvas rect area for draw item (cell in table)
             canvas.clipRect(
                     mManager.getHeaderRowWidth(),
                     mManager.getHeaderColumnHeight(),
                     mSettings.getLayoutWidth(),
                     mSettings.getLayoutHeight());
-        } else if (viewHolder.getItemType() == HOLDER_HEADER_LEFT_TOP) {
+        } else if (viewHolder.getItemType() == ItemType.FIRST_HEADER) {
             // prepare canvas rect area for draw item (cell in table)
             canvas.clipRect(
                     0,
@@ -683,11 +683,11 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (viewHolder != null) {
             OnItemClickListener onItemClickListener = mAdapter.getOnItemClickListener();
             if (onItemClickListener != null) {
-                if (viewHolder.getItemType() == HOLDER_TYPE) {
+                if (viewHolder.getItemType() == ItemType.ITEM) {
                     onItemClickListener.onItemClick(viewHolder.getRowIndex(), viewHolder.getColumnIndex());
-                } else if (viewHolder.getItemType() == HOLDER_HEADER_ROW_TYPE) {
+                } else if (viewHolder.getItemType() == ItemType.ROW_HEADER) {
                     onItemClickListener.onRowHeaderClick(viewHolder.getRowIndex());
-                } else if (viewHolder.getItemType() == HOLDER_HEADER_COLUMN_TYPE) {
+                } else if (viewHolder.getItemType() == ItemType.COLUMN_HEADER) {
                     onItemClickListener.onColumnHeaderClick(viewHolder.getColumnIndex());
                 } else {
                     onItemClickListener.onLeftTopHeaderClick();
@@ -730,9 +730,9 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             } else {
                 OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
                 if (onItemClickListener != null) {
-                    if (viewHolder.getItemType() == HOLDER_TYPE) {
+                    if (viewHolder.getItemType() == ItemType.ITEM) {
                         onItemClickListener.onItemLongClick(viewHolder.getRowIndex(), viewHolder.getColumnIndex());
-                    } else if (viewHolder.getItemType() == HOLDER_HEADER_LEFT_TOP) {
+                    } else if (viewHolder.getItemType() == ItemType.FIRST_HEADER) {
                         onItemClickListener.onLeftTopHeaderLongClick();
                     }
                 }
