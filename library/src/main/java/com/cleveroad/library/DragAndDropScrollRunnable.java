@@ -6,8 +6,6 @@ import android.view.View;
  * Move table layout logic in dragging mode
  */
 class DragAndDropScrollRunnable implements Runnable {
-    static final int ORIENTATION_VERTICAL = 0;
-    static final int ORIENTATION_HORIZONTAL = 1;
     private View mView;
     private boolean isFinished = true;
 
@@ -18,13 +16,14 @@ class DragAndDropScrollRunnable implements Runnable {
         mView = view;
     }
 
-    synchronized void touch(int touchX, int touchY, int orientation) {
-        // horizontal scroll area (left, right)
+    synchronized void touch(int touchX, int touchY, @ScrollType int orientation) {
+
         int partOfWidth = mView.getWidth() / 4;
         // vertical scroll area (top, bottom)
         int partOfHeight = mView.getHeight() / 4;
 
-        if (orientation == ORIENTATION_HORIZONTAL) {
+
+        if (orientation == ScrollType.SCROLL_HORIZONTAL) {
             if (touchX < partOfWidth) {
                 // if touch in left horizontal area -> scroll to left
                 start(touchX - partOfWidth, 0);
@@ -36,7 +35,7 @@ class DragAndDropScrollRunnable implements Runnable {
                 mDiffX = 0;
                 mDiffY = 0;
             }
-        } else if (orientation == ORIENTATION_VERTICAL) {
+        } else if (orientation == ScrollType.SCROLL_VERTICAL) {
             if (touchY < partOfHeight) {
                 // if touch in top vertical area -> scroll to top
                 start(0, touchY - partOfHeight);
