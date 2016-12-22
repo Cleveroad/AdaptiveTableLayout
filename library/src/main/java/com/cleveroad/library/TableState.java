@@ -1,42 +1,54 @@
 package com.cleveroad.library;
 
+/**
+ * Layout state holder.
+ */
 class TableState {
-
+    /**
+     * Current scroll position.
+     */
     private int mScrollX;
     private int mScrollY;
 
+    /**
+     * Dragging row flag
+     */
     private boolean mIsRowDragging;
+
+    /**
+     * Dragging column flag
+     */
     private boolean mIsColumnDragging;
 
-     int getScrollX() {
+    int getScrollX() {
         return mScrollX;
     }
 
-     void setScrollX(int scrollX) {
+    void setScrollX(int scrollX) {
         mScrollX = scrollX;
     }
 
-     int getScrollY() {
+    int getScrollY() {
         return mScrollY;
     }
 
-     void setScrollY(int scrollY) {
+    void setScrollY(int scrollY) {
         mScrollY = scrollY;
     }
 
-     boolean isRowDragging() {
+    boolean isRowDragging() {
         return mIsRowDragging;
     }
 
-     void setRowDragging(boolean rowDragging) {
+    void setRowDragging(boolean rowDragging) {
         mIsRowDragging = rowDragging;
     }
 
-     boolean isColumnDragging() {
+    boolean isColumnDragging() {
         return mIsColumnDragging;
     }
 
-     void setColumnDragging(boolean columnDragging) {
+    void setColumnDragging(boolean columnDragging) {
         mIsColumnDragging = columnDragging;
     }
 }
