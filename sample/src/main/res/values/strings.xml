@@ -3,4 +3,7 @@
 
     <string name="app_name">TableLayout</string>
 
+    <string name="pick_csv_file">Please, select *.CSV file</string>
+    <string name="pick_file">Pick CSV-file</string>
+
 </resources>

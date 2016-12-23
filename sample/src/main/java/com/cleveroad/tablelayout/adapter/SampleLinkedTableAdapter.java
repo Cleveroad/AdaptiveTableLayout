@@ -10,24 +10,27 @@ import android.widget.TextView;
 import com.cleveroad.library.LinkedTableAdapter;
 import com.cleveroad.library.ViewHolderImpl;
 import com.cleveroad.tablelayout.R;
+import com.cleveroad.tablelayout.datasource.TableDataSource;
+
+import java.io.File;
 
 public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
-    public static final int ROWS = 2_000_000;
-    public static final int COLUMNS = 2_000_000;
     private final LayoutInflater mLayoutInflater;
+    private final TableDataSource<String, String , String, String> mTableDataSource;
 
-    public SampleLinkedTableAdapter(Context context) {
+    public SampleLinkedTableAdapter(Context context, TableDataSource<String, String, String, String> tableDataSource) {
         mLayoutInflater = LayoutInflater.from(context);
+        mTableDataSource = tableDataSource;
     }
 
     @Override
     public int getRowCount() {
-        return ROWS;
+        return mTableDataSource.getRowsCount();
     }
 
     @Override
     public int getColumnCount() {
-        return COLUMNS;
+        return mTableDataSource.getColumnsCount();
     }
 
     @NonNull
@@ -58,7 +61,7 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
         if (viewHolder instanceof TestViewHolder) {
             TestViewHolder vh = (TestViewHolder) viewHolder;
-            vh.tvText.setText("R" + row + "C" + column);
+            vh.tvText.setText(mTableDataSource.getItemData(row, column));
         }
     }
 
@@ -66,14 +69,14 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     public void onBindHeaderColumnViewHolder(@NonNull ViewHolderImpl viewHolder, int column) {
         if (viewHolder instanceof TestHeaderColumnViewHolder) {
             TestHeaderColumnViewHolder vh = (TestHeaderColumnViewHolder) viewHolder;
-            vh.tvText.setText("C" + column);
+            vh.tvText.setText(mTableDataSource.getColumnHeaderData(column));
         }
     }
 
     public void onBindHeaderRowViewHolder(@NonNull ViewHolderImpl viewHolder, int row) {
         if (viewHolder instanceof TestHeaderRowViewHolder) {
             TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
-            vh.tvText.setText("R" + row);
+            vh.tvText.setText(mTableDataSource.getRowHeaderData(row));
         }
     }
 
@@ -81,7 +84,7 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     public void onBindLeftTopHeaderViewHolder(@NonNull ViewHolderImpl viewHolder) {
         if (viewHolder instanceof TestHeaderLeftTopViewHolder) {
             TestHeaderLeftTopViewHolder vh = (TestHeaderLeftTopViewHolder) viewHolder;
-            vh.tvText.setText("LeftTop");
+            vh.tvText.setText(mTableDataSource.getFirstHeaderData());
         }
     }
 
@@ -111,13 +114,15 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     @Override
     public void onViewHolderRecycled(@NonNull ViewHolderImpl viewHolder) {
-
+        //do nothing
     }
+
+    //------------------------------------- view holders ------------------------------------------
 
     private static class TestViewHolder extends ViewHolderImpl {
         TextView tvText;
 
-        public TestViewHolder(@NonNull View itemView) {
+        private TestViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
@@ -126,7 +131,7 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     private static class TestHeaderColumnViewHolder extends ViewHolderImpl {
         TextView tvText;
 
-        public TestHeaderColumnViewHolder(@NonNull View itemView) {
+        private TestHeaderColumnViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
@@ -146,7 +151,7 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     private static class TestHeaderLeftTopViewHolder extends ViewHolderImpl {
         TextView tvText;
 
-        TestHeaderLeftTopViewHolder(@NonNull View itemView) {
+        private TestHeaderLeftTopViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
