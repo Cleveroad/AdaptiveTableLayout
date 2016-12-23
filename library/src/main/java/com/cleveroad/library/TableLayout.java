@@ -644,12 +644,14 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                     }
                 }
             }
-
+            // set drag and drop offset
             mDragAndDropPoints.setOffset((int) (event.getX()), (int) (event.getY()));
 
+            // intercept touch for scroll in drag and drop mode
             mScrollerDragAndDropRunnable.touch((int) event.getX(), (int) event.getY(),
                     mState.isColumnDragging() ? ScrollType.SCROLL_HORIZONTAL : ScrollType.SCROLL_VERTICAL);
 
+            // update positions
             refreshViewHolders();
             return true;
         }
@@ -665,9 +667,15 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     private void shiftColumnsViews(final int fromColumn, final int toColumn) {
         if (mAdapter != null) {
 
+            // change data
             mAdapter.changeColumns(fromColumn, toColumn);
+
+            // change view holders
             switchHeaders(mHeaderColumnViewHolders, fromColumn, toColumn, ViewHolderType.COLUMN_HEADER);
+
+            // change indexes in array with widths
             mManager.switchTwoColumns(fromColumn, toColumn);
+
 
             Collection<ViewHolder> fromHolders = mViewHolders.getColumnItems(fromColumn);
             Collection<ViewHolder> toHolders = mViewHolders.getColumnItems(toColumn);
@@ -695,9 +703,13 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      */
     private void shiftRowsViews(final int fromRow, final int toRow) {
         if (mAdapter != null) {
-
+            // change data
             mAdapter.changeRows(fromRow, toRow);
+
+            // change view holders
             switchHeaders(mHeaderRowViewHolders, fromRow, toRow, ViewHolderType.ROW_HEADER);
+
+            // change indexes in array with heights
             mManager.switchTwoRows(fromRow, toRow);
 
             Collection<ViewHolder> fromHolders = mViewHolders.getRowItems(fromRow);
@@ -733,7 +745,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             map.remove(fromIndex);
             if (type == ViewHolderType.COLUMN_HEADER) {
                 fromVh.setColumnIndex(toIndex);
-            } else {
+            } else if (type == ViewHolderType.ROW_HEADER) {
                 fromVh.setRowIndex(toIndex);
             }
         }
@@ -743,7 +755,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             map.remove(toIndex);
             if (type == ViewHolderType.COLUMN_HEADER) {
                 toVh.setColumnIndex(fromIndex);
-            } else {
+            } else if (type == ViewHolderType.ROW_HEADER) {
                 toVh.setRowIndex(fromIndex);
             }
         }
