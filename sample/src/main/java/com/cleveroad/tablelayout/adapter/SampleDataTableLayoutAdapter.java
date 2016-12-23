@@ -107,25 +107,25 @@ public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<Vie
     @Override
     public int getColumnWidth(int column) {
         if (column % 2 == 0) {
-            return 240;
+            return 100;
         } else {
-            return 160;
+            return 70;
         }
     }
 
     @Override
     public int getHeaderColumnHeight() {
-        return 160;
+        return 60;
     }
 
     @Override
     public int getRowHeight(int row) {
-        return 160;
+        return 80;
     }
 
     @Override
     public int getHeaderRowWidth() {
-        return 160;
+        return 80;
     }
 
     @Override
