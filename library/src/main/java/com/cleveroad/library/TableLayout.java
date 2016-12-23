@@ -11,7 +11,6 @@ import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 import java.util.Collection;
@@ -20,27 +19,72 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperListener, TableDataSetObserver {
-    private static final int SHIFT_VIEWS_THRESHOLD = 25; // TODO SIMPLE FILTER. CHANGE TO MORE SPECIFIC...
 
+    private static final int SHIFT_VIEWS_THRESHOLD = 25;
+    /**
+     * Matrix with item view holders
+     */
     private final MapMatrix<ViewHolder> mViewHolders = new MapMatrix<>();
+    /**
+     * Map with column's headers view holders
+     */
     private final HashMap<Integer, ViewHolder> mHeaderColumnViewHolders = new HashMap<>();
+    /**
+     * Map with row's headers view holders
+     */
     private final HashMap<Integer, ViewHolder> mHeaderRowViewHolders = new HashMap<>();
+    /**
+     * Contained with drag and drop points
+     */
     private final DragAndDropPoints mDragAndDropPoints = new DragAndDropPoints();
+    /**
+     * Container with layout state
+     */
     private final TableState mState = new TableState();
+    /**
+     * Item's widths and heights manager.
+     */
     private final TableManager mManager = new TableManager();
-    // need to fix columns bounce when dragging column
-    private final Point mLastSwitchColumnsPoint = new Point();
+
+    /**
+     * Need to fix columns bounce when dragging header.
+     * Saved absolute point when header switched in drag and drop mode.
+     */
+
+    private final Point mLastSwitchHeaderPoint = new Point();
+    /**
+     * Contains visible area rect. Left top point and right bottom
+     */
     private final Rect mVisibleArea = new Rect();
     /**
      * View holder in the left top corner.
      */
     @Nullable
     private ViewHolder mLeftTopViewHolder;
+    /**
+     * Table layout adapter
+     */
     private DataTableLayoutAdapter<ViewHolder> mAdapter;
+    /**
+     * Recycle ViewHolders
+     */
     private Recycler mRecycler;
+    /**
+     * Keep layout settings
+     */
     private TableLayoutSettings mSettings;
+
+    /**
+     * Detect all gestures on layout.
+     */
     private ScrollHelper mScrollHelper;
+    /**
+     * Runnable helps with fling events
+     */
     private SmoothScrollRunnable mScrollerRunnable;
+    /**
+     * Runnable helps with scroll in drag and drop mode
+     */
     private DragAndDropScrollRunnable mScrollerDragAndDropRunnable;
 
 
@@ -68,27 +112,23 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         if (changed) {
+            // calculate layout width and height
             mSettings.setLayoutWidth(r - l);
             mSettings.setLayoutHeight(b - t);
+
+            // init data
             initItems();
         }
     }
 
     private void init(Context context) {
+        // init scroll and fling helpers
         mScrollerRunnable = new SmoothScrollRunnable(this);
         mScrollerDragAndDropRunnable = new DragAndDropScrollRunnable(this);
         mRecycler = new Recycler();
-
-        final ViewConfiguration configuration = ViewConfiguration.get(context);
-
         mSettings = new TableLayoutSettings();
-        mSettings
-                .setMinVelocity(configuration.getScaledMinimumFlingVelocity())
-                .setMaxVelocity(configuration.getScaledMaximumFlingVelocity());
-
         mScrollHelper = new ScrollHelper(context);
         mScrollHelper.setListener(this);
-
     }
 
     private void initItems() {
@@ -96,44 +136,76 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             return;
         }
 
+        // calculate widths
         for (int count = mManager.getColumnCount(), i = 0; i < count; i++) {
             int item = mAdapter.getColumnWidth(i);
             mManager.putColumnWidth(i, item);
         }
 
+        // calculate heights
         for (int count = mManager.getRowCount(), i = 0; i < count; i++) {
             int item = mAdapter.getRowHeight(i);
             mManager.putRowHeight(i, item);
         }
 
+        // set header's width and height. Set 0 in case < 0
         mManager.setHeaderColumnHeight(Math.max(0, mAdapter.getHeaderColumnHeight()));
         mManager.setHeaderRowWidth(Math.max(0, mAdapter.getHeaderRowWidth()));
 
+        // start calculating full width and full height
         mManager.invalidate();
+
+        // show items in this area
         mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
                 mState.getScrollX() + mSettings.getLayoutWidth(),
                 mState.getScrollY() + mSettings.getLayoutHeight());
-        addViews(mVisibleArea);
+        addViewHolders(mVisibleArea);
     }
 
+    /**
+     * Set adapter with IMMUTABLE data.
+     * Create wrapper with links between layout rows, columns and data rows, columns.
+     * On drag and drop event just change links but not change data in adapter.
+     *
+     * @param adapter TableLayout adapter
+     */
     public void setAdapter(@Nullable TableAdapter adapter) {
         if (mAdapter != null) {
+            // remove observers from old adapter
             mAdapter.unregisterDataSetObserver(this);
         }
         if (adapter != null) {
+            // wrap adapter
             mAdapter = new DataTableAdapterImpl<>(adapter);
         } else {
+            // remove adapter
             mAdapter = null;
         }
+
         if (mAdapter != null) {
+            // register notify callbacks
             mAdapter.registerDataSetObserver(this);
+
+            // init manager
             mManager.init(mAdapter.getRowCount(), mAdapter.getColumnCount());
+
             if (mSettings.getLayoutHeight() != 0 && mSettings.getLayoutWidth() != 0) {
+                // if layout has width and height
                 initItems();
             }
         }
     }
 
+    /**
+     * Set adapter with MUTABLE data.
+     * You need to implement switch rows and columns methods.
+     * On drag and drop event calls {@link DataTableLayoutAdapter#changeColumns(int, int)} and
+     * {@link DataTableLayoutAdapter#changeRows(int, int)}
+     * <p>
+     * DO NOT USE WITH BIG DATA!!
+     *
+     * @param adapter DataTableLayoutAdapter adapter
+     */
     public void setAdapter(@Nullable DataTableLayoutAdapter adapter) {
         if (mAdapter != null) {
             mAdapter.unregisterDataSetObserver(this);
@@ -180,70 +252,96 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             mState.setScrollY(mState.getScrollY() + y);
         }
 
-        scrollView(diffX, diffY);
-    }
-
-    private void scrollView(int x, int y) {
-        if (x == 0 && y == 0) {
+        if (diffX == 0 && diffY == 0) {
             return;
         }
 
         if (mAdapter != null) {
-            recycleViews();
+            // refresh views
+            recycleViewHolders();
             mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
                     mState.getScrollX() + mSettings.getLayoutWidth(),
                     mState.getScrollY() + mSettings.getLayoutHeight());
-            addViews(mVisibleArea);
-            refreshLayouts();
+            addViewHolders(mVisibleArea);
+            refreshViewHolders();
         }
     }
 
-    private void refreshLayouts() {
+    /**
+     * Refresh all view holders
+     */
+    private void refreshViewHolders() {
         if (mAdapter != null) {
             for (ViewHolder holder : mHeaderColumnViewHolders.values()) {
                 if (holder != null) {
-                    refreshHeaderColumn(holder.getColumnIndex(), holder);
+                    // column header
+                    refreshHeaderColumnViewHolder(holder);
                 }
             }
 
             for (ViewHolder holder : mHeaderRowViewHolders.values()) {
                 if (holder != null) {
-                    refreshHeaderRow(holder.getRowIndex(), holder);
+                    // row header
+                    refreshHeaderRowViewHolder(holder);
                 }
             }
 
             for (ViewHolder holder : mViewHolders.getAll()) {
                 if (holder != null) {
-                    refreshLayout(holder.getRowIndex(), holder.getColumnIndex(), holder, mState.isRowDragging(), mState.isColumnDragging());
+                    // cell item
+                    refreshItemViewHolder(holder, mState.isRowDragging(), mState.isColumnDragging());
                 }
             }
         }
     }
 
-    private void refreshLayout(int row, int column, ViewHolder holder,
-                               boolean isRowDragging, boolean isColumnDragging) {
-        int left = mManager.getColumnsWidth(0, Math.max(0, column));
-        int top = mManager.getRowsHeight(0, Math.max(0, row));
+    /**
+     * Refresh current item view holder.
+     *
+     * @param holder           current view holder
+     * @param isRowDragging    row dragging state
+     * @param isColumnDragging column dragging state
+     */
+    private void refreshItemViewHolder(@NonNull ViewHolder holder,
+                                       boolean isRowDragging, boolean isColumnDragging) {
+
+        int left = mManager.getColumnsWidth(0, Math.max(0, holder.getColumnIndex()));
+        int top = mManager.getRowsHeight(0, Math.max(0, holder.getRowIndex()));
         View view = holder.getItemView();
         if (isColumnDragging && holder.isDragging() && mDragAndDropPoints.getOffset().x > 0) {
+            // visible dragging column. Calculate left offset using drag and drop points.
             left = mState.getScrollX() + mDragAndDropPoints.getOffset().x - view.getWidth() / 2 - mManager.getHeaderRowWidth();
             view.bringToFront();
         } else if (isRowDragging && holder.isDragging() && mDragAndDropPoints.getOffset().y > 0) {
+            // visible dragging row. Calculate top offset using drag and drop points.
             top = mState.getScrollY() + mDragAndDropPoints.getOffset().y - view.getHeight() / 2 - mManager.getHeaderColumnHeight();
             view.bringToFront();
         }
+
+        // update layout position
         view.layout(left - mState.getScrollX() + mManager.getHeaderRowWidth(),
                 top - mState.getScrollY() + mManager.getHeaderColumnHeight(),
-                left + mManager.getColumnWidth(column) - mState.getScrollX() + mManager.getHeaderRowWidth(),
-                top + mManager.getRowHeight(row) - mState.getScrollY() + mManager.getHeaderColumnHeight());
+                left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX() + mManager.getHeaderRowWidth(),
+                top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY() + mManager.getHeaderColumnHeight());
     }
 
-    private void refreshLayout(int row, int column, ViewHolder holder) {
-        refreshLayout(row, column, holder, false, false);
+    /**
+     * Refresh current item view holder with default parameters.
+     *
+     * @param holder current view holder
+     */
+
+    private void refreshItemViewHolder(ViewHolder holder) {
+        refreshItemViewHolder(holder, false, false);
     }
 
-    private void refreshHeaderColumn(int column, ViewHolder holder) {
-        int left = mManager.getColumnsWidth(0, Math.max(0, column)) + mManager.getHeaderRowWidth();
+    /**
+     * Refresh current column header view holder.
+     *
+     * @param holder current view holder
+     */
+    private void refreshHeaderColumnViewHolder(ViewHolder holder) {
+        int left = mManager.getColumnsWidth(0, Math.max(0, holder.getColumnIndex())) + mManager.getHeaderRowWidth();
         View view = holder.getItemView();
 
         if (holder.isDragging() && mDragAndDropPoints.getOffset().x > 0) {
@@ -253,12 +351,18 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
         view.layout(left - mState.getScrollX(),
                 0,
-                left + mManager.getColumnWidth(column) - mState.getScrollX(),
+                left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX(),
                 mManager.getHeaderColumnHeight());
     }
 
-    private void refreshHeaderRow(int row, ViewHolder holder) {
-        int top = mManager.getRowsHeight(0, Math.max(0, row)) + mManager.getHeaderColumnHeight();
+
+    /**
+     * Refresh current row header view holder.
+     *
+     * @param holder current view holder
+     */
+    private void refreshHeaderRowViewHolder(ViewHolder holder) {
+        int top = mManager.getRowsHeight(0, Math.max(0, holder.getRowIndex())) + mManager.getHeaderColumnHeight();
         View view = holder.getItemView();
         if (holder.isDragging() && mDragAndDropPoints.getOffset().y > 0) {
             top = mState.getScrollY() + mDragAndDropPoints.getOffset().y - view.getHeight() / 2;
@@ -270,57 +374,82 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 top + mManager.getHeaderColumnHeight() - mState.getScrollY());
     }
 
-    private void recycleViews() {
-        recycleViews(false);
+    /**
+     * Recycle all views
+     */
+    private void recycleViewHolders() {
+        recycleViewHolders(false);
     }
 
-    private void recycleViews(boolean isRecycleAll) {
+    /**
+     * Recycle view holders outside screen
+     *
+     * @param isRecycleAll recycle all view holders if true
+     */
+    private void recycleViewHolders(boolean isRecycleAll) {
 
         if (mAdapter == null) {
             return;
         }
 
+        // item view holders
         for (ViewHolder holder : mViewHolders.getAll()) {
             if (holder != null && !holder.isDragging()) {
                 View view = holder.getItemView();
+
                 if (isRecycleAll || (view.getRight() < 0 || view.getLeft() > mSettings.getLayoutWidth() ||
                         view.getBottom() < 0 || view.getTop() > mSettings.getLayoutHeight())) {
+                    // recycle view holder
                     mViewHolders.remove(holder.getRowIndex(), holder.getColumnIndex());
-                    recycleViewHolder(holder, ViewHolderType.ITEM);
+                    recycleViewHolder(holder);
                 }
             }
         }
 
+        // column header view holders
         for (Iterator<Map.Entry<Integer, ViewHolder>> it = mHeaderColumnViewHolders.entrySet().iterator(); it.hasNext(); ) {
             ViewHolder holder = it.next().getValue();
             if (holder != null && !holder.isDragging()) {
                 View view = holder.getItemView();
+                // recycle view holder
                 if (isRecycleAll || (view.getRight() < 0 || view.getLeft() > mSettings.getLayoutWidth())) {
                     it.remove();
-                    recycleViewHolder(holder, ViewHolderType.COLUMN_HEADER);
+                    recycleViewHolder(holder);
                 }
             }
         }
 
+        // row header view holders
         for (Iterator<Map.Entry<Integer, ViewHolder>> it = mHeaderRowViewHolders.entrySet().iterator(); it.hasNext(); ) {
             ViewHolder holder = it.next().getValue();
             if (holder != null && !holder.isDragging()) {
                 View view = holder.getItemView();
+                // recycle view holder
                 if (isRecycleAll || (view.getBottom() < 0 || view.getTop() > mSettings.getLayoutHeight())) {
                     it.remove();
-                    recycleViewHolder(holder, ViewHolderType.ROW_HEADER);
+                    recycleViewHolder(holder);
                 }
             }
         }
     }
 
-    private void recycleViewHolder(ViewHolder holder, int type) {
-        mRecycler.pushRecycledView(holder, type);
+    /**
+     * Recycle view holder and remove view from layout.
+     *
+     * @param holder view holder to recycle
+     */
+    private void recycleViewHolder(ViewHolder holder) {
+        mRecycler.pushRecycledView(holder);
         removeView(holder.getItemView());
-        mAdapter.onViewHolderRecycled(holder); // TODO FIX THIS!!
+        mAdapter.onViewHolderRecycled(holder);
     }
 
-    private void addViews(Rect filledArea) {
+    /**
+     * Create and add view holders with views to the layout.
+     *
+     * @param filledArea visible rect
+     */
+    private void addViewHolders(Rect filledArea) {
         //search indexes for columns and rows which NEED TO BE showed in this area
         int leftColumn = mManager.getColumnByX(filledArea.left);
         int rightColumn = mManager.getColumnByX(filledArea.right);
@@ -329,23 +458,23 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
         for (int i = topRow; i <= bottomRow; i++) {
             for (int j = leftColumn; j <= rightColumn; j++) {
-                // data holders
+                // item view holders
                 ViewHolder viewHolder = mViewHolders.get(i, j);
                 if (viewHolder == null && mAdapter != null) {
-                    addViews(i, j, ViewHolderType.ITEM);
+                    addViewHolder(i, j, ViewHolderType.ITEM);
                 }
             }
-            // row headers
+            // row view headers holders
             ViewHolder viewHolder = mHeaderRowViewHolders.get(i);
             if (viewHolder == null && mAdapter != null) {
-                addViews(i, 0, ViewHolderType.ROW_HEADER);
+                addViewHolder(i, 0, ViewHolderType.ROW_HEADER);
             }
         }
         for (int i = leftColumn; i <= rightColumn; i++) {
-            // column header holders
+            // column view header holders
             ViewHolder viewHolder = mHeaderColumnViewHolders.get(i);
             if (viewHolder == null && mAdapter != null) {
-                addViews(0, i, ViewHolderType.COLUMN_HEADER);
+                addViewHolder(0, i, ViewHolderType.COLUMN_HEADER);
             }
         }
 
@@ -367,55 +496,65 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         }
     }
 
-    private void addViews(int row, int column, int itemType) {
+
+    private void addViewHolder(int row, int column, int itemType) {
 
         // need to add new one
         ViewHolder viewHolder = mRecycler.popRecycledViewHolder(itemType);
 
         if (viewHolder == null) {
-            viewHolder = createViewHolder(TableLayout.this, itemType);
+            viewHolder = createViewHolder(itemType);
         }
 
         if (viewHolder == null) {
             return;
         }
 
+        // prepare view holder
         viewHolder.setRowIndex(row);
         viewHolder.setColumnIndex(column);
         viewHolder.setItemType(itemType);
         View view = viewHolder.getItemView();
         view.setTag(R.id.tag_view_holder, viewHolder);
 
+        // add view to the layout
         addView(view, 0);
 
+        // save and measure view holder
         if (itemType == ViewHolderType.ITEM) {
             mViewHolders.put(row, column, viewHolder);
             mAdapter.onBindViewHolder(viewHolder, row, column);
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getColumnWidth(column), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mManager.getRowHeight(row), MeasureSpec.EXACTLY));
-            refreshLayout(row, column, viewHolder);
+            refreshItemViewHolder(viewHolder);
         } else if (itemType == ViewHolderType.ROW_HEADER) {
             mHeaderRowViewHolders.put(row, viewHolder);
             mAdapter.onBindHeaderRowViewHolder(viewHolder, row);
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderRowWidth(), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mManager.getRowHeight(row), MeasureSpec.EXACTLY));
-            refreshHeaderRow(row, viewHolder);
+            refreshHeaderRowViewHolder(viewHolder);
         } else if (itemType == ViewHolderType.COLUMN_HEADER) {
             mHeaderColumnViewHolders.put(column, viewHolder);
             mAdapter.onBindHeaderColumnViewHolder(viewHolder, column);
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getColumnWidth(column), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderColumnHeight(), MeasureSpec.EXACTLY));
-            refreshHeaderColumn(column, viewHolder);
+            refreshHeaderColumnViewHolder(viewHolder);
         }
     }
 
+    /**
+     * Create view holder by type
+     *
+     * @param itemType view holder type
+     * @return Created view holder
+     */
     @Nullable
-    private ViewHolder createViewHolder(@NonNull ViewGroup parent, int itemType) {
+    private ViewHolder createViewHolder(int itemType) {
         if (itemType == ViewHolderType.ITEM) {
-            return mAdapter.onCreateViewHolder(parent);
+            return mAdapter.onCreateViewHolder(TableLayout.this);
         } else if (itemType == ViewHolderType.ROW_HEADER) {
             return mAdapter.onCreateRowHeaderViewHolder(TableLayout.this);
         } else if (itemType == ViewHolderType.COLUMN_HEADER) {
@@ -427,6 +566,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        // intercept event before OnClickListener on item view.
         mScrollHelper.onTouch(ev);
         return true;
     }
@@ -434,19 +574,25 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (mScrollHelper.isDragging()) {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            // Drag and drop logic
 
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                // end drag and drop event
                 mDragAndDropPoints.setEnd((int) (mState.getScrollX() + event.getX()),
                         (int) (mState.getScrollY() + event.getY()));
-
+                mLastSwitchHeaderPoint.set(0, 0);
                 return mScrollHelper.onTouch(event);
             }
-
+            // calculate absolute x, y
             int absoluteX = (int) (mState.getScrollX() + event.getX());
             int absoluteY = (int) (mState.getScrollY() + event.getY());
-            if (mState.isColumnDragging() && Math.abs(absoluteX - mLastSwitchColumnsPoint.x) > SHIFT_VIEWS_THRESHOLD) {
+
+            if (mState.isColumnDragging() && Math.abs(absoluteX - mLastSwitchHeaderPoint.x) > SHIFT_VIEWS_THRESHOLD) {
+                // if column drag and drop mode and column offset > SHIFT_VIEWS_THRESHOLD
                 int toColumn = 0;
                 int fromColumn = 0;
+
+                // search dragging column and under column
                 for (ViewHolder header : mHeaderColumnViewHolders.values()) {
                     if (header.isDragging()) {
                         fromColumn = header.getColumnIndex();
@@ -456,20 +602,24 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 }
 
                 if (fromColumn != toColumn) {
-                    mLastSwitchColumnsPoint.x = absoluteX;
+                    // need to switch columns
+                    mLastSwitchHeaderPoint.x = absoluteX;
                     if (fromColumn < toColumn) {
+                        // move column from left to right
                         for (int i = fromColumn; i < toColumn; i++) {
                             shiftColumnsViews(i, i + 1);
                         }
                     } else {
+                        // move column from right to left
                         for (int i = fromColumn; i > toColumn; i--) {
                             shiftColumnsViews(i - 1, i);
                         }
                     }
                 }
-            } else if (mState.isRowDragging() && Math.abs(absoluteY - mLastSwitchColumnsPoint.y) > SHIFT_VIEWS_THRESHOLD) {
+            } else if (mState.isRowDragging() && Math.abs(absoluteY - mLastSwitchHeaderPoint.y) > SHIFT_VIEWS_THRESHOLD) {
                 int toRow = 0;
                 int fromRow = 0;
+                // search dragging row and under row
                 for (ViewHolder header : mHeaderRowViewHolders.values()) {
                     if (header.isDragging()) {
                         fromRow = header.getRowIndex();
@@ -479,26 +629,30 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 }
 
                 if (fromRow != toRow) {
-                    mLastSwitchColumnsPoint.y = absoluteY;
+                    // need to switch rows
+                    mLastSwitchHeaderPoint.y = absoluteY;
                     if (fromRow < toRow) {
+                        // move row from top to bottom
                         for (int i = fromRow; i < toRow; i++) {
                             shiftRowsViews(i, i + 1);
                         }
                     } else {
+                        // move row from bottom to top
                         for (int i = fromRow; i > toRow; i--) {
                             shiftRowsViews(i - 1, i);
                         }
                     }
                 }
             }
-
+            // set drag and drop offset
             mDragAndDropPoints.setOffset((int) (event.getX()), (int) (event.getY()));
 
+            // intercept touch for scroll in drag and drop mode
             mScrollerDragAndDropRunnable.touch((int) event.getX(), (int) event.getY(),
                     mState.isColumnDragging() ? ScrollType.SCROLL_HORIZONTAL : ScrollType.SCROLL_VERTICAL);
 
-            refreshLayouts();
-
+            // update positions
+            refreshViewHolders();
             return true;
         }
         return mScrollHelper.onTouch(event);
@@ -513,9 +667,15 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     private void shiftColumnsViews(final int fromColumn, final int toColumn) {
         if (mAdapter != null) {
 
+            // change data
             mAdapter.changeColumns(fromColumn, toColumn);
+
+            // change view holders
             switchHeaders(mHeaderColumnViewHolders, fromColumn, toColumn, ViewHolderType.COLUMN_HEADER);
+
+            // change indexes in array with widths
             mManager.switchTwoColumns(fromColumn, toColumn);
+
 
             Collection<ViewHolder> fromHolders = mViewHolders.getColumnItems(fromColumn);
             Collection<ViewHolder> toHolders = mViewHolders.getColumnItems(toColumn);
@@ -543,9 +703,13 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      */
     private void shiftRowsViews(final int fromRow, final int toRow) {
         if (mAdapter != null) {
-
+            // change data
             mAdapter.changeRows(fromRow, toRow);
+
+            // change view holders
             switchHeaders(mHeaderRowViewHolders, fromRow, toRow, ViewHolderType.ROW_HEADER);
+
+            // change indexes in array with heights
             mManager.switchTwoRows(fromRow, toRow);
 
             Collection<ViewHolder> fromHolders = mViewHolders.getRowItems(fromRow);
@@ -581,7 +745,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             map.remove(fromIndex);
             if (type == ViewHolderType.COLUMN_HEADER) {
                 fromVh.setColumnIndex(toIndex);
-            } else {
+            } else if (type == ViewHolderType.ROW_HEADER) {
                 fromVh.setRowIndex(toIndex);
             }
         }
@@ -591,7 +755,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             map.remove(toIndex);
             if (type == ViewHolderType.COLUMN_HEADER) {
                 toVh.setColumnIndex(fromIndex);
-            } else {
+            } else if (type == ViewHolderType.ROW_HEADER) {
                 toVh.setRowIndex(fromIndex);
             }
         }
@@ -708,7 +872,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 setDraggingToColumn(viewHolder.getColumnIndex(), true);
 
                 // update view
-                refreshLayouts();
+                refreshViewHolders();
                 return true;
             } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
                 // dragging column header
@@ -719,7 +883,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 setDraggingToRow(viewHolder.getRowIndex(), true);
 
                 // update view
-                refreshLayouts();
+                refreshViewHolders();
                 return true;
             } else {
                 OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
@@ -807,7 +971,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         mDragAndDropPoints.setEnd(0, 0);
 
         // update main layout
-        refreshLayouts();
+        refreshViewHolders();
         return true;
     }
 
@@ -862,21 +1026,21 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     @Override
     public void notifyDataSetChanged() {
-        recycleViews(true);
+        recycleViewHolders(true);
         mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
                 mState.getScrollX() + mSettings.getLayoutWidth(),
                 mState.getScrollY() + mSettings.getLayoutHeight());
-        addViews(mVisibleArea);
+        addViewHolders(mVisibleArea);
     }
 
     @Override
     public void notifyLayoutChanged() {
-        recycleViews(true);
+        recycleViewHolders(true);
         invalidate();
         mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
                 mState.getScrollX() + mSettings.getLayoutWidth(),
                 mState.getScrollY() + mSettings.getLayoutHeight());
-        addViews(mVisibleArea);
+        addViewHolders(mVisibleArea);
     }
 
     @Override
@@ -905,8 +1069,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     private void viewHolderChanged(@NonNull ViewHolder holder) {
         mViewHolders.remove(holder.getRowIndex(), holder.getColumnIndex());
-        recycleViewHolder(holder, holder.getItemType());
-        addViews(holder.getRowIndex(), holder.getColumnIndex(), holder.getItemType());
+        recycleViewHolder(holder);
+        addViewHolder(holder.getRowIndex(), holder.getColumnIndex(), holder.getItemType());
     }
 
 }

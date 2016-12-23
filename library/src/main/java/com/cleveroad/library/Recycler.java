@@ -27,13 +27,12 @@ class Recycler {
      * {@link #popRecycledViewHolder(int)}
      *
      * @param viewHolder A viewHolder to add to the Recycler. It can no longer be used.
-     * @param type       the type of the view.
      */
-    void pushRecycledView(@NonNull ViewHolder viewHolder, int type) {
-        Deque<ViewHolder> deque = mViewHolders.get(type);
+    void pushRecycledView(@NonNull ViewHolder viewHolder) {
+        Deque<ViewHolder> deque = mViewHolders.get(viewHolder.getItemType());
         if (deque == null) {
             deque = new ArrayDeque<>();
-            mViewHolders.put(type, deque);
+            mViewHolders.put(viewHolder.getItemType(), deque);
         }
         deque.push(viewHolder);
     }
