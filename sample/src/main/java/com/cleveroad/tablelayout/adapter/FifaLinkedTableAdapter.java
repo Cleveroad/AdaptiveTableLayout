@@ -5,20 +5,25 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.cleveroad.library.LinkedTableAdapter;
 import com.cleveroad.library.ViewHolderImpl;
 import com.cleveroad.tablelayout.R;
 import com.cleveroad.tablelayout.datasource.TableDataSource;
 
-import java.io.File;
-
-public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
+public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
+    private static final int COLUMN_PHOTO = 0;
+    private static final int COLUMN_NAME = 1;
+    private static final int COLUMN_POSITION = 2;
+    private static final int COLUMN_DATE_OF_BIRTH = 3;
+    private static final int COLUMN_FOOTBALL_TEAM = 4;
     private final LayoutInflater mLayoutInflater;
-    private final TableDataSource<String, String , String, String> mTableDataSource;
+    private final TableDataSource<String, String, String, String> mTableDataSource;
 
-    public SampleLinkedTableAdapter(Context context, TableDataSource<String, String, String, String> tableDataSource) {
+    public FifaLinkedTableAdapter(Context context, TableDataSource<String, String, String, String> tableDataSource) {
         mLayoutInflater = LayoutInflater.from(context);
         mTableDataSource = tableDataSource;
     }
@@ -61,7 +66,31 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
         if (viewHolder instanceof TestViewHolder) {
             TestViewHolder vh = (TestViewHolder) viewHolder;
-            vh.tvText.setText(mTableDataSource.getItemData(row, column));
+            String itemData = mTableDataSource.getItemData(row, column).trim();
+
+            switch (column) {
+                case COLUMN_FOOTBALL_TEAM:
+                case COLUMN_PHOTO: {
+                    vh.tvText.setVisibility(View.GONE);
+                    vh.ivImage.setVisibility(View.VISIBLE);
+                    Glide.with(vh.ivImage.getContext())
+                            .load(itemData)
+                            .centerCrop()
+                            .placeholder(R.mipmap.ic_launcher)
+                            .error(R.mipmap.ic_launcher)
+                            .into(vh.ivImage);
+                    break;
+                }
+                case COLUMN_NAME:
+                case COLUMN_POSITION:
+                case COLUMN_DATE_OF_BIRTH: {
+                    vh.tvText.setVisibility(View.VISIBLE);
+                    vh.ivImage.setVisibility(View.GONE);
+                    vh.tvText.setText(itemData);
+                    break;
+                }
+            }
+
         }
     }
 
@@ -90,21 +119,31 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     @Override
     public int getColumnWidth(int column) {
-        if (column % 2 == 0) {
-            return 240;
-        } else {
-            return 160;
+        switch (column) {
+            case COLUMN_FOOTBALL_TEAM:
+                return 300;
+            case COLUMN_NAME:
+                return 400;
+            case COLUMN_POSITION:
+                return 200;
+            case COLUMN_DATE_OF_BIRTH:
+                return 300;
+            case COLUMN_PHOTO:
+                return 300;
+            default:
+                return 100;
+
         }
     }
 
     @Override
     public int getHeaderColumnHeight() {
-        return 160;
+        return 100/*360*/;
     }
 
     @Override
     public int getRowHeight(int row) {
-        return 160;
+        return 360;
     }
 
     @Override
@@ -121,10 +160,12 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     private static class TestViewHolder extends ViewHolderImpl {
         TextView tvText;
+        ImageView ivImage;
 
         private TestViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
+            ivImage = (ImageView) itemView.findViewById(R.id.ivImage);
         }
     }
 
@@ -155,6 +196,6 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
-
     }
+
 }

@@ -9,6 +9,8 @@ public class SampleActivity
         extends AppCompatActivity
         implements CsvPickerFragment.OnCsvFileSelectedListener {
 
+    private static final String ASSETS_FIFA_PLAYERS_FILE = "fifa100.csv";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,7 +19,10 @@ public class SampleActivity
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.container, CsvPickerFragment.newInstance(), CsvPickerFragment.class.getSimpleName())
+//                    .add(R.id.container, CsvPickerFragment.newInstance(), CsvPickerFragment.class.getSimpleName())
+                    .replace(R.id.container,
+                            TableLayoutFragment.newInstance(ASSETS_FIFA_PLAYERS_FILE),
+                            CsvPickerFragment.class.getSimpleName())
                     .commit();
         }
     }
