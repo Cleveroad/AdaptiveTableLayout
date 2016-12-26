@@ -372,7 +372,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         view.layout(0,
                 top - mState.getScrollY(),
                 mManager.getHeaderRowWidth(),
-                top + mManager.getHeaderColumnHeight() - mState.getScrollY());
+                top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY());
     }
 
     /**
@@ -398,8 +398,11 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             if (holder != null && !holder.isDragging()) {
                 View view = holder.getItemView();
 
-                if (isRecycleAll || (view.getRight() < 0 || view.getLeft() > mSettings.getLayoutWidth() ||
-                        view.getBottom() < 0 || view.getTop() > mSettings.getLayoutHeight())) {
+                if (isRecycleAll
+                        || (view.getRight() < 0
+                        || view.getLeft() > mSettings.getLayoutWidth()
+                        || view.getBottom() < 0
+                        || view.getTop() > mSettings.getLayoutHeight())) {
                     // recycle view holder
                     mViewHolders.remove(holder.getRowIndex(), holder.getColumnIndex());
                     recycleViewHolder(holder);
@@ -497,7 +500,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         }
     }
 
-
+    @SuppressWarnings("unused")
     private void addViewHolder(int row, int column, int itemType) {
 
         // need to add new one
@@ -535,7 +538,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             Log.e("ttst", "mManager.getHeaderRowWidth()=" + mManager.getHeaderRowWidth() + "; getRowHeight(row)=" + mManager.getRowHeight(row) + "; row=" + row);
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderRowWidth(), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(mManager.getRowHeight(row) *2, MeasureSpec.EXACTLY));
+                    MeasureSpec.makeMeasureSpec(mManager.getRowHeight(row), MeasureSpec.EXACTLY));
             refreshHeaderRowViewHolder(viewHolder);
         } else if (itemType == ViewHolderType.COLUMN_HEADER) {
             mHeaderColumnViewHolders.put(column, viewHolder);
@@ -556,7 +559,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     @Nullable
     private ViewHolder createViewHolder(int itemType) {
         if (itemType == ViewHolderType.ITEM) {
-            return mAdapter.onCreateViewHolder(TableLayout.this);
+            return mAdapter.onCreateItemViewHolder(TableLayout.this);
         } else if (itemType == ViewHolderType.ROW_HEADER) {
             return mAdapter.onCreateRowHeaderViewHolder(TableLayout.this);
         } else if (itemType == ViewHolderType.COLUMN_HEADER) {
@@ -740,6 +743,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * @param toIndex   index to view holder
      * @param type      type of items (column header or row header)
      */
+    @SuppressWarnings("unused")
     private void switchHeaders(HashMap<Integer, ViewHolder> map, int fromIndex, int toIndex, int type) {
         ViewHolder fromVh = map.get(fromIndex);
 
@@ -909,7 +913,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * @param column     specific column
      * @param isDragging flag to set
      */
-
+    @SuppressWarnings("unused")
     private void setDraggingToColumn(int column, boolean isDragging) {
         Collection<ViewHolder> holders = mViewHolders.getColumnItems(column);
         for (ViewHolder holder : holders) {
@@ -928,6 +932,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * @param row        specific row
      * @param isDragging flag to set
      */
+    @SuppressWarnings("unused")
     private void setDraggingToRow(int row, boolean isDragging) {
         Collection<ViewHolder> holders = mViewHolders.getRowItems(row);
         for (ViewHolder holder : holders) {

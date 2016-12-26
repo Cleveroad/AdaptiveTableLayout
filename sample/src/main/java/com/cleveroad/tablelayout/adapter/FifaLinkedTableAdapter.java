@@ -41,7 +41,7 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
 
     @NonNull
     @Override
-    public ViewHolderImpl onCreateViewHolder(@NonNull ViewGroup parent) {
+    public ViewHolderImpl onCreateItemViewHolder(@NonNull ViewGroup parent) {
         return new TestViewHolder(mLayoutInflater.inflate(R.layout.item_card, parent, false));
     }
 
@@ -121,16 +121,14 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
     @Override
     public int getColumnWidth(int column) {
         switch (column) {
+            case COLUMN_DATE_OF_BIRTH:
+            case COLUMN_PHOTO:
             case COLUMN_FOOTBALL_TEAM:
                 return 300;
             case COLUMN_NAME:
                 return 400;
             case COLUMN_POSITION:
                 return 200;
-            case COLUMN_DATE_OF_BIRTH:
-                return 300;
-            case COLUMN_PHOTO:
-                return 300;
             default:
                 return 100;
 
@@ -139,7 +137,7 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
 
     @Override
     public int getHeaderColumnHeight() {
-        return 100/*360*/;
+        return 180;
     }
 
     @Override
@@ -186,7 +184,6 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
         TestHeaderRowViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
-            itemView.setBackgroundColor(Color.DKGRAY);
         }
 
     }

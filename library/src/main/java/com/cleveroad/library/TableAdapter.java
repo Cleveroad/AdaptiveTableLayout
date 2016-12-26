@@ -76,7 +76,7 @@ interface TableAdapter<VH extends ViewHolder> extends TableDataSetObserver {
      * @see #onBindViewHolder(ViewHolder, int, int)
      */
     @NonNull
-    VH onCreateViewHolder(@NonNull ViewGroup parent);
+    VH onCreateItemViewHolder(@NonNull ViewGroup parent);
 
     /**
      * Called when {@link TableLayout} needs a new COLUMN HEADER ITEM {@link ViewHolder}

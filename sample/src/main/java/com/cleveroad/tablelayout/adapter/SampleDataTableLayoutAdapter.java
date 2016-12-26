@@ -51,7 +51,7 @@ public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<Vie
 
     @NonNull
     @Override
-    public ViewHolderImpl onCreateViewHolder(@NonNull ViewGroup parent) {
+    public ViewHolderImpl onCreateItemViewHolder(@NonNull ViewGroup parent) {
         return new TestViewHolder(mLayoutInflater.inflate(R.layout.item_card, parent, false));
     }
 

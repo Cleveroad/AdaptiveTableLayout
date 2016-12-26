@@ -78,10 +78,10 @@ public class TableLayoutFragment
                 }
             }
         };
-        /*final LinkedTableAdapter adapter = new FifaLinkedTableAdapter(getContext(), mCsvFileDataSource);
+        final LinkedTableAdapter adapter = new FifaLinkedTableAdapter(getContext(), mCsvFileDataSource);
         adapter.setOnItemClickListener(this);
-        adapter.setOnItemLongClickListener(this);*/
-        tableLayout.setAdapter(new SampleDataTableLayoutAdapter(getContext()));
+        adapter.setOnItemLongClickListener(this);
+        tableLayout.setAdapter(adapter);
 
         return view;
     }

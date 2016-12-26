@@ -65,8 +65,8 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
 
     @NonNull
     @Override
-    public VH onCreateViewHolder(@NonNull ViewGroup parent) {
-        return mInner.onCreateViewHolder(parent);
+    public VH onCreateItemViewHolder(@NonNull ViewGroup parent) {
+        return mInner.onCreateItemViewHolder(parent);
     }
 
     @NonNull
