@@ -1,6 +1,7 @@
 package com.cleveroad.tablelayout.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -185,6 +186,7 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
         TestHeaderRowViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
+            itemView.setBackgroundColor(Color.DKGRAY);
         }
 
     }

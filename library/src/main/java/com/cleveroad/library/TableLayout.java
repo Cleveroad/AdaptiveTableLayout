@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -531,9 +532,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         } else if (itemType == ViewHolderType.ROW_HEADER) {
             mHeaderRowViewHolders.put(row, viewHolder);
             mAdapter.onBindHeaderRowViewHolder(viewHolder, row);
+            Log.e("ttst", "mManager.getHeaderRowWidth()=" + mManager.getHeaderRowWidth() + "; getRowHeight(row)=" + mManager.getRowHeight(row) + "; row=" + row);
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderRowWidth(), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(mManager.getRowHeight(row), MeasureSpec.EXACTLY));
+                    MeasureSpec.makeMeasureSpec(mManager.getRowHeight(row) *2, MeasureSpec.EXACTLY));
             refreshHeaderRowViewHolder(viewHolder);
         } else if (itemType == ViewHolderType.COLUMN_HEADER) {
             mHeaderColumnViewHolders.put(column, viewHolder);

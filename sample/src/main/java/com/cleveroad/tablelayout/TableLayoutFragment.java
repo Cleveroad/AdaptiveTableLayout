@@ -14,6 +14,7 @@ import com.cleveroad.library.OnItemClickListener;
 import com.cleveroad.library.OnItemLongClickListener;
 import com.cleveroad.library.TableLayout;
 import com.cleveroad.tablelayout.adapter.FifaLinkedTableAdapter;
+import com.cleveroad.tablelayout.adapter.SampleDataTableLayoutAdapter;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
 
 import java.io.File;
@@ -77,10 +78,10 @@ public class TableLayoutFragment
                 }
             }
         };
-        final LinkedTableAdapter adapter = new FifaLinkedTableAdapter(getContext(), mCsvFileDataSource);
+        /*final LinkedTableAdapter adapter = new FifaLinkedTableAdapter(getContext(), mCsvFileDataSource);
         adapter.setOnItemClickListener(this);
-        adapter.setOnItemLongClickListener(this);
-        tableLayout.setAdapter(adapter);
+        adapter.setOnItemLongClickListener(this);*/
+        tableLayout.setAdapter(new SampleDataTableLayoutAdapter(getContext()));
 
         return view;
     }
