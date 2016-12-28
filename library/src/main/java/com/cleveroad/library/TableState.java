@@ -51,4 +51,8 @@ class TableState {
     void setColumnDragging(boolean columnDragging) {
         mIsColumnDragging = columnDragging;
     }
+
+    boolean isDragging() {
+        return mIsColumnDragging || mIsRowDragging;
+    }
 }

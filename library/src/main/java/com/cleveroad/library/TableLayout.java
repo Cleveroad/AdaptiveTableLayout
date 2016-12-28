@@ -1,6 +1,7 @@
 package com.cleveroad.library;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -88,6 +89,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      */
     private DragAndDropScrollRunnable mScrollerDragAndDropRunnable;
 
+    private boolean mIsHeaderFixed;
+
 
     public TableLayout(Context context) {
         super(context);
@@ -96,17 +99,21 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     public TableLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        initAttrs(context, attrs);
         init(context);
+
     }
 
     public TableLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        initAttrs(context, attrs);
         init(context);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public TableLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        initAttrs(context, attrs);
         init(context);
     }
 
@@ -122,6 +129,19 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         }
     }
 
+    private void initAttrs(Context context, AttributeSet attrs) {
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.TableLayout,
+                0, 0);
+
+        try {
+            mIsHeaderFixed = a.getBoolean(R.styleable.TableLayout_fixedHeaders, true);
+        } finally {
+            a.recycle();
+        }
+    }
+
     private void init(Context context) {
         // init scroll and fling helpers
         mScrollerRunnable = new SmoothScrollRunnable(this);
@@ -130,6 +150,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         mSettings = new TableLayoutSettings();
         mScrollHelper = new ScrollHelper(context);
         mScrollHelper.setListener(this);
+
     }
 
     private void initItems() {
@@ -287,6 +308,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 }
             }
 
+            if (mLeftTopViewHolder != null) {
+                refreshLeftTopHeaderViewHolder(mLeftTopViewHolder);
+            }
+
             for (ViewHolder holder : mViewHolders.getAll()) {
                 if (holder != null) {
                     // cell item
@@ -342,7 +367,9 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * @param holder current view holder
      */
     private void refreshHeaderColumnViewHolder(ViewHolder holder) {
+
         int left = mManager.getColumnsWidth(0, Math.max(0, holder.getColumnIndex())) + mManager.getHeaderRowWidth();
+        int top = mIsHeaderFixed ? 0 : -mState.getScrollY();
         View view = holder.getItemView();
 
         if (holder.isDragging() && mDragAndDropPoints.getOffset().x > 0) {
@@ -351,7 +378,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         }
 
         view.layout(left - mState.getScrollX(),
-                0,
+                top,
                 left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX(),
                 mManager.getHeaderColumnHeight());
     }
@@ -364,15 +391,37 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      */
     private void refreshHeaderRowViewHolder(ViewHolder holder) {
         int top = mManager.getRowsHeight(0, Math.max(0, holder.getRowIndex())) + mManager.getHeaderColumnHeight();
+        int left = mIsHeaderFixed ? 0 : -mState.getScrollX();
         View view = holder.getItemView();
         if (holder.isDragging() && mDragAndDropPoints.getOffset().y > 0) {
             top = mState.getScrollY() + mDragAndDropPoints.getOffset().y - view.getHeight() / 2;
             view.bringToFront();
         }
-        view.layout(0,
+        view.layout(left,
                 top - mState.getScrollY(),
                 mManager.getHeaderRowWidth(),
                 top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY());
+    }
+
+    /**
+     * Refresh current row header view holder.
+     *
+     * @param holder current view holder
+     */
+    private void refreshLeftTopHeaderViewHolder(ViewHolder holder) {
+        if (mIsHeaderFixed) {
+            return;
+        }
+
+        int left = -mState.getScrollX();
+        int top = -mState.getScrollY();
+        View view = holder.getItemView();
+
+        view.layout(left,
+                top,
+                left + mManager.getHeaderRowWidth(),
+                top + mManager.getHeaderColumnHeight());
+
     }
 
     /**
@@ -578,7 +627,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mScrollHelper.isDragging()) {
+        if (mState.isDragging()) {
             // Drag and drop logic
 
             if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -794,13 +843,15 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         final boolean result;
         final ViewHolder viewHolder = (ViewHolder) child.getTag(R.id.tag_view_holder);
         canvas.save();
+        int headerFixedX = (mIsHeaderFixed ? 0 : mState.getScrollX());
+        int headerFixedY = (mIsHeaderFixed ? 0 : mState.getScrollY());
         //noinspection StatementWithEmptyBody
         if (viewHolder == null) {
             //ignore
         } else if (viewHolder.getItemType() == ViewHolderType.COLUMN_HEADER) {
             // prepare canvas rect area for draw column header
             canvas.clipRect(
-                    mManager.getHeaderRowWidth(),
+                    Math.max(0, mManager.getHeaderRowWidth() - headerFixedX),
                     0,
                     mSettings.getLayoutWidth(),
                     mManager.getHeaderColumnHeight());
@@ -808,14 +859,14 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             // prepare canvas rect area for draw row header
             canvas.clipRect(
                     0,
-                    mManager.getHeaderColumnHeight(),
+                    Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY),
                     mManager.getHeaderRowWidth(),
                     mSettings.getLayoutHeight());
         } else if (viewHolder.getItemType() == ViewHolderType.ITEM) {
             // prepare canvas rect area for draw item (cell in table)
             canvas.clipRect(
-                    mManager.getHeaderRowWidth(),
-                    mManager.getHeaderColumnHeight(),
+                    Math.max(0, mManager.getHeaderRowWidth() - headerFixedX),
+                    Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY),
                     mSettings.getLayoutWidth(),
                     mSettings.getLayoutHeight());
         } else if (viewHolder.getItemType() == ViewHolderType.FIRST_HEADER) {
@@ -823,8 +874,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             canvas.clipRect(
                     0,
                     0,
-                    mManager.getHeaderRowWidth(),
-                    mManager.getHeaderColumnHeight());
+                    Math.max(0, mManager.getHeaderRowWidth() - headerFixedX),
+                    Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY));
         }
         result = super.drawChild(canvas, child, drawingTime);
         canvas.restore(); // need to restore here.
@@ -862,7 +913,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     }
 
     @Override
-    public boolean onLongPress(MotionEvent e) {
+    public void onLongPress(MotionEvent e) {
         // prepare drag and drop
         // search view holder by x, y
         ViewHolder viewHolder = getViewHolderByPosition((int) e.getX(), (int) e.getY());
@@ -879,7 +930,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
                 // update view
                 refreshViewHolders();
-                return true;
             } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
                 // dragging column header
                 mState.setRowDragging(true);
@@ -890,7 +940,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
                 // update view
                 refreshViewHolders();
-                return true;
             } else {
                 OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
                 if (onItemClickListener != null) {
@@ -900,11 +949,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                         onItemClickListener.onLeftTopHeaderLongClick();
                     }
                 }
-                return false;
             }
-
         }
-        return false;
     }
 
     /**
@@ -985,29 +1031,56 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     @Nullable
     private ViewHolder getViewHolderByPosition(int x, int y) {
         ViewHolder viewHolder;
+
+        int absX = x + mState.getScrollX();
+        int absY = y + mState.getScrollY();
+
+        if (!mIsHeaderFixed) {
+            x = absX;
+            y = absY;
+        }
+
         if (y < mManager.getHeaderColumnHeight() && x < mManager.getHeaderRowWidth()) {
             // left top view was clicked
             viewHolder = mLeftTopViewHolder;
-        } else if (y < mManager.getHeaderColumnHeight()) {
-            // coordinate x, y in the column header's area
-            int column = mManager.getColumnByX(x + mState.getScrollX());
-            viewHolder = mHeaderColumnViewHolders.get(column);
-        } else if (x < mManager.getHeaderRowWidth()) {
-            // coordinate x, y in the row header's area
-            int row = mManager.getRowByY(y + mState.getScrollY());
-            viewHolder = mHeaderRowViewHolders.get(row);
+        } else if (mIsHeaderFixed) {
+            if (y < mManager.getHeaderColumnHeight()) {
+                // coordinate x, y in the column header's area
+                int column = mManager.getColumnByX(absX);
+                viewHolder = mHeaderColumnViewHolders.get(column);
+            } else if (x < mManager.getHeaderRowWidth()) {
+                // coordinate x, y in the row header's area
+                int row = mManager.getRowByY(absY);
+                viewHolder = mHeaderRowViewHolders.get(row);
+            } else {
+                // coordinate x, y in the items area
+                int column = mManager.getColumnByX(absX);
+                int row = mManager.getRowByY(absY);
+                viewHolder = mViewHolders.get(row, column);
+            }
         } else {
-            // coordinate x, y in the items area
-            int column = mManager.getColumnByX(x + mState.getScrollX());
-            int row = mManager.getRowByY(y + mState.getScrollY());
-            viewHolder = mViewHolders.get(row, column);
+
+            if (absY < mManager.getHeaderColumnHeight()) {
+                // coordinate x, y in the column header's area
+                int column = mManager.getColumnByX(absX);
+                viewHolder = mHeaderColumnViewHolders.get(column);
+            } else if (absX < mManager.getHeaderRowWidth()) {
+                // coordinate x, y in the row header's area
+                int row = mManager.getRowByY(absY);
+                viewHolder = mHeaderRowViewHolders.get(row);
+            } else {
+                // coordinate x, y in the items area
+                int column = mManager.getColumnByX(absX);
+                int row = mManager.getRowByY(absY);
+                viewHolder = mViewHolders.get(row, column);
+            }
         }
         return viewHolder;
     }
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        if (!mScrollHelper.isDragging()) {
+        if (!mState.isDragging()) {
             // simple scroll....
             if (!mScrollerRunnable.isFinished()) {
                 mScrollerRunnable.forceFinished();
@@ -1019,7 +1092,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        if (!mScrollHelper.isDragging()) {
+        if (!mState.isDragging()) {
             // simple fling
             mScrollerRunnable.start(
                     mState.getScrollX(), mState.getScrollY(),
@@ -1080,4 +1153,11 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         addViewHolder(holder.getRowIndex(), holder.getColumnIndex(), holder.getItemType());
     }
 
+    public boolean isHeaderFixed() {
+        return mIsHeaderFixed;
+    }
+
+    public void setHeaderFixed(boolean headerFixed) {
+        mIsHeaderFixed = headerFixed;
+    }
 }

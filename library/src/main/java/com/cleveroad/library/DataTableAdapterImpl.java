@@ -1,6 +1,7 @@
 package com.cleveroad.library;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.ViewGroup;
 
 /**
@@ -125,6 +126,18 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
     @Override
     public int getHeaderRowWidth() {
         return mInner.getHeaderRowWidth();
+    }
+
+    @Override
+    @Nullable
+    public OnItemClickListener getOnItemClickListener() {
+        return mInner.getOnItemClickListener();
+    }
+
+    @Override
+    @Nullable
+    public OnItemLongClickListener getOnItemLongClickListener() {
+        return mInner.getOnItemLongClickListener();
     }
 
     @Override

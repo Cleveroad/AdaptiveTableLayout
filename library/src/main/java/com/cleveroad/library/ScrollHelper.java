@@ -14,12 +14,6 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
      */
     private final GestureDetectorCompat mGestureDetectorCompat;
 
-    /**
-     * ScrollHelper's dragging state.
-     * Change when user emit LongPress on column or row.
-     */
-    private boolean isDragging = false;
-
     @Nullable
     private ScrollHelperListener mListener;
 
@@ -59,7 +53,7 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
     public void onLongPress(MotionEvent e) {
         // catch long click action
         if (mListener != null) {
-            isDragging = mListener.onLongPress(e);
+           mListener.onLongPress(e);
         }
     }
 
@@ -73,7 +67,6 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
             // stop drag and drop mode
-            isDragging = false;
             if (mListener != null) {
                 mListener.onActionUp(event);
             }
@@ -82,9 +75,6 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
         return mGestureDetectorCompat.onTouchEvent(event);
     }
 
-    boolean isDragging() {
-        return isDragging;
-    }
 
     interface ScrollHelperListener {
 
@@ -92,11 +82,7 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
 
         boolean onSingleTapUp(MotionEvent e);
 
-        /**
-         * @param e MotionEvent
-         * @return true if need to start dragging mode
-         */
-        boolean onLongPress(MotionEvent e);
+        void onLongPress(MotionEvent e);
 
         boolean onActionUp(MotionEvent e);
 
