@@ -29,7 +29,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     /**
      * Matrix with item view holders
      */
-    private MapMatrix<ViewHolder> mViewHolders;
+    private SparseMatrix<ViewHolder> mViewHolders;
     /**
      * Map with column's headers view holders
      */
@@ -150,7 +150,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     }
 
     private void init(Context context) {
-        mViewHolders = new MapMatrix<>();
+        mViewHolders = new SparseMatrix<>();
         mHeaderColumnViewHolders = new SparseArrayCompat<>();
         mHeaderRowViewHolders = new SparseArrayCompat<>();
         mDragAndDropPoints = new DragAndDropPoints();

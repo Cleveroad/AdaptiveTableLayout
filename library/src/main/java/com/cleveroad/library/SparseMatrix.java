@@ -2,23 +2,21 @@ package com.cleveroad.library;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.SparseArrayCompat;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Set;
 
 /**
  * Custom matrix realisation to hold Objects
  *
  * @param <TObj> Object
  */
-@Deprecated
-class MapMatrix<TObj> {
-    private final HashMap<Integer, HashMap<Integer, TObj>> mData;
+class SparseMatrix<TObj> {
+    private final SparseArrayCompat<SparseArrayCompat<TObj>> mData;
 
-    public MapMatrix() {
-        mData = new HashMap<>();
+    public SparseMatrix() {
+        mData = new SparseArrayCompat<>();
     }
 
     /**
@@ -29,13 +27,13 @@ class MapMatrix<TObj> {
      * @param item   Object
      */
     void put(int row, int column, @NonNull TObj item) {
-        HashMap<Integer, TObj> map = mData.get(row);
-        if (map == null) {
-            map = new HashMap<>();
-            map.put(column, item);
-            mData.put(row, map);
+        SparseArrayCompat<TObj> array = mData.get(row);
+        if (array == null) {
+            array = new SparseArrayCompat<>();
+            array.put(column, item);
+            mData.put(row, array);
         } else {
-            map.put(column, item);
+            array.put(column, item);
         }
     }
 
@@ -48,12 +46,8 @@ class MapMatrix<TObj> {
      */
     @Nullable
     TObj get(int row, int column) {
-        HashMap<Integer, TObj> map = mData.get(row);
-        if (map == null) {
-            return null;
-        } else {
-            return map.get(column);
-        }
+        SparseArrayCompat<TObj> array = mData.get(row);
+        return array == null ? null : array.get(column);
     }
 
     /**
@@ -65,9 +59,14 @@ class MapMatrix<TObj> {
     @NonNull
     Collection<TObj> getRowItems(int row) {
         Collection<TObj> result = new LinkedList<>();
-        HashMap<Integer, TObj> map = mData.get(row);
-        if (map != null) {
-            result.addAll(map.values());
+        SparseArrayCompat<TObj> array = mData.get(row);
+        for (int count = array.size(), i = 0; i < count; i++) {
+            int key = array.keyAt(i);
+            TObj columnObj = array.get(key);
+            if (columnObj != null) {
+                result.add(columnObj);
+            }
+
         }
         return result;
     }
@@ -81,12 +80,13 @@ class MapMatrix<TObj> {
     @NonNull
     Collection<TObj> getColumnItems(int column) {
         Collection<TObj> result = new LinkedList<>();
-        Set<Integer> keys = mData.keySet();
-        for (int key : keys) {
+        for (int count = mData.size(), i = 0; i < count; i++) {
+            int key = mData.keyAt(i);
             TObj columnObj = mData.get(key).get(column);
             if (columnObj != null) {
                 result.add(columnObj);
             }
+
         }
         return result;
     }
@@ -99,10 +99,14 @@ class MapMatrix<TObj> {
     @NonNull
     Collection<TObj> getAll() {
         Collection<TObj> result = new LinkedList<>();
-        Set<Integer> keys = mData.keySet();
-        for (int key : keys) {
-            Collection<TObj> collection = mData.get(key).values();
-            result.addAll(collection);
+        for (int countR = mData.size(), i = 0; i < countR; i++) {
+            int rowKey = mData.indexOfKey(i);
+            SparseArrayCompat<TObj> columns = mData.get(rowKey);
+            for (int countC = columns.size(), j = 0; j < countC; j++) {
+                int key = columns.keyAt(j);
+                result.add(columns.get(key));
+            }
+
         }
         return result;
     }
@@ -114,9 +118,9 @@ class MapMatrix<TObj> {
      * @param column item column position
      */
     void remove(int row, int column) {
-        HashMap<Integer, TObj> map = mData.get(row);
-        if (map != null) {
-            map.remove(column);
+        SparseArrayCompat<TObj> array = mData.get(row);
+        if (array != null) {
+            array.remove(column);
         }
     }
 

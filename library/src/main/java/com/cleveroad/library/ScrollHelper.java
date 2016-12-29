@@ -53,7 +53,7 @@ class ScrollHelper implements GestureDetector.OnGestureListener {
     public void onLongPress(MotionEvent e) {
         // catch long click action
         if (mListener != null) {
-           mListener.onLongPress(e);
+            mListener.onLongPress(e);
         }
     }
 
