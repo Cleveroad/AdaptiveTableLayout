@@ -58,19 +58,19 @@ public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<Vie
     @NonNull
     @Override
     public ViewHolderImpl onCreateColumnHeaderViewHolder(@NonNull ViewGroup parent) {
-        return new TestHeaderColumnViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
+        return new TestHeaderColumnViewHolder(mLayoutInflater.inflate(R.layout.item_header_row, parent, false));
     }
 
     @NonNull
     @Override
     public ViewHolderImpl onCreateRowHeaderViewHolder(@NonNull ViewGroup parent) {
-        return new TestHeaderRowViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
+        return new TestHeaderRowViewHolder(mLayoutInflater.inflate(R.layout.item_header_row, parent, false));
     }
 
     @NonNull
     @Override
     public ViewHolderImpl onCreateLeftTopHeaderViewHolder(@NonNull ViewGroup parent) {
-        return new TestHeaderLeftTopViewHolder(mLayoutInflater.inflate(R.layout.item_header_card, parent, false));
+        return new TestHeaderLeftTopViewHolder(mLayoutInflater.inflate(R.layout.item_header_row, parent, false));
     }
 
     @Override

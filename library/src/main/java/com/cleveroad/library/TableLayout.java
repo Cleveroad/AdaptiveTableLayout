@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperListener, TableDataSetObserver {
-
+    private static final int SHADOW_THICK = 25;
     private static final int SHIFT_VIEWS_THRESHOLD = 25;
     /**
      * Matrix with item view holders
@@ -46,7 +46,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * Item's widths and heights manager.
      */
     private final TableManager mManager = new TableManager();
-
     /**
      * Need to fix columns bounce when dragging header.
      * Saved absolute point when header switched in drag and drop mode.
@@ -57,6 +56,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * Contains visible area rect. Left top point and right bottom
      */
     private final Rect mVisibleArea = new Rect();
+
+
     /**
      * View holder in the left top corner.
      */
@@ -87,6 +88,11 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * Runnable helps with scroll in drag and drop mode
      */
     private DragAndDropScrollRunnable mScrollerDragAndDropRunnable;
+
+    /**
+     * Helps work with row' or column' shadows.
+     */
+    private ShadowHelper mShadowHelper;
 
 
     public TableLayout(Context context) {
@@ -130,6 +136,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         mSettings = new TableLayoutSettings();
         mScrollHelper = new ScrollHelper(context);
         mScrollHelper.setListener(this);
+        mShadowHelper = new ShadowHelper();
     }
 
     private void initItems() {
@@ -350,6 +357,27 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             view.bringToFront();
         }
 
+        if (holder.isDragging()) {
+            View leftShadow = mShadowHelper.getLeftShadow();
+            View rightShadow = mShadowHelper.getRightShadow();
+
+            if (leftShadow != null) {
+                int shadowRight = left - mState.getScrollX();
+                leftShadow.layout(Math.max(mManager.getHeaderRowWidth(), shadowRight - SHADOW_THICK),
+                        0, shadowRight, mSettings.getLayoutHeight());
+                leftShadow.bringToFront();
+            }
+
+            if (rightShadow != null) {
+                int shadowLeft = left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX();
+                rightShadow.layout(Math.max(mManager.getHeaderRowWidth(), shadowLeft),
+                        0, shadowLeft + SHADOW_THICK, mSettings.getLayoutHeight());
+                rightShadow.bringToFront();
+            }
+
+
+        }
+
         view.layout(left - mState.getScrollX(),
                 0,
                 left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX(),
@@ -368,6 +396,29 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (holder.isDragging() && mDragAndDropPoints.getOffset().y > 0) {
             top = mState.getScrollY() + mDragAndDropPoints.getOffset().y - view.getHeight() / 2;
             view.bringToFront();
+        }
+        if (holder.isDragging()) {
+            View topShadow = mShadowHelper.getTopShadow();
+            View bottomShadow = mShadowHelper.getBottomShadow();
+            if (topShadow != null) {
+                int shadowTop = top - mState.getScrollY();
+                topShadow.layout(0,
+                        Math.max(mManager.getHeaderColumnHeight(), shadowTop - SHADOW_THICK),
+                        mSettings.getLayoutWidth(),
+                        shadowTop);
+                topShadow.bringToFront();
+            }
+
+            if (bottomShadow != null) {
+                int shadowBottom = top - mState.getScrollY() + mManager.getRowHeight(holder.getRowIndex());
+                bottomShadow.layout(
+                        0,
+                        Math.max(mManager.getHeaderColumnHeight(), shadowBottom),
+                        mSettings.getLayoutWidth(),
+                        shadowBottom + SHADOW_THICK);
+
+                bottomShadow.bringToFront();
+            }
         }
         view.layout(0,
                 top - mState.getScrollY(),
@@ -788,7 +839,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         }
     }
 
-
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         final boolean result;
@@ -879,6 +929,9 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
                 // update view
                 refreshViewHolders();
+                mShadowHelper.addLeftShadow(this);
+                mShadowHelper.addRightShadow(this);
+
                 return true;
             } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
                 // dragging column header
@@ -890,6 +943,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
                 // update view
                 refreshViewHolders();
+
+                mShadowHelper.addTopShadow(this);
+                mShadowHelper.addBottomShadow(this);
+
                 return true;
             } else {
                 OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
@@ -947,6 +1004,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     @Override
     public boolean onActionUp(MotionEvent e) {
+
+        // remove shadows from dragging views
+        mShadowHelper.removeAll(this);
+
         // stop smooth scrolling
         if (!mScrollerDragAndDropRunnable.isFinished()) {
             mScrollerDragAndDropRunnable.stop();
