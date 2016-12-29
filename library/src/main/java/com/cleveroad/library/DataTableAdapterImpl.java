@@ -1,6 +1,8 @@
 package com.cleveroad.library;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.ViewGroup;
 
 /**
@@ -10,6 +12,8 @@ import android.view.ViewGroup;
  * @param <VH> Adapter's ViewHolder class
  */
 class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH> implements DataTableLayoutAdapter<VH> {
+    private static final String EXTRA_SAVE_STATE_COLUMNS = "EXTRA_SAVE_STATE_COLUMNS";
+    private static final String EXTRA_SAVE_STATE_ROWS = "EXTRA_SAVE_STATE_ROWS";
     /**
      * Decorated TableAdapter
      */
@@ -18,12 +22,12 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
     /**
      * Redirect column's ids
      */
-    private final int[] mColumnIds;
+    private int[] mColumnIds;
 
     /**
      * Redirect row's ids
      */
-    private final int[] mRowIds;
+    private int[] mRowIds;
 
     DataTableAdapterImpl(@NonNull TableAdapter<VH> inner) {
         mInner = inner;
@@ -128,6 +132,18 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
     }
 
     @Override
+    @Nullable
+    public OnItemClickListener getOnItemClickListener() {
+        return mInner.getOnItemClickListener();
+    }
+
+    @Override
+    @Nullable
+    public OnItemLongClickListener getOnItemLongClickListener() {
+        return mInner.getOnItemLongClickListener();
+    }
+
+    @Override
     public void onViewHolderRecycled(@NonNull VH viewHolder) {
         mInner.onViewHolderRecycled(viewHolder);
     }
@@ -140,10 +156,41 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
      * @param toIndex   second index
      */
     void switchTwoItems(int[] array, int fromIndex, int toIndex) {
-
         int cellData = array[toIndex];
         array[toIndex] = array[fromIndex];
         array[fromIndex] = cellData;
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle bundle) {
+        bundle.putIntArray(EXTRA_SAVE_STATE_COLUMNS, mColumnIds);
+        bundle.putIntArray(EXTRA_SAVE_STATE_ROWS, mRowIds);
+
+    }
+
+    @Override
+    public void onRestoreInstanceState(@NonNull Bundle bundle) {
+        restoreColumns(bundle.getIntArray(EXTRA_SAVE_STATE_COLUMNS));
+        restoreRows(bundle.getIntArray(EXTRA_SAVE_STATE_ROWS));
+    }
+
+    private void restoreColumns(@Nullable int[] array) {
+        if (array != null) {
+            for (int count = array.length, i = 0; i < count; i++) {
+                if (mColumnIds.length > i) {
+                    mColumnIds[i] = array[i];
+                }
+            }
+        }
+    }
+
+    private void restoreRows(@Nullable int[] array) {
+        if (array != null) {
+            for (int count = array.length, i = 0; i < count; i++) {
+                if (mRowIds.length > i) {
+                    mRowIds[i] = array[i];
+                }
+            }
+        }
+    }
 }
