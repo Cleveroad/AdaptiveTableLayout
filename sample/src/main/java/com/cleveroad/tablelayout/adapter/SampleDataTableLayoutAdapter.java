@@ -1,6 +1,7 @@
 package com.cleveroad.tablelayout.adapter;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -146,6 +147,16 @@ public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<Vie
     @Override
     protected Object[] getColumnHeaders() {
         return mColumns;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle bundle) {
+
+    }
+
+    @Override
+    public void onRestoreInstanceState(@NonNull Bundle bundle) {
+
     }
 
     static class TestViewHolder extends ViewHolderImpl {

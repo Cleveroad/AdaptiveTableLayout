@@ -14,7 +14,6 @@ import com.cleveroad.library.OnItemClickListener;
 import com.cleveroad.library.OnItemLongClickListener;
 import com.cleveroad.library.TableLayout;
 import com.cleveroad.tablelayout.adapter.FifaLinkedTableAdapter;
-import com.cleveroad.tablelayout.adapter.SampleDataTableLayoutAdapter;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
 
 import java.io.File;
@@ -32,6 +31,7 @@ public class TableLayoutFragment
     @Nullable
     private String mAssetsFileName;
     private CsvFileDataSourceImpl mCsvFileDataSource;
+    private TableLayout mTableLayout;
 
     public static TableLayoutFragment newInstance(@NonNull File csvFile) {
         Bundle args = new Bundle();
@@ -65,7 +65,7 @@ public class TableLayoutFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tab_layout, container, false);
 
-        TableLayout tableLayout = (TableLayout) view.findViewById(R.id.tableLayout);
+        mTableLayout = (TableLayout) view.findViewById(R.id.tableLayout);
 
 
         mCsvFileDataSource = new CsvFileDataSourceImpl() {
@@ -81,7 +81,8 @@ public class TableLayoutFragment
         final LinkedTableAdapter adapter = new FifaLinkedTableAdapter(getContext(), mCsvFileDataSource);
         adapter.setOnItemClickListener(this);
         adapter.setOnItemLongClickListener(this);
-        tableLayout.setAdapter(adapter);
+
+        mTableLayout.setAdapter(adapter);
 
         return view;
     }

@@ -37,8 +37,8 @@ public abstract class LinkedTableAdapter<VH extends ViewHolder> implements Table
     }
 
     @Override
-    public void setOnItemClickListener(@Nullable OnItemClickListener onItemLongClickListener) {
-        mOnItemClickListener = onItemLongClickListener;
+    public void setOnItemClickListener(@Nullable OnItemClickListener onItemClickListener) {
+        mOnItemClickListener = onItemClickListener;
     }
 
     @Override

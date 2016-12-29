@@ -7,13 +7,14 @@ import android.view.View;
  */
 class DragAndDropScrollRunnable implements Runnable {
     private View mView;
-    private boolean isFinished = true;
+    private boolean isFinished;
 
     private int mDiffX;
     private int mDiffY;
 
     DragAndDropScrollRunnable(View view) {
         mView = view;
+        isFinished = true;
     }
 
     synchronized void touch(int touchX, int touchY, @ScrollType int orientation) {
