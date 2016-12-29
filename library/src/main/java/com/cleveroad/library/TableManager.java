@@ -37,13 +37,38 @@ class TableManager {
      */
     private int mHeaderRowWidth;
 
+    private boolean mIsInited = false;
+
+    void clear() {
+        // clear objects
+        mRowHeights = new int[0];
+        mColumnWidths = new int[0];
+
+        mFullWidth = 0;
+        mFullHeight = 0;
+
+        mHeaderColumnHeight = 0;
+        mHeaderRowWidth = 0;
+
+        mIsInited = false;
+
+    }
+
     void init(int rowCount, int columnCount) {
         // create objects
         mRowHeights = new int[rowCount];
         mColumnWidths = new int[columnCount];
+        mIsInited = true;
+    }
+
+    private void checkForInit() {
+        if (!mIsInited) {
+            throw new IllegalStateException("You need to init matrix before work!");
+        }
     }
 
     void invalidate() {
+        checkForInit();
         // calculate widths
         mFullWidth = 0;
         for (int itemWidth : mColumnWidths) {
@@ -61,6 +86,7 @@ class TableManager {
      * @return column's width
      */
     int getColumnWidth(int column) {
+        checkForInit();
         return mColumnWidths[column];
     }
 
@@ -71,6 +97,7 @@ class TableManager {
      * @param width  column's width
      */
     void putColumnWidth(int column, int width) {
+        checkForInit();
         mColumnWidths[column] = width;
     }
 
@@ -80,6 +107,7 @@ class TableManager {
      * @return columns width
      */
     int getColumnsWidth(int from, int to) {
+        checkForInit();
         int width = 0;
         for (int i = from; i < to && mColumnWidths != null; i++) {
             width += mColumnWidths[i];
@@ -91,6 +119,7 @@ class TableManager {
      * @return columns count
      */
     int getColumnCount() {
+        checkForInit();
         if (mColumnWidths != null) {
             return mColumnWidths.length;
         }
@@ -102,6 +131,7 @@ class TableManager {
      * @return row's height
      */
     int getRowHeight(int row) {
+        checkForInit();
         return mRowHeights[row];
     }
 
@@ -113,6 +143,7 @@ class TableManager {
      * @param height row's height
      */
     void putRowHeight(int row, int height) {
+        checkForInit();
         mRowHeights[row] = height;
 
     }
@@ -123,6 +154,7 @@ class TableManager {
      * @return rows height
      */
     int getRowsHeight(int from, int to) {
+        checkForInit();
         int height = 0;
         for (int i = from; i < to && mRowHeights != null; i++) {
             height += mRowHeights[i];
@@ -134,6 +166,7 @@ class TableManager {
      * @return rows count
      */
     int getRowCount() {
+        checkForInit();
         if (mRowHeights != null) {
             return mRowHeights.length;
         }
@@ -144,6 +177,7 @@ class TableManager {
      * @return columns width with row's header width
      */
     long getFullWidth() {
+        checkForInit();
         return mFullWidth + mHeaderRowWidth;
     }
 
@@ -151,6 +185,7 @@ class TableManager {
      * @return rows height with column's header height
      */
     long getFullHeight() {
+        checkForInit();
         return mFullHeight + mHeaderColumnHeight;
     }
 
@@ -161,6 +196,7 @@ class TableManager {
      * @return column number
      */
     int getColumnByX(int x) {
+        checkForInit();
         int sum = 0;
         // header offset
         x -= mHeaderRowWidth;
@@ -186,6 +222,7 @@ class TableManager {
      * @return row number
      */
     int getRowByY(int y) {
+        checkForInit();
         int sum = 0;
         // header offset
         y -= mHeaderColumnHeight;
@@ -209,6 +246,7 @@ class TableManager {
      * @return column's header height
      */
     int getHeaderColumnHeight() {
+        checkForInit();
         return mHeaderColumnHeight;
     }
 
@@ -218,6 +256,7 @@ class TableManager {
      * @param headerColumnHeight column's header height.
      */
     void setHeaderColumnHeight(int headerColumnHeight) {
+        checkForInit();
         mHeaderColumnHeight = headerColumnHeight;
     }
 
@@ -225,6 +264,7 @@ class TableManager {
      * @return row's header width
      */
     int getHeaderRowWidth() {
+        checkForInit();
         return mHeaderRowWidth;
     }
 
@@ -235,6 +275,7 @@ class TableManager {
      * @param headerRowWidth row's header width.
      */
     void setHeaderRowWidth(int headerRowWidth) {
+        checkForInit();
         mHeaderRowWidth = headerRowWidth;
     }
 
@@ -245,6 +286,7 @@ class TableManager {
      * @param columnToIndex to column index
      */
     void switchTwoColumns(int columnIndex, int columnToIndex) {
+        checkForInit();
         int cellData = mColumnWidths[columnToIndex];
         mColumnWidths[columnToIndex] = mColumnWidths[columnIndex];
         mColumnWidths[columnIndex] = cellData;
@@ -257,6 +299,7 @@ class TableManager {
      * @param rowToIndex to row index
      */
     void switchTwoRows(int rowIndex, int rowToIndex) {
+        checkForInit();
         int cellData = mRowHeights[rowToIndex];
         mRowHeights[rowToIndex] = mRowHeights[rowIndex];
         mRowHeights[rowIndex] = cellData;

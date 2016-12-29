@@ -1,5 +1,8 @@
 package com.cleveroad.library;
 
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+
 interface DataTableLayoutAdapter<VH extends ViewHolder> extends TableAdapter<VH> {
     /**
      * Method calls when need to need to switch 2 columns with each other in the data matrix
@@ -16,4 +19,8 @@ interface DataTableLayoutAdapter<VH extends ViewHolder> extends TableAdapter<VH>
      * @param rowToIndex row to
      */
     void changeRows(int rowIndex, int rowToIndex);
+
+    void onSaveInstanceState(@NonNull Bundle bundle);
+
+    void onRestoreInstanceState(@NonNull Bundle bundle);
 }
