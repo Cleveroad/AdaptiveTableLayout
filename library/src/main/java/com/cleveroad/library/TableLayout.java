@@ -487,20 +487,21 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             View rightShadow = mShadowHelper.getRightShadow();
 
             if (leftShadow != null) {
-                int shadowRight = left - mState.getScrollX();
-                leftShadow.layout(Math.max(mManager.getHeaderRowWidth(), shadowRight - SHADOW_THICK),
-                        0, shadowRight, mSettings.getLayoutHeight());
+                int shadowLeft = left - mState.getScrollX();
+                leftShadow.layout(
+                        Math.max(mManager.getHeaderRowWidth() - mState.getScrollX(), shadowLeft - SHADOW_THICK),
+                        0,
+                        shadowLeft,
+                        mSettings.getLayoutHeight());
                 leftShadow.bringToFront();
             }
 
             if (rightShadow != null) {
                 int shadowLeft = left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX();
-                rightShadow.layout(Math.max(mManager.getHeaderRowWidth(), shadowLeft),
+                rightShadow.layout(Math.max(mManager.getHeaderRowWidth() - mState.getScrollX(), shadowLeft),
                         0, shadowLeft + SHADOW_THICK, mSettings.getLayoutHeight());
                 rightShadow.bringToFront();
             }
-
-
         }
 
         //noinspection ResourceType
@@ -530,7 +531,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             if (topShadow != null) {
                 int shadowTop = top - mState.getScrollY();
                 topShadow.layout(0,
-                        Math.max(mManager.getHeaderColumnHeight(), shadowTop - SHADOW_THICK),
+                        Math.max(mManager.getHeaderColumnHeight() - mState.getScrollY(), shadowTop - SHADOW_THICK),
                         mSettings.getLayoutWidth(),
                         shadowTop);
                 topShadow.bringToFront();
@@ -540,7 +541,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 int shadowBottom = top - mState.getScrollY() + mManager.getRowHeight(holder.getRowIndex());
                 bottomShadow.layout(
                         0,
-                        Math.max(mManager.getHeaderColumnHeight(), shadowBottom),
+                        Math.max(mManager.getHeaderColumnHeight() - mState.getScrollY(), shadowBottom),
                         mSettings.getLayoutWidth(),
                         shadowBottom + SHADOW_THICK);
 
@@ -1135,7 +1136,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 mShadowHelper.addLeftShadow(this);
                 mShadowHelper.addRightShadow(this);
 
-                return true;
             } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
                 // dragging column header
                 mState.setRowDragging(true);
@@ -1150,7 +1150,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 mShadowHelper.addTopShadow(this);
                 mShadowHelper.addBottomShadow(this);
 
-                return true;
             } else {
                 OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
                 if (onItemClickListener != null) {
