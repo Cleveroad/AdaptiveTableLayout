@@ -14,6 +14,10 @@ class TableLayoutSettings {
      */
     private int mLayoutHeight;
 
+    private boolean mIsHeaderFixed;
+
+    private int mCellMargin;
+
 
     TableLayoutSettings() {
     }
@@ -33,6 +37,24 @@ class TableLayoutSettings {
 
     TableLayoutSettings setLayoutHeight(int layoutHeight) {
         mLayoutHeight = layoutHeight;
+        return this;
+    }
+
+    public boolean isHeaderFixed() {
+        return mIsHeaderFixed;
+    }
+
+    public TableLayoutSettings setHeaderFixed(boolean headerFixed) {
+        mIsHeaderFixed = headerFixed;
+        return this;
+    }
+
+    public int getCellMargin() {
+        return mCellMargin;
+    }
+
+    public TableLayoutSettings setCellMargin(int cellMargin) {
+        mCellMargin = cellMargin;
         return this;
     }
 }

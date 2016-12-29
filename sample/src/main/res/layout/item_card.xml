@@ -3,30 +3,25 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/charcoal"
     >
 
-    <RelativeLayout
+
+    <TextView
+        android:id="@+id/tvText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="1dp"
-        android:background="@color/charcoal">
+        android:layout_gravity="center"
+        android:focusableInTouchMode="true"
+        android:gravity="center"/>
 
-        <TextView
-            android:id="@+id/tvText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:focusableInTouchMode="true"
-            android:gravity="center"/>
+    <ImageView
+        android:id="@+id/ivImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:focusableInTouchMode="true"
+        android:src="@mipmap/ic_launcher"
+        android:visibility="visible"/>
 
-        <ImageView
-            android:id="@+id/ivImage"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:focusableInTouchMode="true"
-            android:src="@mipmap/ic_launcher"
-            android:visibility="visible"/>
-
-    </RelativeLayout>
 </RelativeLayout>
