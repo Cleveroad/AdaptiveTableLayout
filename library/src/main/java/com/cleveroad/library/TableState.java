@@ -4,6 +4,8 @@ package com.cleveroad.library;
  * Layout state holder.
  */
 class TableState {
+
+    static final int NO_DRAGGING_POSITION = -1;
     /**
      * Current scroll position.
      */
@@ -19,6 +21,16 @@ class TableState {
      * Dragging column flag
      */
     private boolean mIsColumnDragging;
+
+    /**
+     * Dragging column index
+     */
+    private int mColumnDraggingIndex;
+    /**
+     * Dragging row index
+     */
+    private int mRowDraggingIndex;
+
 
     int getScrollX() {
         return mScrollX;
@@ -40,19 +52,29 @@ class TableState {
         return mIsRowDragging;
     }
 
-    void setRowDragging(boolean rowDragging) {
+    void setRowDragging(boolean rowDragging, int rowIndex) {
         mIsRowDragging = rowDragging;
+        mRowDraggingIndex = rowIndex;
     }
 
     boolean isColumnDragging() {
         return mIsColumnDragging;
     }
 
-    void setColumnDragging(boolean columnDragging) {
+    void setColumnDragging(boolean columnDragging, int columnIndex) {
         mIsColumnDragging = columnDragging;
+        mColumnDraggingIndex = columnIndex;
     }
 
     boolean isDragging() {
         return mIsColumnDragging || mIsRowDragging;
+    }
+
+    int getColumnDraggingIndex() {
+        return mColumnDraggingIndex;
+    }
+
+    int getRowDraggingIndex() {
+        return mRowDraggingIndex;
     }
 }
