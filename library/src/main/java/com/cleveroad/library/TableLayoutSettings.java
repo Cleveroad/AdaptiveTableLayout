@@ -18,6 +18,12 @@ class TableLayoutSettings {
 
     private int mCellMargin;
 
+    /**
+     * if true - value of row header fixed to the row. Fixed to the data
+     * if false - fixed to the number of row. Fixed to the row' number from 0 to n.
+     */
+    private boolean mSolidRowHeader;
+
 
     TableLayoutSettings() {
     }
@@ -55,6 +61,15 @@ class TableLayoutSettings {
 
     public TableLayoutSettings setCellMargin(int cellMargin) {
         mCellMargin = cellMargin;
+        return this;
+    }
+
+    public boolean isSolidRowHeader() {
+        return mSolidRowHeader;
+    }
+
+    public TableLayoutSettings setSolidRowHeader(boolean solidRowHeader) {
+        mSolidRowHeader = solidRowHeader;
         return this;
     }
 }

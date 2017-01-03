@@ -11,7 +11,7 @@ import android.view.ViewGroup;
  *
  * @param <VH> Adapter's ViewHolder class
  */
-class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH> implements DataTableLayoutAdapter<VH> {
+class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH> implements DataTableLayoutAdapter<VH> {
     private static final String EXTRA_SAVE_STATE_COLUMNS = "EXTRA_SAVE_STATE_COLUMNS";
     private static final String EXTRA_SAVE_STATE_ROWS = "EXTRA_SAVE_STATE_ROWS";
     /**
@@ -19,6 +19,12 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
      */
     private final TableAdapter<VH> mInner;
 
+    /**
+     * need to fix row header to data or to row' number
+     * true - fixed to the row data.
+     * false - fixed to row number.
+     */
+    private boolean mIsSolidRowHeader;
     /**
      * Redirect column's ids
      */
@@ -29,8 +35,9 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
      */
     private int[] mRowIds;
 
-    DataTableAdapterImpl(@NonNull TableAdapter<VH> inner) {
+    LinkedTableAdapterImpl(@NonNull TableAdapter<VH> inner, boolean isSolidRowHeader) {
         mInner = inner;
+        mIsSolidRowHeader = isSolidRowHeader;
 
         // init data
         mColumnIds = new int[getColumnCount()];
@@ -53,7 +60,9 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
         switchTwoItems(mColumnIds, columnIndex, columnToIndex);
     }
 
-    public void changeRows(int rowIndex, int rowToIndex) {
+    @Override
+    public void changeRows(int rowIndex, int rowToIndex, boolean solidRowHeader) {
+        mIsSolidRowHeader = solidRowHeader;
         switchTwoItems(mRowIds, rowIndex, rowToIndex);
     }
 
@@ -103,7 +112,7 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
 
     @Override
     public void onBindHeaderRowViewHolder(@NonNull VH viewHolder, int row) {
-        mInner.onBindHeaderRowViewHolder(viewHolder, mRowIds[row]);
+        mInner.onBindHeaderRowViewHolder(viewHolder, mIsSolidRowHeader ? mRowIds[row] : row);
     }
 
     @Override
@@ -165,7 +174,6 @@ class DataTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH>
     public void onSaveInstanceState(@NonNull Bundle bundle) {
         bundle.putIntArray(EXTRA_SAVE_STATE_COLUMNS, mColumnIds);
         bundle.putIntArray(EXTRA_SAVE_STATE_ROWS, mRowIds);
-
     }
 
     @Override

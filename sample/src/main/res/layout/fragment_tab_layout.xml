@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:cellMargin="2dp"
-        app:fixedHeaders="false"/>
+        app:fixedHeaders="false"
+        app:solidRowHeaders="false"/>
 
 </FrameLayout>

@@ -6,14 +6,14 @@
     android:background="@color/charcoal"
     >
 
-
     <TextView
         android:id="@+id/tvText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:focusableInTouchMode="true"
-        android:gravity="center"/>
+        android:gravity="center"
+        />
 
     <ImageView
         android:id="@+id/ivImage"
@@ -22,6 +22,7 @@
         android:layout_gravity="center"
         android:focusableInTouchMode="true"
         android:src="@mipmap/ic_launcher"
-        android:visibility="visible"/>
+        android:visibility="gone"
+        />
 
 </RelativeLayout>

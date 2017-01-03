@@ -3,5 +3,6 @@
     <declare-styleable name="TableLayout">
         <attr name="fixedHeaders" format="boolean"/>
         <attr name="cellMargin" format="dimension"/>
+        <attr name="solidRowHeaders" format="boolean"/>
     </declare-styleable>
 </resources>

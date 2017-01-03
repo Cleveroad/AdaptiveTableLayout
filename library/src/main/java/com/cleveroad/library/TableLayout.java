@@ -146,12 +146,15 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 attrs,
                 R.styleable.TableLayout,
                 0, 0);
+
         try {
             mSettings.setHeaderFixed(a.getBoolean(R.styleable.TableLayout_fixedHeaders, true));
             mSettings.setCellMargin(a.getDimensionPixelSize(R.styleable.TableLayout_cellMargin, 0));
+            mSettings.setSolidRowHeader(a.getBoolean(R.styleable.TableLayout_solidRowHeaders, true));
         } finally {
             a.recycle();
         }
+
     }
 
     private void init(Context context) {
@@ -263,7 +266,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
         if (adapter != null) {
             // wrap adapter
-            mAdapter = new DataTableAdapterImpl<>(adapter);
+            mAdapter = new LinkedTableAdapterImpl<>(adapter, mSettings.isSolidRowHeader());
             // register notify callbacks
             mAdapter.registerDataSetObserver(this);
         } else {
@@ -282,7 +285,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * Set adapter with MUTABLE data.
      * You need to implement switch rows and columns methods.
      * On drag and drop event calls {@link DataTableLayoutAdapter#changeColumns(int, int)} and
-     * {@link DataTableLayoutAdapter#changeRows(int, int)}
+     * {@link DataTableLayoutAdapter#changeRows(int, int, boolean)}
      * <p>
      * DO NOT USE WITH BIG DATA!!
      *
@@ -958,7 +961,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     private void shiftRowsViews(final int fromRow, final int toRow) {
         if (mAdapter != null) {
             // change data
-            mAdapter.changeRows(fromRow, toRow);
+            mAdapter.changeRows(fromRow, toRow, mSettings.isSolidRowHeader());
 
             // change view holders
             switchHeaders(mHeaderRowViewHolders, fromRow, toRow, ViewHolderType.ROW_HEADER);
@@ -980,6 +983,12 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             for (ViewHolder holder : toHolders) {
                 holder.setRowIndex(fromRow);
                 mViewHolders.put(holder.getRowIndex(), holder.getColumnIndex(), holder);
+            }
+
+            // update row headers
+            if (!mSettings.isSolidRowHeader()) {
+                mAdapter.onBindHeaderRowViewHolder(mHeaderRowViewHolders.get(fromRow), fromRow);
+                mAdapter.onBindHeaderRowViewHolder(mHeaderRowViewHolders.get(toRow), toRow);
             }
         }
     }
@@ -1422,6 +1431,14 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     public void setHeaderFixed(boolean headerFixed) {
         mSettings.setHeaderFixed(headerFixed);
+    }
+
+    public boolean isSolidRowHeader() {
+        return mSettings.isSolidRowHeader();
+    }
+
+    public void setSolidRowHeader(boolean solidRowHeader) {
+        mSettings.setSolidRowHeader(solidRowHeader);
     }
 
     private static class TableInstanceSaver implements Parcelable {
