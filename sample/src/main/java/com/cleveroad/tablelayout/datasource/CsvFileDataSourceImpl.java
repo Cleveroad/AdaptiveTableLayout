@@ -88,7 +88,7 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
             fileReader = getInputStreamReader();
             lineNumberReader = new LineNumberReader(fileReader);
             lineNumberReader.skip(Long.MAX_VALUE);
-            return lineNumberReader.getLineNumber() + 1; //Add 1 because line index starts at 0
+            return lineNumberReader.getLineNumber(); //Add 1 because line index starts at 0
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
@@ -173,7 +173,8 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
 
 
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            e.printStackTrace();
+//            Log.e(TAG, e.toString());
         } finally {
             closeWithoutException(fileReader);
         }
