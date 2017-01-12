@@ -75,15 +75,9 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, final int column) {
+    public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, final int row, final int column) {
         if (viewHolder instanceof TestViewHolder) {
             final TestViewHolder vh = (TestViewHolder) viewHolder;
-            //TODO FIX Viewholder reuse with different view size!!!
-//            Log.e("Glide", "vh c = " + vh.getColumnIndex() + " ** " + column + " | r = " + vh.getRowIndex() + " ** " + row);
-//            int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(getColumnWidth(column), View.MeasureSpec.EXACTLY);
-//            int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(getRowHeight(row), View.MeasureSpec.EXACTLY);
-//            vh.getItemView().measure(widthMeasureSpec, heightMeasureSpec);
-
             String itemData = mTableDataSource.getItemData(row, column);
             if (TextUtils.isEmpty(itemData)) {
                 Log.e("Adapter", "Item data = empty, row = " + row + ", column = " + column);
@@ -100,17 +94,15 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
                     .listener(new RequestListener<String, GlideDrawable>() {
                         @Override
                         public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                            vh.ivImage.setVisibility(View.GONE);
+                            vh.ivImage.setVisibility(View.INVISIBLE);
                             vh.tvText.setVisibility(View.VISIBLE);
-
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                             vh.ivImage.setVisibility(View.VISIBLE);
-                            vh.tvText.setVisibility(View.GONE);
-//                            Log.e("Glide", "width = " + vh.ivImage.getWidth() + " | " + getColumnWidth(column) + " | " + vh.getItemView().getWidth());
+                            vh.tvText.setVisibility(View.INVISIBLE);
                             return false;
                         }
                     })
@@ -157,20 +149,6 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
         } else {
             return 900;
         }
-
-//        switch (column) {
-//            case COLUMN_DATE_OF_BIRTH:
-//            case COLUMN_PHOTO:
-//            case COLUMN_FOOTBALL_TEAM:
-//                return 300;
-//            case COLUMN_NAME:
-//                return 400;
-//            case COLUMN_POSITION:
-//                return 200;
-//            default:
-//                return 100;
-//
-//        }
     }
 
     @Override
@@ -180,7 +158,13 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
 
     @Override
     public int getRowHeight(int row) {
-        return 360;
+        if (row == 0) {
+            return 300;
+        } else if (row == 1) {
+            return 600;
+        } else {
+            return 900;
+        }
     }
 
     @Override
