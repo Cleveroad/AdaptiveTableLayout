@@ -216,6 +216,32 @@ class TableManager {
     }
 
     /**
+     * Return column number which bounds contains X
+     *
+     * @param x coordinate
+     * @return column number
+     */
+    int getColumnByXWithShift(int x, int shiftEveryStep) {
+        checkForInit();
+        int sum = 0;
+        // header offset
+        x -= mHeaderRowWidth;
+        if (x <= sum) {
+            return 0;
+        }
+        for (int count = mColumnWidths.length, i = 0; i < count; i++) {
+            int nextSum = sum + mColumnWidths[i] + shiftEveryStep;
+            if (x > sum && x < nextSum) {
+                return i;
+            } else if (x < nextSum) {
+                return i - 1;
+            }
+            sum = nextSum;
+        }
+        return mColumnWidths.length - 1;
+    }
+
+    /**
      * Return row number which bounds contains Y
      *
      * @param y coordinate
@@ -231,6 +257,33 @@ class TableManager {
         }
         for (int count = mRowHeights.length, i = 0; i < count; i++) {
             int nextSum = sum + mRowHeights[i];
+
+            if (y > sum && y < nextSum) {
+                return i;
+            } else if (y < nextSum) {
+                return i - 1;
+            }
+            sum = nextSum;
+        }
+        return mRowHeights.length - 1;
+    }
+
+    /**
+     * Return row number which bounds contains Y
+     *
+     * @param y coordinate
+     * @return row number
+     */
+    int getRowByYWithShift(int y, int shiftEveryStep) {
+        checkForInit();
+        int sum = 0;
+        // header offset
+        y -= mHeaderColumnHeight;
+        if (y <= sum) {
+            return 0;
+        }
+        for (int count = mRowHeights.length, i = 0; i < count; i++) {
+            int nextSum = sum + mRowHeights[i] + shiftEveryStep;
 
             if (y > sum && y < nextSum) {
                 return i;

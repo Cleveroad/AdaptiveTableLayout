@@ -53,13 +53,14 @@ public abstract class BaseDataTableLayoutAdapter<VH extends ViewHolder> extends 
     }
 
     @Override
-    public void changeRows(int rowIndex, int rowToIndex) {
+    public void changeRows(int rowIndex, int rowToIndex, boolean solidRowHeader) {
         // switch data
         switchTwoRows(rowIndex, rowToIndex);
-        // switch headers
-        switchTwoRowHeaders(rowIndex, rowToIndex);
+        if (solidRowHeader) {
+            // switch headers
+            switchTwoRowHeaders(rowIndex, rowToIndex);
+        }
     }
-
 
     /**
      * Switch 2 rows with data

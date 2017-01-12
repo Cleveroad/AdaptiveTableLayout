@@ -10,6 +10,7 @@ public class SampleActivity
         implements CsvPickerFragment.OnCsvFileSelectedListener {
 
     private static final String ASSETS_FIFA_PLAYERS_FILE = "fifa100.csv";
+    private static final String ASSETS_ARTISTS_FILE = "artists.csv";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,7 +22,7 @@ public class SampleActivity
                     .beginTransaction()
 //                    .add(R.id.container, CsvPickerFragment.newInstance(), CsvPickerFragment.class.getSimpleName())
                     .replace(R.id.container,
-                            TableLayoutFragment.newInstance(ASSETS_FIFA_PLAYERS_FILE),
+                            TableLayoutFragment.newInstance(ASSETS_ARTISTS_FILE),
                             CsvPickerFragment.class.getSimpleName())
                     .commit();
         }

@@ -22,8 +22,11 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperListener, TableDataSetObserver {
+
     private static final String EXTRA_STATE_SUPER = "EXTRA_STATE_SUPER";
     private static final String EXTRA_STATE_VIEW_GROUP = "EXTRA_STATE_VIEW_GROUP";
+
+    private static final int SHADOW_THICK = 25;
 
     private static final int SHIFT_VIEWS_THRESHOLD = 25;
     /**
@@ -92,7 +95,11 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      */
     private DragAndDropScrollRunnable mScrollerDragAndDropRunnable;
 
-    private boolean mIsHeaderFixed;
+    /**
+     * Helps work with row' or column' shadows.
+     */
+    private ShadowHelper mShadowHelper;
+
     /**
      * Instant state
      */
@@ -106,22 +113,21 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     public TableLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initAttrs(context, attrs);
         init(context);
-
+        initAttrs(context, attrs);
     }
 
     public TableLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initAttrs(context, attrs);
         init(context);
+        initAttrs(context, attrs);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public TableLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        initAttrs(context, attrs);
         init(context);
+        initAttrs(context, attrs);
     }
 
     @Override
@@ -130,7 +136,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             // calculate layout width and height
             mSettings.setLayoutWidth(r - l);
             mSettings.setLayoutHeight(b - t);
-
             // init data
             initItems();
         }
@@ -143,10 +148,13 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 0, 0);
 
         try {
-            mIsHeaderFixed = a.getBoolean(R.styleable.TableLayout_fixedHeaders, true);
+            mSettings.setHeaderFixed(a.getBoolean(R.styleable.TableLayout_fixedHeaders, true));
+            mSettings.setCellMargin(a.getDimensionPixelSize(R.styleable.TableLayout_cellMargin, 0));
+            mSettings.setSolidRowHeader(a.getBoolean(R.styleable.TableLayout_solidRowHeaders, true));
         } finally {
             a.recycle();
         }
+
     }
 
     private void init(Context context) {
@@ -165,6 +173,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         mSettings = new TableLayoutSettings();
         mScrollHelper = new ScrollHelper(context);
         mScrollHelper.setListener(this);
+        mShadowHelper = new ShadowHelper();
     }
 
 
@@ -231,7 +240,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         mManager.invalidate();
 
         // show items in this area
-        mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
+        mVisibleArea.set(mState.getScrollX(),
+                mState.getScrollY(),
                 mState.getScrollX() + mSettings.getLayoutWidth(),
                 mState.getScrollY() + mSettings.getLayoutHeight());
         addViewHolders(mVisibleArea);
@@ -256,7 +266,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
         if (adapter != null) {
             // wrap adapter
-            mAdapter = new DataTableAdapterImpl<>(adapter);
+            mAdapter = new LinkedTableAdapterImpl<>(adapter, mSettings.isSolidRowHeader());
             // register notify callbacks
             mAdapter.registerDataSetObserver(this);
         } else {
@@ -275,7 +285,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * Set adapter with MUTABLE data.
      * You need to implement switch rows and columns methods.
      * On drag and drop event calls {@link DataTableLayoutAdapter#changeColumns(int, int)} and
-     * {@link DataTableLayoutAdapter#changeRows(int, int)}
+     * {@link DataTableLayoutAdapter#changeRows(int, int, boolean)}
      * <p>
      * DO NOT USE WITH BIG DATA!!
      *
@@ -300,12 +310,19 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     public void scrollTo(int x, int y) {
         int absoluteX = x;
         int absoluteY = y;
+
+        int shadowShiftX = mManager.getColumnCount() * mSettings.getCellMargin();
+        int shadowShiftY = mManager.getRowCount() * mSettings.getCellMargin();
+
+        long maxX = mManager.getFullWidth() + shadowShiftX;
+        long maxY = mManager.getFullHeight() + shadowShiftY;
+
         if (x < 0) {
             // scroll over view to the left
             absoluteX = 0;
-        } else if (mSettings.getLayoutWidth() + x > mManager.getFullWidth()) {
+        } else if (mSettings.getLayoutWidth() + x > maxX) {
             // scroll over view to the right
-            absoluteX = (int) (mManager.getFullWidth() - mSettings.getLayoutWidth());
+            absoluteX = (int) (maxX - mSettings.getLayoutWidth());
         }
 
         mState.setScrollX(absoluteX);
@@ -313,16 +330,17 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (y < 0) {
             // scroll over view to the top
             absoluteY = 0;
-        } else if (mSettings.getLayoutHeight() + absoluteY > mManager.getFullHeight()) {
+        } else if (mSettings.getLayoutHeight() + absoluteY > maxY) {
             // scroll over view to the bottom
-            absoluteY = (int) (mManager.getFullHeight() - mSettings.getLayoutHeight());
+            absoluteY = (int) (maxY - mSettings.getLayoutHeight());
         }
         mState.setScrollY(absoluteY);
 
         if (mAdapter != null) {
             // refresh views
             recycleViewHolders();
-            mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
+            mVisibleArea.set(mState.getScrollX(),
+                    mState.getScrollY(),
                     mState.getScrollX() + mSettings.getLayoutWidth(),
                     mState.getScrollY() + mSettings.getLayoutHeight());
             addViewHolders(mVisibleArea);
@@ -338,13 +356,21 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
         int diffX = x;
         int diffY = y;
+
+        int shadowShiftX = mManager.getColumnCount() * mSettings.getCellMargin();
+        int shadowShiftY = mManager.getRowCount() * mSettings.getCellMargin();
+
+        long maxX = mManager.getFullWidth() + shadowShiftX;
+        long maxY = mManager.getFullHeight() + shadowShiftY;
+
         if (mState.getScrollX() + x < 0) {
             // scroll over view to the left
             diffX = mState.getScrollX();
             mState.setScrollX(0);
-        } else if (mState.getScrollX() + mSettings.getLayoutWidth() + x > mManager.getFullWidth()) {
+        } else if (mState.getScrollX() + mSettings.getLayoutWidth() + x > maxX) {
             // scroll over view to the right
-            diffX = (int) (mManager.getFullWidth() - mState.getScrollX() - mSettings.getLayoutWidth());
+            diffX = (int) (maxX - mState.getScrollX() - mSettings.getLayoutWidth());
+
             mState.setScrollX(mState.getScrollX() + diffX);
         } else {
             mState.setScrollX(mState.getScrollX() + x);
@@ -354,9 +380,9 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             // scroll over view to the top
             diffY = mState.getScrollY();
             mState.setScrollY(0);
-        } else if (mState.getScrollY() + mSettings.getLayoutHeight() + y > mManager.getFullHeight()) {
+        } else if (mState.getScrollY() + mSettings.getLayoutHeight() + y > maxY) {
             // scroll over view to the bottom
-            diffY = (int) (mManager.getFullHeight() - mState.getScrollY() - mSettings.getLayoutHeight());
+            diffY = (int) (maxY - mState.getScrollY() - mSettings.getLayoutHeight());
             mState.setScrollY(mState.getScrollY() + diffY);
         } else {
             mState.setScrollY(mState.getScrollY() + y);
@@ -369,7 +395,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (mAdapter != null) {
             // refresh views
             recycleViewHolders();
-            mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
+            mVisibleArea.set(mState.getScrollX(),
+                    mState.getScrollY(),
                     mState.getScrollX() + mSettings.getLayoutWidth(),
                     mState.getScrollY() + mSettings.getLayoutHeight());
             addViewHolders(mVisibleArea);
@@ -439,12 +466,13 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             top = mState.getScrollY() + mDragAndDropPoints.getOffset().y - view.getHeight() / 2 - mManager.getHeaderColumnHeight();
             view.bringToFront();
         }
-
+        int leftMargin = holder.getColumnIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
+        int topMargin = holder.getRowIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
         // update layout position
-        view.layout(left - mState.getScrollX() + mManager.getHeaderRowWidth(),
-                top - mState.getScrollY() + mManager.getHeaderColumnHeight(),
-                left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX() + mManager.getHeaderRowWidth(),
-                top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY() + mManager.getHeaderColumnHeight());
+        view.layout(left - mState.getScrollX() + mManager.getHeaderRowWidth() + leftMargin,
+                top - mState.getScrollY() + mManager.getHeaderColumnHeight() + topMargin,
+                left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX() + mManager.getHeaderRowWidth() + leftMargin,
+                top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY() + mManager.getHeaderColumnHeight() + topMargin);
     }
 
     /**
@@ -465,19 +493,48 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     private void refreshHeaderColumnViewHolder(ViewHolder holder) {
 
         int left = mManager.getColumnsWidth(0, Math.max(0, holder.getColumnIndex())) + mManager.getHeaderRowWidth();
-        int top = mIsHeaderFixed ? 0 : -mState.getScrollY();
+        int top = mSettings.isHeaderFixed() ? 0 : -mState.getScrollY();
         View view = holder.getItemView();
+
+        int leftMargin = holder.getColumnIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
+        int topMargin = holder.getRowIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
 
         if (holder.isDragging() && mDragAndDropPoints.getOffset().x > 0) {
             left = mState.getScrollX() + mDragAndDropPoints.getOffset().x - view.getWidth() / 2;
             view.bringToFront();
         }
 
+        if (holder.isDragging()) {
+            View leftShadow = mShadowHelper.getLeftShadow();
+            View rightShadow = mShadowHelper.getRightShadow();
+
+            if (leftShadow != null) {
+                int shadowLeft = left - mState.getScrollX();
+                leftShadow.layout(
+                        Math.max(mManager.getHeaderRowWidth() - mState.getScrollX(), shadowLeft - SHADOW_THICK) + leftMargin,
+                        0,
+                        shadowLeft + leftMargin,
+                        mSettings.getLayoutHeight());
+                leftShadow.bringToFront();
+            }
+
+            if (rightShadow != null) {
+                int shadowLeft = left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX();
+                rightShadow.layout(
+                        Math.max(mManager.getHeaderRowWidth() - mState.getScrollX(), shadowLeft) + leftMargin,
+                        0,
+                        shadowLeft + SHADOW_THICK + leftMargin,
+                        mSettings.getLayoutHeight());
+                rightShadow.bringToFront();
+            }
+        }
+
+
         //noinspection ResourceType
-        view.layout(left - mState.getScrollX(),
-                top,
-                left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX(),
-                mManager.getHeaderColumnHeight());
+        view.layout(left - mState.getScrollX() + leftMargin,
+                top + topMargin,
+                left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX() + leftMargin,
+                mManager.getHeaderColumnHeight() + topMargin);
     }
 
 
@@ -488,17 +545,45 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      */
     private void refreshHeaderRowViewHolder(ViewHolder holder) {
         int top = mManager.getRowsHeight(0, Math.max(0, holder.getRowIndex())) + mManager.getHeaderColumnHeight();
-        int left = mIsHeaderFixed ? 0 : -mState.getScrollX();
+        int left = mSettings.isHeaderFixed() ? 0 : -mState.getScrollX();
         View view = holder.getItemView();
+
+        int leftMargin = holder.getColumnIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
+        int topMargin = holder.getRowIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
+
         if (holder.isDragging() && mDragAndDropPoints.getOffset().y > 0) {
             top = mState.getScrollY() + mDragAndDropPoints.getOffset().y - view.getHeight() / 2;
             view.bringToFront();
         }
+        if (holder.isDragging()) {
+            View topShadow = mShadowHelper.getTopShadow();
+            View bottomShadow = mShadowHelper.getBottomShadow();
+            if (topShadow != null) {
+                int shadowTop = top - mState.getScrollY();
+                topShadow.layout(0,
+                        Math.max(mManager.getHeaderColumnHeight() - mState.getScrollY(), shadowTop - SHADOW_THICK) + topMargin,
+                        mSettings.getLayoutWidth(),
+                        shadowTop + topMargin);
+                topShadow.bringToFront();
+            }
+
+            if (bottomShadow != null) {
+                int shadowBottom = top - mState.getScrollY() + mManager.getRowHeight(holder.getRowIndex());
+                bottomShadow.layout(
+                        0,
+                        Math.max(mManager.getHeaderColumnHeight() - mState.getScrollY(), shadowBottom) + topMargin,
+                        mSettings.getLayoutWidth(),
+                        shadowBottom + SHADOW_THICK + topMargin);
+
+                bottomShadow.bringToFront();
+            }
+        }
+
         //noinspection ResourceType
-        view.layout(left,
-                top - mState.getScrollY(),
-                mManager.getHeaderRowWidth(),
-                top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY());
+        view.layout(left + leftMargin,
+                top - mState.getScrollY() + topMargin,
+                mManager.getHeaderRowWidth() + leftMargin,
+                top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY() + topMargin);
     }
 
     /**
@@ -507,7 +592,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * @param holder current view holder
      */
     private void refreshLeftTopHeaderViewHolder(ViewHolder holder) {
-        if (mIsHeaderFixed) {
+        if (mSettings.isHeaderFixed()) {
             return;
         }
 
@@ -515,10 +600,13 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         int top = -mState.getScrollY();
         View view = holder.getItemView();
 
-        view.layout(left,
-                top,
-                left + mManager.getHeaderRowWidth(),
-                top + mManager.getHeaderColumnHeight());
+        int leftMargin = mSettings.getCellMargin();
+        int topMargin = mSettings.getCellMargin();
+
+        view.layout(left + leftMargin,
+                top + topMargin,
+                left + mManager.getHeaderRowWidth() + leftMargin,
+                top + mManager.getHeaderColumnHeight() + topMargin);
 
     }
 
@@ -607,11 +695,15 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * @param filledArea visible rect
      */
     private void addViewHolders(Rect filledArea) {
+
+//        int shadowShiftX = mManager.getColumnCount() * mSettings.getCellMargin();
+//        int shadowShiftY = mManager.getRowCount() * mSettings.getCellMargin();
+
         //search indexes for columns and rows which NEED TO BE showed in this area
-        int leftColumn = mManager.getColumnByX(filledArea.left);
-        int rightColumn = mManager.getColumnByX(filledArea.right);
-        int topRow = mManager.getRowByY(filledArea.top);
-        int bottomRow = mManager.getRowByY(filledArea.bottom);
+        int leftColumn = mManager.getColumnByXWithShift(filledArea.left, mSettings.getCellMargin());
+        int rightColumn = mManager.getColumnByXWithShift(filledArea.right, mSettings.getCellMargin());
+        int topRow = mManager.getRowByYWithShift(filledArea.top, mSettings.getCellMargin());
+        int bottomRow = mManager.getRowByYWithShift(filledArea.bottom, mSettings.getCellMargin());
 
         for (int i = topRow; i <= bottomRow; i++) {
             for (int j = leftColumn; j <= rightColumn; j++) {
@@ -646,10 +738,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderRowWidth(), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderColumnHeight(), MeasureSpec.EXACTLY));
-            view.layout(0,
-                    0,
-                    mManager.getHeaderRowWidth(),
-                    mManager.getHeaderColumnHeight());
+            view.layout(mSettings.getCellMargin(),
+                    mSettings.getCellMargin(),
+                    mManager.getHeaderRowWidth() + mSettings.getCellMargin(),
+                    mManager.getHeaderColumnHeight() + mSettings.getCellMargin());
         }
     }
 
@@ -672,6 +764,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         viewHolder.setColumnIndex(column);
         viewHolder.setItemType(itemType);
         View view = viewHolder.getItemView();
+
         view.setTag(R.id.tag_view_holder, viewHolder);
 
         // add view to the layout
@@ -756,7 +849,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                     ViewHolder holder = mHeaderColumnViewHolders.get(key);
                     if (holder != null && holder.isDragging()) {
                         fromColumn = holder.getColumnIndex();
-                        toColumn = mManager.getColumnByX(absoluteX);
+                        toColumn = mManager.getColumnByXWithShift(absoluteX, mSettings.getCellMargin());
                         break;
                     }
                 }
@@ -787,7 +880,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                     ViewHolder holder = mHeaderRowViewHolders.get(key);
                     if (holder != null && holder.isDragging()) {
                         fromRow = holder.getRowIndex();
-                        toRow = mManager.getRowByY(absoluteY);
+                        toRow = mManager.getRowByYWithShift(absoluteY, mSettings.getCellMargin());
                         break;
                     }
                 }
@@ -868,7 +961,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     private void shiftRowsViews(final int fromRow, final int toRow) {
         if (mAdapter != null) {
             // change data
-            mAdapter.changeRows(fromRow, toRow);
+            mAdapter.changeRows(fromRow, toRow, mSettings.isSolidRowHeader());
 
             // change view holders
             switchHeaders(mHeaderRowViewHolders, fromRow, toRow, ViewHolderType.ROW_HEADER);
@@ -890,6 +983,12 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             for (ViewHolder holder : toHolders) {
                 holder.setRowIndex(fromRow);
                 mViewHolders.put(holder.getRowIndex(), holder.getColumnIndex(), holder);
+            }
+
+            // update row headers
+            if (!mSettings.isSolidRowHeader()) {
+                mAdapter.onBindHeaderRowViewHolder(mHeaderRowViewHolders.get(fromRow), fromRow);
+                mAdapter.onBindHeaderRowViewHolder(mHeaderRowViewHolders.get(toRow), toRow);
             }
         }
     }
@@ -987,14 +1086,13 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         }
     }
 
-
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         final boolean result;
         final ViewHolder viewHolder = (ViewHolder) child.getTag(R.id.tag_view_holder);
         canvas.save();
-        int headerFixedX = (mIsHeaderFixed ? 0 : mState.getScrollX());
-        int headerFixedY = (mIsHeaderFixed ? 0 : mState.getScrollY());
+        int headerFixedX = (mSettings.isHeaderFixed() ? 0 : mState.getScrollX());
+        int headerFixedY = (mSettings.isHeaderFixed() ? 0 : mState.getScrollY());
         //noinspection StatementWithEmptyBody
         if (viewHolder == null) {
             //ignore
@@ -1004,13 +1102,13 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                     Math.max(0, mManager.getHeaderRowWidth() - headerFixedX),
                     0,
                     mSettings.getLayoutWidth(),
-                    mManager.getHeaderColumnHeight());
+                    Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY));
         } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
             // prepare canvas rect area for draw row header
             canvas.clipRect(
                     0,
                     Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY),
-                    mManager.getHeaderRowWidth(),
+                    Math.max(0, mManager.getHeaderRowWidth() - headerFixedX),
                     mSettings.getLayoutHeight());
         } else if (viewHolder.getItemType() == ViewHolderType.ITEM) {
             // prepare canvas rect area for draw item (cell in table)
@@ -1080,6 +1178,9 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
                 // update view
                 refreshViewHolders();
+                mShadowHelper.addLeftShadow(this);
+                mShadowHelper.addRightShadow(this);
+
             } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
                 // dragging column header
                 mState.setRowDragging(true);
@@ -1090,6 +1191,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
                 // update view
                 refreshViewHolders();
+
+                mShadowHelper.addTopShadow(this);
+                mShadowHelper.addBottomShadow(this);
+
             } else {
                 OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
                 if (onItemClickListener != null) {
@@ -1143,6 +1248,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     @Override
     public boolean onActionUp(MotionEvent e) {
+
+        // remove shadows from dragging views
+        mShadowHelper.removeAll(this);
+
         // stop smooth scrolling
         if (!mScrollerDragAndDropRunnable.isFinished()) {
             mScrollerDragAndDropRunnable.stop();
@@ -1196,7 +1305,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         int absX = x + mState.getScrollX();
         int absY = y + mState.getScrollY();
 
-        if (!mIsHeaderFixed) {
+        if (!mSettings.isHeaderFixed()) {
             x = absX;
             y = absY;
         }
@@ -1204,35 +1313,35 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (y < mManager.getHeaderColumnHeight() && x < mManager.getHeaderRowWidth()) {
             // left top view was clicked
             viewHolder = mLeftTopViewHolder;
-        } else if (mIsHeaderFixed) {
+        } else if (mSettings.isHeaderFixed()) {
             if (y < mManager.getHeaderColumnHeight()) {
                 // coordinate x, y in the column header's area
-                int column = mManager.getColumnByX(absX);
+                int column = mManager.getColumnByXWithShift(absX, mSettings.getCellMargin());
                 viewHolder = mHeaderColumnViewHolders.get(column);
             } else if (x < mManager.getHeaderRowWidth()) {
                 // coordinate x, y in the row header's area
-                int row = mManager.getRowByY(absY);
+                int row = mManager.getRowByYWithShift(absY, mSettings.getCellMargin());
                 viewHolder = mHeaderRowViewHolders.get(row);
             } else {
                 // coordinate x, y in the items area
-                int column = mManager.getColumnByX(absX);
-                int row = mManager.getRowByY(absY);
+                int column = mManager.getColumnByXWithShift(absX, mSettings.getCellMargin());
+                int row = mManager.getRowByYWithShift(absY, mSettings.getCellMargin());
                 viewHolder = mViewHolders.get(row, column);
             }
         } else {
-
+            // TODO Refactor
             if (absY < mManager.getHeaderColumnHeight()) {
                 // coordinate x, y in the column header's area
-                int column = mManager.getColumnByX(absX);
+                int column = mManager.getColumnByXWithShift(absX, mSettings.getCellMargin());
                 viewHolder = mHeaderColumnViewHolders.get(column);
             } else if (absX < mManager.getHeaderRowWidth()) {
                 // coordinate x, y in the row header's area
-                int row = mManager.getRowByY(absY);
+                int row = mManager.getRowByYWithShift(absY, mSettings.getCellMargin());
                 viewHolder = mHeaderRowViewHolders.get(row);
             } else {
                 // coordinate x, y in the items area
-                int column = mManager.getColumnByX(absX);
-                int row = mManager.getRowByY(absY);
+                int column = mManager.getColumnByXWithShift(absX, mSettings.getCellMargin());
+                int row = mManager.getRowByYWithShift(absY, mSettings.getCellMargin());
                 viewHolder = mViewHolders.get(row, column);
             }
         }
@@ -1258,8 +1367,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             mScrollerRunnable.start(
                     mState.getScrollX(), mState.getScrollY(),
                     (int) velocityX / 2, (int) velocityY / 2,
-                    (int) (mManager.getFullWidth() - mSettings.getLayoutWidth()),
-                    (int) (mManager.getFullHeight() - mSettings.getLayoutHeight())
+                    (int) (mManager.getFullWidth() - mSettings.getLayoutWidth() + mManager.getColumnCount() * mSettings.getCellMargin()),
+                    (int) (mManager.getFullHeight() - mSettings.getLayoutHeight() + mManager.getRowCount() * mSettings.getCellMargin())
             );
         }
         return true;
@@ -1268,7 +1377,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     @Override
     public void notifyDataSetChanged() {
         recycleViewHolders(true);
-        mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
+        mVisibleArea.set(mState.getScrollX(),
+                mState.getScrollY(),
                 mState.getScrollX() + mSettings.getLayoutWidth(),
                 mState.getScrollY() + mSettings.getLayoutHeight());
         addViewHolders(mVisibleArea);
@@ -1278,7 +1388,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     public void notifyLayoutChanged() {
         recycleViewHolders(true);
         invalidate();
-        mVisibleArea.set(mState.getScrollX(), mState.getScrollY(),
+        mVisibleArea.set(mState.getScrollX(),
+                mState.getScrollY(),
                 mState.getScrollX() + mSettings.getLayoutWidth(),
                 mState.getScrollY() + mSettings.getLayoutHeight());
         addViewHolders(mVisibleArea);
@@ -1315,13 +1426,20 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     }
 
     public boolean isHeaderFixed() {
-        return mIsHeaderFixed;
+        return mSettings.isHeaderFixed();
     }
 
     public void setHeaderFixed(boolean headerFixed) {
-        mIsHeaderFixed = headerFixed;
+        mSettings.setHeaderFixed(headerFixed);
     }
 
+    public boolean isSolidRowHeader() {
+        return mSettings.isSolidRowHeader();
+    }
+
+    public void setSolidRowHeader(boolean solidRowHeader) {
+        mSettings.setSolidRowHeader(solidRowHeader);
+    }
 
     private static class TableInstanceSaver implements Parcelable {
         public static final Creator<TableInstanceSaver> CREATOR = new Creator<TableInstanceSaver>() {

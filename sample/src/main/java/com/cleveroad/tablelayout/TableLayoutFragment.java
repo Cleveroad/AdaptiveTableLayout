@@ -1,8 +1,11 @@
 package com.cleveroad.tablelayout;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,8 +16,11 @@ import com.cleveroad.library.LinkedTableAdapter;
 import com.cleveroad.library.OnItemClickListener;
 import com.cleveroad.library.OnItemLongClickListener;
 import com.cleveroad.library.TableLayout;
-import com.cleveroad.tablelayout.adapter.FifaLinkedTableAdapter;
+import com.cleveroad.tablelayout.adapter.ArtistLinkedTableAdapter;
+import com.cleveroad.tablelayout.datasource.ArtistDataSource;
+import com.cleveroad.tablelayout.datasource.ArtistDataSourceWrapper;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
+import com.cleveroad.tablelayout.model.ArtistModel;
 
 import java.io.File;
 import java.io.FileReader;
@@ -26,11 +32,14 @@ public class TableLayoutFragment
     private static final String TAG = TableLayoutFragment.class.getSimpleName();
     private static final String EXTRA_CSV_FILE = "EXTRA_CSV_FILE";
     private static final String EXTRA_ASSETS_FILE = "EXTRA_ASSETS_FILE";
+    private static final int EDIT_ARTIST_REQUEST_CODE = 121;
     @Nullable
     private File mCsvFile;
     @Nullable
     private String mAssetsFileName;
+    private LinkedTableAdapter mTableAdapter;
     private CsvFileDataSourceImpl mCsvFileDataSource;
+    private ArtistDataSource mArtistDataSource;
     private TableLayout mTableLayout;
 
     public static TableLayoutFragment newInstance(@NonNull File csvFile) {
@@ -67,7 +76,6 @@ public class TableLayoutFragment
 
         mTableLayout = (TableLayout) view.findViewById(R.id.tableLayout);
 
-
         mCsvFileDataSource = new CsvFileDataSourceImpl() {
             @Override
             protected InputStreamReader getInputStreamReader() throws Exception {
@@ -78,13 +86,30 @@ public class TableLayoutFragment
                 }
             }
         };
-        final LinkedTableAdapter adapter = new FifaLinkedTableAdapter(getContext(), mCsvFileDataSource);
-        adapter.setOnItemClickListener(this);
-        adapter.setOnItemLongClickListener(this);
+        mArtistDataSource = new ArtistDataSourceWrapper(mCsvFileDataSource);
+        mTableAdapter = new ArtistLinkedTableAdapter(getContext(), mArtistDataSource);
+        mTableAdapter.setOnItemClickListener(this);
+        mTableAdapter.setOnItemLongClickListener(this);
 
-        mTableLayout.setAdapter(adapter);
+        mTableLayout.setAdapter(mTableAdapter);
+
+        //rotation fix
+        Fragment fragment = getChildFragmentManager().findFragmentByTag(EditArtistDialog.class.getSimpleName());
+        if (fragment != null) {
+            fragment.setTargetFragment(this, EDIT_ARTIST_REQUEST_CODE);
+        }
 
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == EDIT_ARTIST_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            int rowIndex = data.getIntExtra(EditArtistDialog.EXTRA_ROW_NUMBER, 0);
+            ArtistModel model = (ArtistModel) data.getSerializableExtra(EditArtistDialog.EXTRA_ARTIST);
+            mArtistDataSource.updateRow(rowIndex, model);
+            mTableAdapter.notifyRowChanged(rowIndex);
+        }
     }
 
     @Override
@@ -93,7 +118,7 @@ public class TableLayoutFragment
         super.onDestroyView();
     }
 
-    //------------------------------------- adapter callbacks --------------------------------------
+    //------------------------------------- mTableAdapter callbacks --------------------------------------
     @Override
     public void onItemClick(int row, int column) {
         Log.e(TAG, "onItemClick = " + row + " | " + column);
@@ -117,6 +142,9 @@ public class TableLayoutFragment
     @Override
     public void onItemLongClick(int row, int column) {
         Log.e(TAG, "onItemLongClick = " + row + " | " + column);
+        DialogFragment dialog = EditArtistDialog.newInstance(mArtistDataSource.getArtist(row), row);
+        dialog.setTargetFragment(this, EDIT_ARTIST_REQUEST_CODE);
+        dialog.show(getChildFragmentManager(), EditArtistDialog.class.getSimpleName());
     }
 
     @Override

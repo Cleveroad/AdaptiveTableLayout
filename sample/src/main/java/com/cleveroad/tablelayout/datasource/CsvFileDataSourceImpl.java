@@ -88,24 +88,12 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
             fileReader = getInputStreamReader();
             lineNumberReader = new LineNumberReader(fileReader);
             lineNumberReader.skip(Long.MAX_VALUE);
-            return lineNumberReader.getLineNumber() + 1; //Add 1 because line index starts at 0
+            return lineNumberReader.getLineNumber();
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
-            try {
-                if (fileReader != null) {
-                    fileReader.close();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-            }
-            try {
-                if (lineNumberReader != null) {
-                    lineNumberReader.close();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-            }
+            closeWithoutException(fileReader);
+            closeWithoutException(lineNumberReader);
         }
         return 0;
     }

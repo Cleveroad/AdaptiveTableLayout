@@ -6,4 +6,26 @@
     <string name="pick_csv_file">Please, select *.CSV file</string>
     <string name="pick_file">Pick CSV-file</string>
 
+    <!-- edit artist dialog -->
+    <string name="edit_artist">Edit artist</string>
+    <string name="position">Position</string>
+    <string name="photo_url">Photo url</string>
+    <string name="name">Name</string>
+    <string name="song">Song</string>
+    <string name="genres">Genres</string>
+
+    <string name="rock">Rock</string>
+    <string name="r_and_b">R&amp;B</string>
+    <string name="pop">Pop</string>
+    <string name="jazz">Jazz</string>
+    <string name="hip_hop">Hip hop</string>
+    <string name="electronic">Electronic</string>
+    <string name="blues">Blues</string>
+    <string name="country">Country</string>
+
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+
 </resources>

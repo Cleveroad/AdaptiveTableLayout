@@ -15,10 +15,11 @@ interface DataTableLayoutAdapter<VH extends ViewHolder> extends TableAdapter<VH>
     /**
      * Method calls when need to need to switch 2 rows with each other in the data matrix
      *
-     * @param rowIndex   row from
-     * @param rowToIndex row to
+     * @param rowIndex       row from
+     * @param rowToIndex     row to
+     * @param solidRowHeader fixed to the data or to the row number.
      */
-    void changeRows(int rowIndex, int rowToIndex);
+    void changeRows(int rowIndex, int rowToIndex, boolean solidRowHeader);
 
     void onSaveInstanceState(@NonNull Bundle bundle);
 

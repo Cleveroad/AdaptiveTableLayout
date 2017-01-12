@@ -14,35 +14,35 @@ import com.bumptech.glide.Glide;
 import com.cleveroad.library.LinkedTableAdapter;
 import com.cleveroad.library.ViewHolderImpl;
 import com.cleveroad.tablelayout.R;
-import com.cleveroad.tablelayout.datasource.TableDataSource;
+import com.cleveroad.tablelayout.datasource.ArtistDataSource;
+import com.cleveroad.tablelayout.model.ArtistModel;
 
-public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
+public class ArtistLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
     private static final int COLUMN_PHOTO = 0;
-    private static final int COLUMN_NAME = 1;
-    private static final int COLUMN_POSITION = 2;
-    private static final int COLUMN_DATE_OF_BIRTH = 3;
-    private static final int COLUMN_FOOTBALL_TEAM = 4;
-    private final LayoutInflater mLayoutInflater;
-    private final TableDataSource<String, String, String, String> mTableDataSource;
-
-    private int[] mColors = new int[]{
+    private static final int COLUMN_ARTIST = 1;
+    private static final int COLUMN_SONG = 2;
+    private static final int COLUMN_GENRES = 3;
+    private static final int[] COLORS = new int[]{
             0xffe62a10, 0xffe91e63, 0xff9c27b0, 0xff673ab7, 0xff3f51b5,
             0xff5677fc, 0xff03a9f4, 0xff00bcd4, 0xff009688, 0xff259b24,
             0xff8bc34a, 0xffcddc39, 0xffffeb3b, 0xffffc107, 0xffff9800, 0xffff5722};
 
-    public FifaLinkedTableAdapter(Context context, TableDataSource<String, String, String, String> tableDataSource) {
+    private final LayoutInflater mLayoutInflater;
+    private final ArtistDataSource mArtistDataSource;
+
+    public ArtistLinkedTableAdapter(Context context, ArtistDataSource artistDataSource) {
         mLayoutInflater = LayoutInflater.from(context);
-        mTableDataSource = tableDataSource;
+        mArtistDataSource = artistDataSource;
     }
 
     @Override
     public int getRowCount() {
-        return mTableDataSource.getRowsCount();
+        return mArtistDataSource.getRowsCount();
     }
 
     @Override
     public int getColumnCount() {
-        return mTableDataSource.getColumnsCount();
+        return mArtistDataSource.getColumnsCount();
     }
 
     @NonNull
@@ -73,10 +73,10 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
         if (viewHolder instanceof TestViewHolder) {
             TestViewHolder vh = (TestViewHolder) viewHolder;
-            String itemData = mTableDataSource.getItemData(row, column).trim();
+            ArtistModel artistModel = mArtistDataSource.getArtist(row);
+            String itemData = artistModel.getFieldByIndex(column).trim();
 
             switch (column) {
-                case COLUMN_FOOTBALL_TEAM:
                 case COLUMN_PHOTO: {
                     vh.tvText.setVisibility(View.GONE);
                     vh.ivImage.setVisibility(View.VISIBLE);
@@ -88,9 +88,9 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
                             .into(vh.ivImage);
                     break;
                 }
-                case COLUMN_NAME:
-                case COLUMN_POSITION:
-                case COLUMN_DATE_OF_BIRTH: {
+                case COLUMN_ARTIST:
+                case COLUMN_SONG:
+                case COLUMN_GENRES: {
                     vh.tvText.setVisibility(View.VISIBLE);
                     vh.ivImage.setVisibility(View.GONE);
                     vh.tvText.setText(itemData);
@@ -104,8 +104,8 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
     public void onBindHeaderColumnViewHolder(@NonNull ViewHolderImpl viewHolder, int column) {
         if (viewHolder instanceof TestHeaderColumnViewHolder) {
             TestHeaderColumnViewHolder vh = (TestHeaderColumnViewHolder) viewHolder;
-            vh.tvText.setText(mTableDataSource.getColumnHeaderData(column));
-            int color = mColors[column % mColors.length];
+            vh.tvText.setText(mArtistDataSource.getColumnHeader(column));
+            int color = COLORS[column % COLORS.length];
             GradientDrawable gd = new GradientDrawable(
                     GradientDrawable.Orientation.LEFT_RIGHT,
                     new int[]{ColorUtils.setAlphaComponent(color, 30), 0x00000000});
@@ -115,10 +115,11 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
         }
     }
 
+    @Override
     public void onBindHeaderRowViewHolder(@NonNull ViewHolderImpl viewHolder, int row) {
         if (viewHolder instanceof TestHeaderRowViewHolder) {
             TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
-            vh.tvText.setText(mTableDataSource.getRowHeaderData(row));
+            vh.tvText.setText(String.valueOf(row));
         }
     }
 
@@ -126,21 +127,23 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
     public void onBindLeftTopHeaderViewHolder(@NonNull ViewHolderImpl viewHolder) {
         if (viewHolder instanceof TestHeaderLeftTopViewHolder) {
             TestHeaderLeftTopViewHolder vh = (TestHeaderLeftTopViewHolder) viewHolder;
-            vh.tvText.setText(mTableDataSource.getFirstHeaderData());
+            vh.tvText.setText("Artists");
         }
     }
 
     @Override
     public int getColumnWidth(int column) {
         switch (column) {
-            case COLUMN_DATE_OF_BIRTH:
-            case COLUMN_PHOTO:
-            case COLUMN_FOOTBALL_TEAM:
-                return 300;
-            case COLUMN_NAME:
+            case COLUMN_ARTIST: {
                 return 400;
-            case COLUMN_POSITION:
-                return 200;
+            }
+            case COLUMN_GENRES: {
+                return 410;
+            }
+            case COLUMN_PHOTO:
+            case COLUMN_SONG: {
+                return 300;
+            }
             default:
                 return 100;
         }
@@ -148,17 +151,17 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
 
     @Override
     public int getHeaderColumnHeight() {
-        return 180;
+        return 200;
     }
 
     @Override
     public int getRowHeight(int row) {
-        return 360;
+        return 400;
     }
 
     @Override
     public int getHeaderRowWidth() {
-        return 160;
+        return 300;
     }
 
     @Override
