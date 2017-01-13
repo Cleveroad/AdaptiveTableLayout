@@ -9,7 +9,6 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:textColor">@color/colorTextWhite</item>
         <item name="android:actionMenuTextColor">@color/colorTextWhite</item>
-        <item name="android:textColor">@color/colorTextWhite</item>
     </style>
 
 </resources>

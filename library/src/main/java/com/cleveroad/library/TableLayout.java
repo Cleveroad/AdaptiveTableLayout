@@ -28,7 +28,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     private static final int SHADOW_THICK = 25;
 
-    private static final int SHIFT_VIEWS_THRESHOLD = 25;
     /**
      * Matrix with item view holders
      */

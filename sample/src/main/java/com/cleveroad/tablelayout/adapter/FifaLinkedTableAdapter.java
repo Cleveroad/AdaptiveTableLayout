@@ -75,28 +75,6 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
             final TestViewHolder vh = (TestViewHolder) viewHolder;
             String itemData = mTableDataSource.getItemData(row, column);
 
-            switch (column) {
-                case COLUMN_FOOTBALL_TEAM:
-                case COLUMN_PHOTO: {
-                    vh.tvText.setVisibility(View.GONE);
-                    vh.ivImage.setVisibility(View.VISIBLE);
-                    Glide.with(vh.ivImage.getContext())
-                            .load(itemData)
-                            .centerCrop()
-                            .placeholder(R.mipmap.ic_launcher)
-                            .error(R.mipmap.ic_launcher)
-                            .into(vh.ivImage);
-                    break;
-                }
-                case COLUMN_NAME:
-                case COLUMN_POSITION:
-                case COLUMN_DATE_OF_BIRTH: {
-                    vh.tvText.setVisibility(View.VISIBLE);
-                    vh.ivImage.setVisibility(View.GONE);
-                    vh.tvText.setText(itemData);
-                    break;
-                }
-            }
             if (TextUtils.isEmpty(itemData)) {
                 itemData = "";
             }

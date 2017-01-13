@@ -21,10 +21,10 @@ public class SampleActivity extends AppCompatActivity implements
 //                    .replace(R.id.container,
 //                            TableLayoutFragment.newInstance(ASSETS_FIFA_PLAYERS_FILE),
 //                            CsvPickerFragment.class.getSimpleName())
-//                    .add(R.id.container, CsvPickerFragment.newInstance(), CsvPickerFragment.class.getSimpleName())
-                    .replace(R.id.container,
-                            TableLayoutFragment.newInstance(ASSETS_ARTISTS_FILE),
-                            CsvPickerFragment.class.getSimpleName())
+                    .add(R.id.container, CsvPickerFragment.newInstance(), CsvPickerFragment.class.getSimpleName())
+//                    .replace(R.id.container,
+//                            TableLayoutFragment.newInstance(ASSETS_ARTISTS_FILE),
+//                            CsvPickerFragment.class.getSimpleName())
                     .commit();
         }
     }
