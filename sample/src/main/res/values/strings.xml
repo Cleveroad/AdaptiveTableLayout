@@ -6,13 +6,17 @@
     <string name="pick_csv_file">Add CSV table from your phone memory and you can read and edit it.</string>
     <string name="pick_file">Pick CSV-file</string>
 
-    <!-- edit artist dialog -->
-    <string name="edit_artist">Edit artist</string>
+    <!-- edit song dialog -->
+    <string name="edit_song">Edit song</string>
     <string name="position">Position</string>
     <string name="photo_url">Photo url</string>
-    <string name="name">Name</string>
+    <string name="artist_name">Artist name</string>
+    <string name="album_name">Album name</string>
     <string name="song">Song</string>
     <string name="genres">Genres</string>
+    <string name="time">Time</string>
+    <string name="chart_number">WLS on chart</string>
+    <string name="votes">Votes count</string>
 
     <string name="rock">Rock</string>
     <string name="r_and_b">R&amp;B</string>

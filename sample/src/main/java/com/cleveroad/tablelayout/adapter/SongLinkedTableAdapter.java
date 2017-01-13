@@ -1,48 +1,49 @@
 package com.cleveroad.tablelayout.adapter;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.cleveroad.library.LinkedTableAdapter;
 import com.cleveroad.library.ViewHolderImpl;
 import com.cleveroad.tablelayout.R;
-import com.cleveroad.tablelayout.datasource.ArtistDataSource;
-import com.cleveroad.tablelayout.model.ArtistModel;
+import com.cleveroad.tablelayout.datasource.SongDataSource;
+import com.cleveroad.tablelayout.model.SongModel;
 
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.NonNull;
 import android.support.v4.graphics.ColorUtils;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ArtistLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
-    private static final int COLUMN_PHOTO = 0;
-    private static final int COLUMN_ARTIST = 1;
-    private static final int COLUMN_SONG = 2;
-    private static final int COLUMN_GENRES = 3;
+public class SongLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
     private static final int[] COLORS = new int[]{
             0xffe62a10, 0xffe91e63, 0xff9c27b0, 0xff673ab7, 0xff3f51b5,
             0xff5677fc, 0xff03a9f4, 0xff00bcd4, 0xff009688, 0xff259b24,
             0xff8bc34a, 0xffcddc39, 0xffffeb3b, 0xffffc107, 0xffff9800, 0xffff5722};
 
     private final LayoutInflater mLayoutInflater;
-    private final ArtistDataSource mArtistDataSource;
+    private final SongDataSource mSongDataSource;
 
-    public ArtistLinkedTableAdapter(Context context, ArtistDataSource artistDataSource) {
+    public SongLinkedTableAdapter(Context context, SongDataSource songDataSource) {
         mLayoutInflater = LayoutInflater.from(context);
-        mArtistDataSource = artistDataSource;
+        mSongDataSource = songDataSource;
     }
 
     @Override
     public int getRowCount() {
-        return mArtistDataSource.getRowsCount();
+        return mSongDataSource.getRowsCount();
     }
 
     @Override
     public int getColumnCount() {
-        return mArtistDataSource.getColumnsCount();
+        return mSongDataSource.getColumnsCount();
     }
 
     @NonNull
@@ -71,37 +72,45 @@ public class ArtistLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
-        TestViewHolder vh = (TestViewHolder) viewHolder;
-        ArtistModel artistModel = mArtistDataSource.getArtist(row);
-        String itemData = artistModel.getFieldByIndex(column).trim();
+        final TestViewHolder vh = (TestViewHolder) viewHolder;
+        SongModel song = mSongDataSource.getSong(row);
+        String itemData = song.getFieldByIndex(column);
 
-        switch (column) {
-            case COLUMN_PHOTO:
-                vh.tvText.setVisibility(View.GONE);
-                vh.ivImage.setVisibility(View.VISIBLE);
-                Glide.with(vh.ivImage.getContext())
-                        .load(itemData)
-                        .centerCrop()
-                        .placeholder(R.mipmap.ic_launcher)
-                        .error(R.mipmap.ic_launcher)
-                        .into(vh.ivImage);
-                break;
-            case COLUMN_ARTIST:
-            case COLUMN_SONG:
-            case COLUMN_GENRES:
-            default:
-                vh.tvText.setVisibility(View.VISIBLE);
-                vh.ivImage.setVisibility(View.GONE);
-                vh.tvText.setText(itemData);
-                break;
+        if (TextUtils.isEmpty(itemData)) {
+            itemData = "";
         }
+
+        itemData = itemData.trim();
+        vh.tvText.setVisibility(View.VISIBLE);
+        vh.ivImage.setVisibility(View.VISIBLE);
+        vh.tvText.setText(itemData);
+        Glide.with(vh.ivImage.getContext())
+                .load(itemData)
+                .fitCenter()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        vh.ivImage.setVisibility(View.INVISIBLE);
+                        vh.tvText.setVisibility(View.VISIBLE);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        vh.ivImage.setVisibility(View.VISIBLE);
+                        vh.tvText.setVisibility(View.INVISIBLE);
+                        return false;
+                    }
+                })
+                .into(vh.ivImage);
     }
 
     @Override
     public void onBindHeaderColumnViewHolder(@NonNull ViewHolderImpl viewHolder, int column) {
         TestHeaderColumnViewHolder vh = (TestHeaderColumnViewHolder) viewHolder;
 
-        vh.tvText.setText(mArtistDataSource.getColumnHeader(column));
+        vh.tvText.setText(mSongDataSource.getColumnHeader(column));
         int color = COLORS[column % COLORS.length];
         GradientDrawable gd = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
@@ -125,17 +134,7 @@ public class ArtistLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     @Override
     public int getColumnWidth(int column) {
-        switch (column) {
-            case COLUMN_ARTIST:
-                return 400;
-            case COLUMN_GENRES:
-                return 610;
-            case COLUMN_PHOTO:
-            case COLUMN_SONG:
-                return 300;
-            default:
-                return 100;
-        }
+        return 200;
     }
 
     @Override
@@ -145,17 +144,12 @@ public class ArtistLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     @Override
     public int getRowHeight(int row) {
-        return 400;
+        return 200;
     }
 
     @Override
     public int getHeaderRowWidth() {
-        return 300;
-    }
-
-    @Override
-    public void onViewHolderRecycled(@NonNull ViewHolderImpl viewHolder) {
-        //do nothing
+        return 200;
     }
 
     //------------------------------------- view holders ------------------------------------------

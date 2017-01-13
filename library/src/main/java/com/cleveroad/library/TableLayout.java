@@ -268,6 +268,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             mAdapter = new LinkedTableAdapterImpl<>(adapter, mSettings.isSolidRowHeader());
             // register notify callbacks
             mAdapter.registerDataSetObserver(this);
+            adapter.registerDataSetObserver(new DataSetObserverProxy(mAdapter));
         } else {
             // remove adapter
             mAdapter = null;

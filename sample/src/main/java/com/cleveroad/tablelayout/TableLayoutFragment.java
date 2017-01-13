@@ -19,11 +19,11 @@ import com.cleveroad.library.LinkedTableAdapter;
 import com.cleveroad.library.OnItemClickListener;
 import com.cleveroad.library.OnItemLongClickListener;
 import com.cleveroad.library.TableLayout;
-import com.cleveroad.tablelayout.adapter.ArtistLinkedTableAdapter;
-import com.cleveroad.tablelayout.datasource.ArtistDataSource;
-import com.cleveroad.tablelayout.datasource.ArtistDataSourceWrapper;
+import com.cleveroad.tablelayout.adapter.SongLinkedTableAdapter;
+import com.cleveroad.tablelayout.datasource.SongDataSource;
+import com.cleveroad.tablelayout.datasource.SongDataSourceWrapper;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
-import com.cleveroad.tablelayout.model.ArtistModel;
+import com.cleveroad.tablelayout.model.SongModel;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class TableLayoutFragment
     private Uri mCsvFile;
     private LinkedTableAdapter mTableAdapter;
     private CsvFileDataSourceImpl mCsvFileDataSource;
-    private ArtistDataSource mArtistDataSource;
+    private SongDataSource mSongDataSource;
     private TableLayout mTableLayout;
     private Toolbar mToolbar;
 
@@ -63,7 +63,7 @@ public class TableLayoutFragment
                 return new FileReader(mCsvFile.getEncodedPath());
             }
         };
-        mArtistDataSource = new ArtistDataSourceWrapper(mCsvFileDataSource);
+        mSongDataSource = new SongDataSourceWrapper(mCsvFileDataSource);
     }
 
     @Nullable
@@ -92,14 +92,14 @@ public class TableLayoutFragment
 
         mTableLayout = (TableLayout) view.findViewById(R.id.tableLayout);
 
-        mTableAdapter = new ArtistLinkedTableAdapter(getContext(), mArtistDataSource);
+        mTableAdapter = new SongLinkedTableAdapter(getContext(), mSongDataSource);
         mTableAdapter.setOnItemClickListener(this);
         mTableAdapter.setOnItemLongClickListener(this);
 
         mTableLayout.setAdapter(mTableAdapter);
 
         //rotation fix
-        Fragment fragment = getChildFragmentManager().findFragmentByTag(EditArtistDialog.class.getSimpleName());
+        Fragment fragment = getChildFragmentManager().findFragmentByTag(EditSongDialog.class.getSimpleName());
         if (fragment != null) {
             fragment.setTargetFragment(this, EDIT_ARTIST_REQUEST_CODE);
         }
@@ -110,9 +110,9 @@ public class TableLayoutFragment
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == EDIT_ARTIST_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            int rowIndex = data.getIntExtra(EditArtistDialog.EXTRA_ROW_NUMBER, 0);
-            ArtistModel model = (ArtistModel) data.getSerializableExtra(EditArtistDialog.EXTRA_ARTIST);
-            mArtistDataSource.updateRow(rowIndex, model);
+            int rowIndex = data.getIntExtra(EditSongDialog.EXTRA_ROW_NUMBER, 0);
+            SongModel model = data.getParcelableExtra(EditSongDialog.EXTRA_SONG);
+            mSongDataSource.updateRow(rowIndex, model);
             mTableAdapter.notifyRowChanged(rowIndex);
         }
     }
@@ -147,9 +147,9 @@ public class TableLayoutFragment
     @Override
     public void onItemLongClick(int row, int column) {
         Log.e(TAG, "onItemLongClick = " + row + " | " + column);
-        DialogFragment dialog = EditArtistDialog.newInstance(mArtistDataSource.getArtist(row), row);
+        DialogFragment dialog = EditSongDialog.newInstance(mSongDataSource.getSong(row), row);
         dialog.setTargetFragment(this, EDIT_ARTIST_REQUEST_CODE);
-        dialog.show(getChildFragmentManager(), EditArtistDialog.class.getSimpleName());
+        dialog.show(getChildFragmentManager(), EditSongDialog.class.getSimpleName());
     }
 
     @Override

@@ -12,18 +12,23 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-import com.cleveroad.tablelayout.model.ArtistModel;
+import com.cleveroad.tablelayout.model.SongModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EditArtistDialog extends DialogFragment implements View.OnClickListener {
-    public static final String EXTRA_ARTIST = "EXTRA_ARTIST";
+public class EditSongDialog extends DialogFragment implements View.OnClickListener {
+    public static final String EXTRA_SONG = "EXTRA_SONG";
     public static final String EXTRA_ROW_NUMBER = "EXTRA_ROW_NUMBER";
 
-    private EditText mEtName;
+    private EditText mEtSongName;
     private EditText mEtPhotoUrl;
-    private EditText mEtSong;
+    private EditText mEtArtistName;
+    private EditText mEtAlbumName;
+    private EditText mEtTime;
+    private EditText mEtChartPosition;
+    private EditText mEtVotesCount;
+
     private CheckBox mCbRock;
     private CheckBox mCbRandB;
     private CheckBox mCbPop;
@@ -33,18 +38,18 @@ public class EditArtistDialog extends DialogFragment implements View.OnClickList
     private CheckBox mCbBlues;
     private CheckBox mCbCountry;
 
-    private ArtistModel mArtistModel;
+    private SongModel mSongModel;
     private int mRowNumber;
 
-    public static EditArtistDialog newInstance(@NonNull ArtistModel artist, int rowNumber) {
-        EditArtistDialog fragment = new EditArtistDialog();
-        fragment.setArguments(createArgs(artist, rowNumber));
+    public static EditSongDialog newInstance(@NonNull SongModel songModel, int rowNumber) {
+        EditSongDialog fragment = new EditSongDialog();
+        fragment.setArguments(createArgs(songModel, rowNumber));
         return fragment;
     }
 
-    public static Bundle createArgs(@NonNull ArtistModel artist, int rowNumber) {
+    public static Bundle createArgs(@NonNull SongModel artist, int rowNumber) {
         Bundle args = new Bundle();
-        args.putSerializable(EXTRA_ARTIST, artist);
+        args.putParcelable(EXTRA_SONG, artist);
         args.putInt(EXTRA_ROW_NUMBER, rowNumber);
         return args;
     }
@@ -61,7 +66,7 @@ public class EditArtistDialog extends DialogFragment implements View.OnClickList
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mArtistModel = (ArtistModel) getArguments().getSerializable(EXTRA_ARTIST);
+        mSongModel = getArguments().getParcelable(EXTRA_SONG);
         mRowNumber = getArguments().getInt(EXTRA_ROW_NUMBER);
     }
 
@@ -69,11 +74,16 @@ public class EditArtistDialog extends DialogFragment implements View.OnClickList
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable
             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.dialog_edit_artist, container, false);
+        View view = inflater.inflate(R.layout.dialog_edit_song, container, false);
 
-        mEtName = (EditText) view.findViewById(R.id.etName);
+        mEtSongName = (EditText) view.findViewById(R.id.etSongName);
         mEtPhotoUrl = (EditText) view.findViewById(R.id.etPhotoUrl);
-        mEtSong = (EditText) view.findViewById(R.id.etSong);
+        mEtArtistName = (EditText) view.findViewById(R.id.etArtistName);
+        mEtAlbumName = (EditText) view.findViewById(R.id.etAlbumName);
+        mEtTime = (EditText) view.findViewById(R.id.etTime);
+        mEtChartPosition = (EditText) view.findViewById(R.id.etChartPosition);
+        mEtVotesCount = (EditText) view.findViewById(R.id.etVotesCount);
+
         mCbRock = (CheckBox) view.findViewById(R.id.cbRock);
         mCbRandB = (CheckBox) view.findViewById(R.id.cbRandB);
         mCbPop = (CheckBox) view.findViewById(R.id.cbPop);
@@ -96,7 +106,7 @@ public class EditArtistDialog extends DialogFragment implements View.OnClickList
             case R.id.bPositive:
                 Intent intent = new Intent();
                 updateModelAccordingToUi();
-                intent.putExtra(EXTRA_ARTIST, mArtistModel);
+                intent.putExtra(EXTRA_SONG, mSongModel);
                 intent.putExtra(EXTRA_ROW_NUMBER, mRowNumber);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
                 break;
@@ -111,11 +121,15 @@ public class EditArtistDialog extends DialogFragment implements View.OnClickList
     }
 
     private void updateUiAccordingToModel() {
-        mEtName.setText(mArtistModel.getName());
-        mEtPhotoUrl.setText(mArtistModel.getPhotoUrl());
-        mEtSong.setText(mArtistModel.getSong());
+        mEtSongName.setText(mSongModel.getSongName());
+        mEtPhotoUrl.setText(mSongModel.getCoverUrl());
+        mEtArtistName.setText(mSongModel.getArtistName());
+        mEtAlbumName.setText(mSongModel.getAlbumName());
+        mEtTime.setText(mSongModel.getTime());
+        mEtChartPosition.setText(String.valueOf(mSongModel.getChartRaiting()));
+        mEtVotesCount.setText(String.valueOf(mSongModel.getVotesCount()));
 
-        List<String> genres = mArtistModel.getGenres();
+        List<String> genres = mSongModel.getGenres();
         mCbRock.setChecked(containsIgnoreCase(genres, mCbRock.getText().toString()));
         mCbRandB.setChecked(containsIgnoreCase(genres, mCbRandB.getText().toString()));
         mCbPop.setChecked(containsIgnoreCase(genres, mCbPop.getText().toString()));
@@ -127,9 +141,13 @@ public class EditArtistDialog extends DialogFragment implements View.OnClickList
     }
 
     private void updateModelAccordingToUi() {
-        mArtistModel.setName(mEtName.getText().toString());
-        mArtistModel.setPhotoUrl(mEtPhotoUrl.getText().toString());
-        mArtistModel.setSong(mEtSong.getText().toString());
+        mSongModel.setSongName(mEtSongName.getText().toString());
+        mSongModel.setCoverUrl(mEtPhotoUrl.getText().toString());
+        mSongModel.setArtistName(mEtArtistName.getText().toString());
+        mSongModel.setAlbumName(mEtAlbumName.getText().toString());
+        mSongModel.setTime(mEtTime.getText().toString());
+        mSongModel.setChartRaiting(Integer.parseInt(mEtChartPosition.getText().toString()));
+        mSongModel.setVotesCount(Long.parseLong(mEtVotesCount.getText().toString()));
 
         List<String> genres = new ArrayList<>();
 
@@ -166,8 +184,8 @@ public class EditArtistDialog extends DialogFragment implements View.OnClickList
         }
 
 
-        mArtistModel.setGenres(genres);
+        mSongModel.setGenres(genres);
 
-        getArguments().putSerializable(EXTRA_ARTIST, mArtistModel);
+        getArguments().putParcelable(EXTRA_SONG, mSongModel);
     }
 }

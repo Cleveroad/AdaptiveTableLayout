@@ -19,7 +19,7 @@
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/edit_artist"
+            android:text="@string/edit_song"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -30,7 +30,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tvTitle"
             android:layout_marginTop="10dp">
-
 
             <LinearLayout
                 android:id="@+id/llEditFields"
@@ -43,10 +42,10 @@
                     android:layout_height="wrap_content">
 
                     <android.support.v7.widget.AppCompatEditText
-                        android:id="@+id/etName"
+                        android:id="@+id/etSongName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/name"
+                        android:hint="@string/song"
                         android:inputType="text"
                         android:maxLength="50" />
 
@@ -70,12 +69,65 @@
                     android:layout_height="wrap_content">
 
                     <android.support.v7.widget.AppCompatEditText
-                        android:id="@+id/etSong"
+                        android:id="@+id/etArtistName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/song"
+                        android:hint="@string/artist_name"
                         android:inputType="text"
                         android:maxLength="50" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    <android.support.v7.widget.AppCompatEditText
+                            android:id="@+id/etAlbumName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/album_name"
+                            android:inputType="text"
+                            android:maxLength="50" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    <android.support.v7.widget.AppCompatEditText
+                            android:id="@+id/etTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/time"
+                            android:inputType="time"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    <android.support.v7.widget.AppCompatEditText
+                            android:id="@+id/etChartPosition"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/chart_number"
+                            android:inputType="number"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                    <android.support.v7.widget.AppCompatEditText
+                            android:id="@+id/etVotesCount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/votes"
+                            android:inputType="number"/>
 
                 </android.support.design.widget.TextInputLayout>
 
