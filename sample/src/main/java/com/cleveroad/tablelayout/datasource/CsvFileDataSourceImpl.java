@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -17,7 +16,6 @@ import java.util.WeakHashMap;
 
 public abstract class CsvFileDataSourceImpl implements TableDataSource<String, String, String, String> {
     private static final String TAG = CsvFileDataSourceImpl.class.getSimpleName();
-    private static final String CSV_DELIMITER = ",";
     private static final int READ_FILE_LINES_LIMIT = 50;
     private List<String> mColumnHeaders = new ArrayList<>();
     private Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
@@ -39,7 +37,7 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
 
     @Override
     public int getRowsCount() {
-        return mRowsCount;
+        return mRowsCount == 0 ? 0 : (mRowsCount + 1);
     }
 
     @Override

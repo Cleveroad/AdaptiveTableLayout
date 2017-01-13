@@ -34,7 +34,6 @@ public class TableLayoutFragment
         implements OnItemClickListener, OnItemLongClickListener {
     private static final String TAG = TableLayoutFragment.class.getSimpleName();
     private static final String EXTRA_CSV_FILE = "EXTRA_CSV_FILE";
-    private static final int EDIT_ARTIST_REQUEST_CODE = 121;
     private Uri mCsvFile;
     private LinkedTableAdapter mTableAdapter;
     private CsvFileDataSourceImpl mCsvFileDataSource;
@@ -98,18 +97,12 @@ public class TableLayoutFragment
 
         mTableLayout.setAdapter(mTableAdapter);
 
-        //rotation fix
-        Fragment fragment = getChildFragmentManager().findFragmentByTag(EditSongDialog.class.getSimpleName());
-        if (fragment != null) {
-            fragment.setTargetFragment(this, EDIT_ARTIST_REQUEST_CODE);
-        }
-
         return view;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == EDIT_ARTIST_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+        if (requestCode == EditSongDialog.REQUEST_CODE_EDIT_SONG && resultCode == Activity.RESULT_OK && data != null) {
             int rowIndex = data.getIntExtra(EditSongDialog.EXTRA_ROW_NUMBER, 0);
             SongModel model = data.getParcelableExtra(EditSongDialog.EXTRA_SONG);
             mSongDataSource.updateRow(rowIndex, model);
@@ -148,7 +141,6 @@ public class TableLayoutFragment
     public void onItemLongClick(int row, int column) {
         Log.e(TAG, "onItemLongClick = " + row + " | " + column);
         DialogFragment dialog = EditSongDialog.newInstance(mSongDataSource.getSong(row), row);
-        dialog.setTargetFragment(this, EDIT_ARTIST_REQUEST_CODE);
         dialog.show(getChildFragmentManager(), EditSongDialog.class.getSimpleName());
     }
 

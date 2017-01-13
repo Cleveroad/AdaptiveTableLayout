@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EditSongDialog extends DialogFragment implements View.OnClickListener {
+    public static final int REQUEST_CODE_EDIT_SONG = 777;
     public static final String EXTRA_SONG = "EXTRA_SONG";
     public static final String EXTRA_ROW_NUMBER = "EXTRA_ROW_NUMBER";
 
@@ -108,10 +109,10 @@ public class EditSongDialog extends DialogFragment implements View.OnClickListen
                 updateModelAccordingToUi();
                 intent.putExtra(EXTRA_SONG, mSongModel);
                 intent.putExtra(EXTRA_ROW_NUMBER, mRowNumber);
-                getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
+                getParentFragment().onActivityResult(REQUEST_CODE_EDIT_SONG, Activity.RESULT_OK, intent);
                 break;
             case R.id.bNegative:
-                getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_CANCELED, null);
+                getParentFragment().onActivityResult(REQUEST_CODE_EDIT_SONG, Activity.RESULT_CANCELED, null);
                 break;
             default:
                 //do nothing
