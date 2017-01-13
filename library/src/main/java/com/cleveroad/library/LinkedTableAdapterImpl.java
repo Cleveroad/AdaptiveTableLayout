@@ -180,7 +180,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
 
     @Override
     public int getColumnWidth(int column) {
-        return mInner.getColumnWidth(column);
+        return mInner.getColumnWidth(mColumnIds[column]);
     }
 
     @Override
@@ -238,18 +238,6 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
     public void onRestoreInstanceState(@NonNull Bundle bundle) {
         restoreColumns(bundle.getIntArray(EXTRA_SAVE_STATE_COLUMNS));
         restoreRows(bundle.getIntArray(EXTRA_SAVE_STATE_ROWS));
-    }
-
-    @Override
-    public void registerDataSetObserver(@NonNull TableDataSetObserver observer) {
-        super.registerDataSetObserver(observer);
-        mInner.registerDataSetObserver(observer);
-    }
-
-    @Override
-    public void unregisterDataSetObserver(@NonNull TableDataSetObserver observer) {
-        super.unregisterDataSetObserver(observer);
-        mInner.unregisterDataSetObserver(observer);
     }
 
     @Override

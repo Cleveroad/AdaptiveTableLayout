@@ -159,8 +159,6 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
                     break;
                 }
             }
-
-
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {

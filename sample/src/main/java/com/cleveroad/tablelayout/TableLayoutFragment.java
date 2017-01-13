@@ -70,6 +70,17 @@ public class TableLayoutFragment
         setRetainInstance(true);
         mCsvFile = (File) getArguments().getSerializable(EXTRA_CSV_FILE);
         mAssetsFileName = getArguments().getString(EXTRA_ASSETS_FILE);
+        mCsvFileDataSource = new CsvFileDataSourceImpl() {
+            @Override
+            protected InputStreamReader getInputStreamReader() throws IOException {
+                if (mCsvFile != null) {
+                    return new FileReader(mCsvFile);
+                } else {
+                    return new InputStreamReader(getContext().getAssets().open(mAssetsFileName));
+                }
+            }
+        };
+        mArtistDataSource = new ArtistDataSourceWrapper(mCsvFileDataSource);
     }
 
     @Nullable
@@ -98,17 +109,6 @@ public class TableLayoutFragment
 
         mTableLayout = (TableLayout) view.findViewById(R.id.tableLayout);
 
-        mCsvFileDataSource = new CsvFileDataSourceImpl() {
-            @Override
-            protected InputStreamReader getInputStreamReader() throws IOException {
-                if (mCsvFile != null) {
-                    return new FileReader(mCsvFile);
-                } else {
-                    return new InputStreamReader(getContext().getAssets().open(mAssetsFileName));
-                }
-            }
-        };
-        mArtistDataSource = new ArtistDataSourceWrapper(mCsvFileDataSource);
         mTableAdapter = new ArtistLinkedTableAdapter(getContext(), mArtistDataSource);
         mTableAdapter.setOnItemClickListener(this);
         mTableAdapter.setOnItemLongClickListener(this);

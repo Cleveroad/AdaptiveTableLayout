@@ -93,18 +93,16 @@ public class EditArtistDialog extends DialogFragment implements View.OnClickList
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.bPositive: {
+            case R.id.bPositive:
                 Intent intent = new Intent();
                 updateModelAccordingToUi();
                 intent.putExtra(EXTRA_ARTIST, mArtistModel);
                 intent.putExtra(EXTRA_ROW_NUMBER, mRowNumber);
                 getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
                 break;
-            }
-            case R.id.bNegative: {
+            case R.id.bNegative:
                 getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_CANCELED, null);
                 break;
-            }
             default:
                 //do nothing
         }

@@ -129,7 +129,7 @@ public class ArtistLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
             case COLUMN_ARTIST:
                 return 400;
             case COLUMN_GENRES:
-                return 410;
+                return 610;
             case COLUMN_PHOTO:
             case COLUMN_SONG:
                 return 300;
