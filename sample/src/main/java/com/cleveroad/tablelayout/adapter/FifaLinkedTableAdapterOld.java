@@ -4,25 +4,25 @@ import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.NonNull;
 import android.support.v4.graphics.ColorUtils;
-import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.cleveroad.library.LinkedTableAdapter;
 import com.cleveroad.library.ViewHolderImpl;
 import com.cleveroad.tablelayout.R;
 import com.cleveroad.tablelayout.datasource.TableDataSource;
 
-public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
+public class FifaLinkedTableAdapterOld extends LinkedTableAdapter<ViewHolderImpl> {
+    private static final int COLUMN_PHOTO = 0;
+    private static final int COLUMN_NAME = 1;
+    private static final int COLUMN_POSITION = 2;
+    private static final int COLUMN_DATE_OF_BIRTH = 3;
+    private static final int COLUMN_FOOTBALL_TEAM = 4;
     private final LayoutInflater mLayoutInflater;
     private final TableDataSource<String, String, String, String> mTableDataSource;
 
@@ -30,7 +30,7 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
             0xff5677fc, 0xff03a9f4, 0xff00bcd4, 0xff009688, 0xff259b24,
             0xff8bc34a, 0xffcddc39, 0xffffeb3b, 0xffffc107, 0xffff9800, 0xffff5722};
 
-    public FifaLinkedTableAdapter(Context context, TableDataSource<String, String, String, String> tableDataSource) {
+    public FifaLinkedTableAdapterOld(Context context, TableDataSource<String, String, String, String> tableDataSource) {
         mLayoutInflater = LayoutInflater.from(context);
         mTableDataSource = tableDataSource;
     }
@@ -70,61 +70,41 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, final int row, final int column) {
+    public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
         if (viewHolder instanceof TestViewHolder) {
-            final TestViewHolder vh = (TestViewHolder) viewHolder;
+            TestViewHolder vh = (TestViewHolder) viewHolder;
             String itemData = mTableDataSource.getItemData(row, column);
-
-            switch (column) {
-                case COLUMN_FOOTBALL_TEAM:
-                case COLUMN_PHOTO: {
-                    vh.tvText.setVisibility(View.GONE);
-                    vh.ivImage.setVisibility(View.VISIBLE);
-                    Glide.with(vh.ivImage.getContext())
-                            .load(itemData)
-                            .centerCrop()
-                            .placeholder(R.mipmap.ic_launcher)
-                            .error(R.mipmap.ic_launcher)
-                            .into(vh.ivImage);
-                    break;
-                }
-                case COLUMN_NAME:
-                case COLUMN_POSITION:
-                case COLUMN_DATE_OF_BIRTH: {
-                    vh.tvText.setVisibility(View.VISIBLE);
-                    vh.ivImage.setVisibility(View.GONE);
-                    vh.tvText.setText(itemData);
-                    break;
-                }
-            }
             if (TextUtils.isEmpty(itemData)) {
-                itemData = "";
+                Log.e("Adapter", "Item data = empty, row = " + row + ", column = " + column);
+                return;
             }
-
             itemData = itemData.trim();
             vh.tvText.setVisibility(View.VISIBLE);
-            vh.ivImage.setVisibility(View.VISIBLE);
+            vh.ivImage.setVisibility(View.GONE);
             vh.tvText.setText(itemData);
-            Glide.with(vh.ivImage.getContext())
-                    .load(itemData)
-                    .fitCenter()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .listener(new RequestListener<String, GlideDrawable>() {
-                        @Override
-                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                            vh.ivImage.setVisibility(View.INVISIBLE);
-                            vh.tvText.setVisibility(View.VISIBLE);
-                            return false;
-                        }
+//            switch (column) {
+//                case COLUMN_FOOTBALL_TEAM:
+//                case COLUMN_PHOTO: {
+//                    vh.tvText.setVisibility(View.GONE);
+//                    vh.ivImage.setVisibility(View.VISIBLE);
+//                    Glide.with(vh.ivImage.getContext())
+//                            .load(itemData)
+//                            .centerCrop()
+//                            .placeholder(R.mipmap.ic_launcher)
+//                            .error(R.mipmap.ic_launcher)
+//                            .into(vh.ivImage);
+//                    break;
+//                }
+//                case COLUMN_NAME:
+//                case COLUMN_POSITION:
+//                case COLUMN_DATE_OF_BIRTH: {
+//                    vh.tvText.setVisibility(View.VISIBLE);
+//                    vh.ivImage.setVisibility(View.GONE);
+//                    vh.tvText.setText(itemData);
+//                    break;
+//                }
+//            }
 
-                        @Override
-                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            vh.ivImage.setVisibility(View.VISIBLE);
-                            vh.tvText.setVisibility(View.INVISIBLE);
-                            return false;
-                        }
-                    })
-                    .into(vh.ivImage);
         }
     }
 
@@ -160,22 +140,34 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
 
     @Override
     public int getColumnWidth(int column) {
-        return 200;
+        switch (column) {
+            case COLUMN_DATE_OF_BIRTH:
+            case COLUMN_PHOTO:
+            case COLUMN_FOOTBALL_TEAM:
+                return 300;
+            case COLUMN_NAME:
+                return 400;
+            case COLUMN_POSITION:
+                return 200;
+            default:
+                return 100;
+
+        }
     }
 
     @Override
     public int getHeaderColumnHeight() {
-        return 200;
+        return 180;
     }
 
     @Override
     public int getRowHeight(int row) {
-        return 200;
+        return 360;
     }
 
     @Override
     public int getHeaderRowWidth() {
-        return 200;
+        return 160;
     }
 
     @Override

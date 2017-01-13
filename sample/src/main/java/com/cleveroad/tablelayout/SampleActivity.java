@@ -3,11 +3,8 @@ package com.cleveroad.tablelayout;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import java.io.File;
-
-public class SampleActivity
-        extends AppCompatActivity
-        implements CsvPickerFragment.OnCsvFileSelectedListener {
+public class SampleActivity extends AppCompatActivity implements
+        CsvPickerFragment.OnCsvFileSelectedListener {
 
     private static final String ASSETS_FIFA_PLAYERS_FILE = "fifa100.csv";
     private static final String ASSETS_ARTISTS_FILE = "artists.csv";
@@ -20,6 +17,10 @@ public class SampleActivity
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
+                    .replace(R.id.container, CsvPickerFragment.newInstance(), CsvPickerFragment.class.getSimpleName())
+//                    .replace(R.id.container,
+//                            TableLayoutFragment.newInstance(ASSETS_FIFA_PLAYERS_FILE),
+//                            CsvPickerFragment.class.getSimpleName())
 //                    .add(R.id.container, CsvPickerFragment.newInstance(), CsvPickerFragment.class.getSimpleName())
                     .replace(R.id.container,
                             TableLayoutFragment.newInstance(ASSETS_ARTISTS_FILE),
@@ -28,8 +29,9 @@ public class SampleActivity
         }
     }
 
+
     @Override
-    public void onCsvFileSelected(File file) {
+    public void onCsvFileSelected(String file) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, TableLayoutFragment.newInstance(file), CsvPickerFragment.class.getSimpleName())

@@ -3,7 +3,7 @@
 
     <string name="app_name">TableLayout</string>
 
-    <string name="pick_csv_file">Please, select *.CSV file</string>
+    <string name="pick_csv_file">Add CSV table from your phone memory and you can read and edit it.</string>
     <string name="pick_file">Pick CSV-file</string>
 
     <!-- edit artist dialog -->

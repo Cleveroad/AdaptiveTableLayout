@@ -3,7 +3,6 @@ package com.cleveroad.tablelayout.datasource;
 import android.util.Log;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
@@ -106,10 +105,11 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
         try {
             fileReader = getInputStreamReader();
             Scanner scanner = new Scanner(fileReader);
-            return new ArrayList<>(Arrays.asList(scanner.nextLine().split(CSV_DELIMITER)));
+            return new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
+
             closeWithoutException(fileReader);
         }
 
@@ -139,10 +139,10 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
             //on scroll to bottom
             for (int i = rowIndexInFile; i < getRowsCount() + 1 && i < rowIndexInFile + READ_FILE_LINES_LIMIT; i++) {
                 if (i - 1 == rowIndex) {
-                    result = new ArrayList<>(Arrays.asList(scanner.nextLine().split(CSV_DELIMITER)));
+                    result = new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
                     mItemsCache.put(i - 1, result);
                 } else {
-                    mItemsCache.put(i - 1, new ArrayList<>(Arrays.asList(scanner.nextLine().split(CSV_DELIMITER))));
+                    mItemsCache.put(i - 1, new ArrayList<>(CsvUtils.parseLine(scanner.nextLine())));
                 }
 
                 if (mItemsCache.containsKey(i)) {
@@ -153,12 +153,13 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
 
             //on scroll to top
             for (int i = rowIndexInFile - 1; i > 1/*rows header*/ && i > rowIndexInFile - READ_FILE_LINES_LIMIT; i--) {
-                mItemsCache.put(i - 1, new ArrayList<>(Arrays.asList(scanner.nextLine().split(CSV_DELIMITER))));
+                mItemsCache.put(i - 1, new ArrayList<>(CsvUtils.parseLine(scanner.nextLine())));
                 if (mItemsCache.containsKey(i - 2)) {
                     Log.i(TAG, "scroll to top -> contains #" + (i - 2) + "; break");
                     break;
                 }
             }
+
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
