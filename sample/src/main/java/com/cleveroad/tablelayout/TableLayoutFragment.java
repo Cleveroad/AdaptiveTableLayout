@@ -1,17 +1,5 @@
 package com.cleveroad.tablelayout;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.cleveroad.library.LinkedTableAdapter;
 import com.cleveroad.library.OnItemClickListener;
 import com.cleveroad.library.OnItemLongClickListener;
@@ -22,8 +10,23 @@ import com.cleveroad.tablelayout.datasource.ArtistDataSourceWrapper;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
 import com.cleveroad.tablelayout.model.ArtistModel;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class TableLayoutFragment
@@ -41,6 +44,7 @@ public class TableLayoutFragment
     private CsvFileDataSourceImpl mCsvFileDataSource;
     private ArtistDataSource mArtistDataSource;
     private TableLayout mTableLayout;
+    private Toolbar mToolbar;
 
     public static TableLayoutFragment newInstance(@NonNull File csvFile) {
         Bundle args = new Bundle();
@@ -52,7 +56,6 @@ public class TableLayoutFragment
     }
 
     public static TableLayoutFragment newInstance(@NonNull String assetsFileName) {
-
         Bundle args = new Bundle();
         args.putString(EXTRA_ASSETS_FILE, assetsFileName);
 
@@ -74,11 +77,30 @@ public class TableLayoutFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tab_layout, container, false);
 
+        mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
+        mToolbar.inflateMenu(R.menu.table_layout);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.actionSave) {
+
+                }
+                return true;
+            }
+        });
+
+
         mTableLayout = (TableLayout) view.findViewById(R.id.tableLayout);
 
         mCsvFileDataSource = new CsvFileDataSourceImpl() {
             @Override
-            protected InputStreamReader getInputStreamReader() throws Exception {
+            protected InputStreamReader getInputStreamReader() throws IOException {
                 if (mCsvFile != null) {
                     return new FileReader(mCsvFile);
                 } else {

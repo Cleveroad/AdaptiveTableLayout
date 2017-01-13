@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 public class ArtistDataSourceWrapper implements ArtistDataSource {
+    private static final String ARTIST_GENRES_DELIMITER = ";";
     private final TableDataSource<String, String, String, String> mDataSource;
     private Map<Integer, ArtistModel> mItems = new WeakHashMap<>();
 
@@ -29,7 +30,7 @@ public class ArtistDataSourceWrapper implements ArtistDataSource {
                     mDataSource.getItemData(index, 0),
                     mDataSource.getItemData(index, 1),
                     mDataSource.getItemData(index, 2),
-                    Arrays.asList(mDataSource.getItemData(index, 3).split(";"))
+                    Arrays.asList(mDataSource.getItemData(index, 3).split(ARTIST_GENRES_DELIMITER))
             );
             mItems.put(index, artistModel);
         }

@@ -1,5 +1,12 @@
 package com.cleveroad.tablelayout.adapter;
 
+import com.bumptech.glide.Glide;
+import com.cleveroad.library.LinkedTableAdapter;
+import com.cleveroad.library.ViewHolderImpl;
+import com.cleveroad.tablelayout.R;
+import com.cleveroad.tablelayout.datasource.ArtistDataSource;
+import com.cleveroad.tablelayout.model.ArtistModel;
+
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.NonNull;
@@ -9,13 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
-import com.cleveroad.library.LinkedTableAdapter;
-import com.cleveroad.library.ViewHolderImpl;
-import com.cleveroad.tablelayout.R;
-import com.cleveroad.tablelayout.datasource.ArtistDataSource;
-import com.cleveroad.tablelayout.model.ArtistModel;
 
 public class ArtistLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
     private static final int COLUMN_PHOTO = 0;
@@ -71,79 +71,68 @@ public class ArtistLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
-        if (viewHolder instanceof TestViewHolder) {
-            TestViewHolder vh = (TestViewHolder) viewHolder;
-            ArtistModel artistModel = mArtistDataSource.getArtist(row);
-            String itemData = artistModel.getFieldByIndex(column).trim();
+        TestViewHolder vh = (TestViewHolder) viewHolder;
+        ArtistModel artistModel = mArtistDataSource.getArtist(row);
+        String itemData = artistModel.getFieldByIndex(column).trim();
 
-            switch (column) {
-                case COLUMN_PHOTO: {
-                    vh.tvText.setVisibility(View.GONE);
-                    vh.ivImage.setVisibility(View.VISIBLE);
-                    Glide.with(vh.ivImage.getContext())
-                            .load(itemData)
-                            .centerCrop()
-                            .placeholder(R.mipmap.ic_launcher)
-                            .error(R.mipmap.ic_launcher)
-                            .into(vh.ivImage);
-                    break;
-                }
-                case COLUMN_ARTIST:
-                case COLUMN_SONG:
-                case COLUMN_GENRES: {
-                    vh.tvText.setVisibility(View.VISIBLE);
-                    vh.ivImage.setVisibility(View.GONE);
-                    vh.tvText.setText(itemData);
-                    break;
-                }
-            }
+        switch (column) {
+            case COLUMN_PHOTO:
+                vh.tvText.setVisibility(View.GONE);
+                vh.ivImage.setVisibility(View.VISIBLE);
+                Glide.with(vh.ivImage.getContext())
+                        .load(itemData)
+                        .centerCrop()
+                        .placeholder(R.mipmap.ic_launcher)
+                        .error(R.mipmap.ic_launcher)
+                        .into(vh.ivImage);
+                break;
+            case COLUMN_ARTIST:
+            case COLUMN_SONG:
+            case COLUMN_GENRES:
+            default:
+                vh.tvText.setVisibility(View.VISIBLE);
+                vh.ivImage.setVisibility(View.GONE);
+                vh.tvText.setText(itemData);
+                break;
         }
     }
 
     @Override
     public void onBindHeaderColumnViewHolder(@NonNull ViewHolderImpl viewHolder, int column) {
-        if (viewHolder instanceof TestHeaderColumnViewHolder) {
-            TestHeaderColumnViewHolder vh = (TestHeaderColumnViewHolder) viewHolder;
-            vh.tvText.setText(mArtistDataSource.getColumnHeader(column));
-            int color = COLORS[column % COLORS.length];
-            GradientDrawable gd = new GradientDrawable(
-                    GradientDrawable.Orientation.LEFT_RIGHT,
-                    new int[]{ColorUtils.setAlphaComponent(color, 30), 0x00000000});
-            gd.setCornerRadius(0f);
-            vh.vGradient.setBackground(gd);
-            vh.vLine.setBackgroundColor(color);
-        }
+        TestHeaderColumnViewHolder vh = (TestHeaderColumnViewHolder) viewHolder;
+
+        vh.tvText.setText(mArtistDataSource.getColumnHeader(column));
+        int color = COLORS[column % COLORS.length];
+        GradientDrawable gd = new GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[]{ColorUtils.setAlphaComponent(color, 30), 0x00000000});
+        gd.setCornerRadius(0f);
+        vh.vGradient.setBackground(gd);
+        vh.vLine.setBackgroundColor(color);
     }
 
     @Override
     public void onBindHeaderRowViewHolder(@NonNull ViewHolderImpl viewHolder, int row) {
-        if (viewHolder instanceof TestHeaderRowViewHolder) {
-            TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
-            vh.tvText.setText(String.valueOf(row));
-        }
+        TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
+        vh.tvText.setText(String.valueOf(row + 1));
     }
 
     @Override
     public void onBindLeftTopHeaderViewHolder(@NonNull ViewHolderImpl viewHolder) {
-        if (viewHolder instanceof TestHeaderLeftTopViewHolder) {
-            TestHeaderLeftTopViewHolder vh = (TestHeaderLeftTopViewHolder) viewHolder;
-            vh.tvText.setText("Artists");
-        }
+        TestHeaderLeftTopViewHolder vh = (TestHeaderLeftTopViewHolder) viewHolder;
+        vh.tvText.setText(R.string.artists_header);
     }
 
     @Override
     public int getColumnWidth(int column) {
         switch (column) {
-            case COLUMN_ARTIST: {
+            case COLUMN_ARTIST:
                 return 400;
-            }
-            case COLUMN_GENRES: {
+            case COLUMN_GENRES:
                 return 410;
-            }
             case COLUMN_PHOTO:
-            case COLUMN_SONG: {
+            case COLUMN_SONG:
                 return 300;
-            }
             default:
                 return 100;
         }
@@ -202,7 +191,6 @@ public class ArtistLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
-
     }
 
     private static class TestHeaderLeftTopViewHolder extends ViewHolderImpl {

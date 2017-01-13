@@ -54,7 +54,6 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
                 innerListener.onLeftTopHeaderLongClick();
             }
         }
-
     };
 
     /**
@@ -251,6 +250,21 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
     public void unregisterDataSetObserver(@NonNull TableDataSetObserver observer) {
         super.unregisterDataSetObserver(observer);
         mInner.unregisterDataSetObserver(observer);
+    }
+
+    @Override
+    public void notifyItemChanged(int rowIndex, int columnIndex) {
+        super.notifyItemChanged(mRowIds[rowIndex], mColumnIds[columnIndex]);
+    }
+
+    @Override
+    public void notifyRowChanged(int rowIndex) {
+        super.notifyRowChanged(mRowIds[rowIndex]);
+    }
+
+    @Override
+    public void notifyColumnChanged(int columnIndex) {
+        super.notifyColumnChanged(mColumnIds[columnIndex]);
     }
 
     private void restoreColumns(@Nullable int[] array) {

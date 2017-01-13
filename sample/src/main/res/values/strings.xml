@@ -27,5 +27,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 
+    <string name="artists_header">Artists</string>
+    <string name="save">Save</string>
 
 </resources>
