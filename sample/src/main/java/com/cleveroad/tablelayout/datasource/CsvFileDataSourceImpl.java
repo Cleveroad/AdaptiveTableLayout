@@ -1,27 +1,36 @@
 package com.cleveroad.tablelayout.datasource;
 
-import com.cleveroad.tablelayout.utils.CsvUtils;
-
+import android.net.Uri;
 import android.util.Log;
 
+import com.cleveroad.tablelayout.utils.CsvUtils;
+import com.cleveroad.tablelayout.utils.StringUtils;
+
 import java.io.Closeable;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.WeakHashMap;
 
-public abstract class CsvFileDataSourceImpl implements TableDataSource<String, String, String, String> {
+public class CsvFileDataSourceImpl implements TableDataSource<String, String, String, String> {
     private static final String TAG = CsvFileDataSourceImpl.class.getSimpleName();
     private static final int READ_FILE_LINES_LIMIT = 50;
+    private final Uri mCsvFileUri;
     private List<String> mColumnHeaders = new ArrayList<>();
     private Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
+    private Map<Integer, List<String>> mChangedItems = new HashMap<>();
     private int mRowsCount;
 
-    public CsvFileDataSourceImpl() {
+    public CsvFileDataSourceImpl(Uri csvFileUri) {
+        mCsvFileUri = csvFileUri;
         init();
     }
 
@@ -33,6 +42,28 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
+    }
+
+    private static List<String> modifyListPositions(List<String> inputList, Map<Integer, Integer> modifications) {
+        List<String> result = new ArrayList<>(inputList.size());
+        for (int i = 0, size = inputList.size(); i < size; i++) {
+            Integer newPosition = null;
+            if (i != 0) {
+                //do not move fixed first column
+                newPosition = modifications.get(i - 1); //TODO: simplify logic
+                if (newPosition != null) {
+                    newPosition++;
+                }
+            }
+
+            String value = inputList.get(newPosition != null ? newPosition : i);
+            if (value.contains(",")) {
+                value = "\"" + value + "\"";
+            }
+            result.add(value);
+        }
+
+        return result;
     }
 
     @Override
@@ -70,10 +101,53 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
         }
     }
 
-    protected abstract InputStreamReader getInputStreamReader() throws IOException;
+    public List<String> getColumnHeaders() {
+        return new ArrayList<>(mColumnHeaders);
+    }
+
+    public List<String> getRowValues(int rowIndex) {
+        return getRow(rowIndex);
+    }
+
+    public void updateRow(int rowIndex, List<String> rowItems) {
+        mChangedItems.put(rowIndex, rowItems);
+    }
+
+    //TODO: to worker thread
+    //TODO: show error messages
+    public void applyChanges(Map<Integer, Integer> rowModifications, Map<Integer, Integer> columnModifications) {
+        OutputStreamWriter writer = null;
+
+        try {
+            writer = new FileWriter(mCsvFileUri.getEncodedPath() + "_new.csv");
+            writer.write(StringUtils.toString(modifyListPositions(getColumnHeaders(), columnModifications), ","));
+            writer.write("\n");
+            for (int i = 0, size = getRowsCount(); i < size; i++) {
+                Integer newRowPosition = rowModifications.get(i);
+                List<String> row = getRow(newRowPosition != null ? newRowPosition : i);
+                writer.write(StringUtils.toString(modifyListPositions(row, columnModifications), ","));
+                if(i != size - 1) {
+                    writer.write("\n");
+                }
+            }
+            //TODO: delete old file
+            //TODO rename new file "XXX_new.csv" to "XXX"
+            //TODO: refresh CsvFileDataSourceImpl - remove all cache & reload data
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        } finally {
+            closeWithoutException(writer);
+        }
+    }
+
+    protected InputStreamReader getInputStreamReader() throws IOException {
+        return new FileReader(mCsvFileUri.getEncodedPath());
+    }
 
     public void destroy() {
-        //close streams
+//        mItemsCache.clear();
+//        mColumnHeaders.clear();
+//        mChangedItems.clear();
     }
 
     private void init() {
@@ -110,7 +184,6 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
-
             closeWithoutException(fileReader);
         }
 
@@ -118,7 +191,8 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
     }
 
     private List<String> getRow(int rowIndex) {
-        List<String> result = mItemsCache.get(rowIndex);
+        List<String> result = mChangedItems.containsKey(rowIndex)
+                ? mChangedItems.get(rowIndex) : mItemsCache.get(rowIndex);
         if (result != null) {
             return result;
         }
