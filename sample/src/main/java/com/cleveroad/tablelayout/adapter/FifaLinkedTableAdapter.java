@@ -5,7 +5,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.NonNull;
 import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,11 +22,6 @@ import com.cleveroad.tablelayout.R;
 import com.cleveroad.tablelayout.datasource.TableDataSource;
 
 public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
-    private static final int COLUMN_PHOTO = 0;
-    private static final int COLUMN_NAME = 1;
-    private static final int COLUMN_POSITION = 2;
-    private static final int COLUMN_DATE_OF_BIRTH = 3;
-    private static final int COLUMN_FOOTBALL_TEAM = 4;
     private final LayoutInflater mLayoutInflater;
     private final TableDataSource<String, String, String, String> mTableDataSource;
 
@@ -79,17 +73,18 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
         if (viewHolder instanceof TestViewHolder) {
             final TestViewHolder vh = (TestViewHolder) viewHolder;
             String itemData = mTableDataSource.getItemData(row, column);
+
             if (TextUtils.isEmpty(itemData)) {
-                Log.e("Adapter", "Item data = empty, row = " + row + ", column = " + column);
-                return;
+                itemData = "";
             }
+
             itemData = itemData.trim();
             vh.tvText.setVisibility(View.VISIBLE);
             vh.ivImage.setVisibility(View.VISIBLE);
             vh.tvText.setText(itemData);
             Glide.with(vh.ivImage.getContext())
                     .load(itemData)
-                    .centerCrop()
+                    .fitCenter()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .listener(new RequestListener<String, GlideDrawable>() {
                         @Override
@@ -142,34 +137,22 @@ public class FifaLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
 
     @Override
     public int getColumnWidth(int column) {
-        if (column == 0) {
-            return 300;
-        } else if (column == 1) {
-            return 600;
-        } else {
-            return 900;
-        }
+        return 200;
     }
 
     @Override
     public int getHeaderColumnHeight() {
-        return 180;
+        return 200;
     }
 
     @Override
     public int getRowHeight(int row) {
-        if (row == 0) {
-            return 300;
-        } else if (row == 1) {
-            return 600;
-        } else {
-            return 900;
-        }
+        return 200;
     }
 
     @Override
     public int getHeaderRowWidth() {
-        return 160;
+        return 200;
     }
 
     @Override

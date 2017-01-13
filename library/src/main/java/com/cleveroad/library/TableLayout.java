@@ -365,6 +365,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             // scroll over view to the left
             diffX = mState.getScrollX();
             mState.setScrollX(0);
+        } else if (mSettings.getLayoutWidth() > maxX) {
+            // few items and we have free space.
+            diffX = 0;
+            mState.setScrollX(0);
         } else if (mState.getScrollX() + mSettings.getLayoutWidth() + x > maxX) {
             // scroll over view to the right
             diffX = (int) (maxX - mState.getScrollX() - mSettings.getLayoutWidth());
@@ -377,6 +381,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (mState.getScrollY() + y < 0) {
             // scroll over view to the top
             diffY = mState.getScrollY();
+            mState.setScrollY(0);
+        } else if (mState.getScrollY() > maxY) {
+            // few items and we have free space.
+            diffY = 0;
             mState.setScrollY(0);
         } else if (mState.getScrollY() + mSettings.getLayoutHeight() + y > maxY) {
             // scroll over view to the bottom

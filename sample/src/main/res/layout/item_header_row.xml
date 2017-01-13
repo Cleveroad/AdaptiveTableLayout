@@ -10,8 +10,8 @@
         android:id="@+id/tvText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textSize="40sp"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:textSize="12sp"
         tools:text="text"/>
 </RelativeLayout>

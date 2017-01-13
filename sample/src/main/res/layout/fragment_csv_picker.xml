@@ -3,24 +3,35 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/medium_jungle_green"
     >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/icon_csv"/>
 
     <TextView
         android:id="@+id/tvPickFile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/bPickFile"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="@string/pick_csv_file"/>
+        android:gravity="center"
+        android:padding="16dp"
+        android:textStyle="bold"
+        android:text="@string/pick_csv_file"
+        android:textSize="16sp"/>
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/bPickFile"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tvPickFile"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:background="@color/charcoal"
         android:text="@string/pick_file"/>
-
 
 </RelativeLayout>
