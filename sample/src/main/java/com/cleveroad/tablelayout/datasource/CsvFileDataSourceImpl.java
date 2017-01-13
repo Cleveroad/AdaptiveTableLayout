@@ -2,11 +2,12 @@ package com.cleveroad.tablelayout.datasource;
 
 import android.util.Log;
 
+import com.cleveroad.tablelayout.utils.CsvUtils;
+
 import java.io.Closeable;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -14,7 +15,6 @@ import java.util.WeakHashMap;
 
 public abstract class CsvFileDataSourceImpl implements TableDataSource<String, String, String, String> {
     private static final String TAG = CsvFileDataSourceImpl.class.getSimpleName();
-    private static final String CSV_DELIMITER = ",";
     private static final int READ_FILE_LINES_LIMIT = 50;
     private List<String> mColumnHeaders = new ArrayList<>();
     private Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
@@ -88,7 +88,7 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
             fileReader = getInputStreamReader();
             lineNumberReader = new LineNumberReader(fileReader);
             lineNumberReader.skip(Long.MAX_VALUE);
-            return lineNumberReader.getLineNumber() + 1; //Add 1 because line index starts at 0
+            return lineNumberReader.getLineNumber(); //Add 1 because line index starts at 0
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
@@ -117,10 +117,11 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
         try {
             fileReader = getInputStreamReader();
             Scanner scanner = new Scanner(fileReader);
-            return new ArrayList<>(Arrays.asList(scanner.nextLine().split(CSV_DELIMITER)));
+            return new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
+
             closeWithoutException(fileReader);
         }
 
@@ -150,10 +151,10 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
             //on scroll to bottom
             for (int i = rowIndexInFile; i < getRowsCount() + 1 && i < rowIndexInFile + READ_FILE_LINES_LIMIT; i++) {
                 if (i - 1 == rowIndex) {
-                    result = new ArrayList<>(Arrays.asList(scanner.nextLine().split(CSV_DELIMITER)));
+                    result = new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
                     mItemsCache.put(i - 1, result);
                 } else {
-                    mItemsCache.put(i - 1, new ArrayList<>(Arrays.asList(scanner.nextLine().split(CSV_DELIMITER))));
+                    mItemsCache.put(i - 1, new ArrayList<>(CsvUtils.parseLine(scanner.nextLine())));
                 }
 
                 if (mItemsCache.containsKey(i)) {
@@ -164,16 +165,14 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
 
             //on scroll to top
             for (int i = rowIndexInFile - 1; i > 1/*rows header*/ && i > rowIndexInFile - READ_FILE_LINES_LIMIT; i--) {
-                mItemsCache.put(i - 1, new ArrayList<>(Arrays.asList(scanner.nextLine().split(CSV_DELIMITER))));
+                mItemsCache.put(i - 1, new ArrayList<>(CsvUtils.parseLine(scanner.nextLine())));
                 if (mItemsCache.containsKey(i - 2)) {
                     Log.i(TAG, "scroll to top -> contains #" + (i - 2) + "; break");
                     break;
                 }
             }
-
-
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            e.printStackTrace();
         } finally {
             closeWithoutException(fileReader);
         }

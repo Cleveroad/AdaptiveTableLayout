@@ -365,6 +365,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             // scroll over view to the left
             diffX = mState.getScrollX();
             mState.setScrollX(0);
+        } else if (mSettings.getLayoutWidth() > maxX) {
+            // few items and we have free space.
+            diffX = 0;
+            mState.setScrollX(0);
         } else if (mState.getScrollX() + mSettings.getLayoutWidth() + x > maxX) {
             // scroll over view to the right
             diffX = (int) (maxX - mState.getScrollX() - mSettings.getLayoutWidth());
@@ -377,6 +381,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (mState.getScrollY() + y < 0) {
             // scroll over view to the top
             diffY = mState.getScrollY();
+            mState.setScrollY(0);
+        } else if (mState.getScrollY() > maxY) {
+            // few items and we have free space.
+            diffY = 0;
             mState.setScrollY(0);
         } else if (mState.getScrollY() + mSettings.getLayoutHeight() + y > maxY) {
             // scroll over view to the bottom
@@ -745,11 +753,11 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     @SuppressWarnings("unused")
     private void addViewHolder(int row, int column, int itemType) {
-
+        boolean createdNewView = false;
         // need to add new one
         ViewHolder viewHolder = mRecycler.popRecycledViewHolder(itemType);
 
-        if (viewHolder == null) {
+        if (createdNewView = (viewHolder == null)) {
             viewHolder = createViewHolder(itemType);
         }
 
@@ -764,32 +772,59 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         View view = viewHolder.getItemView();
 
         view.setTag(R.id.tag_view_holder, viewHolder);
-
         // add view to the layout
         addView(view, 0);
 
         // save and measure view holder
         if (itemType == ViewHolderType.ITEM) {
             mViewHolders.put(row, column, viewHolder);
-            mAdapter.onBindViewHolder(viewHolder, row, column);
+            if (createdNewView) {
+                // DO NOT REMOVE THIS!! Fix bug with request layout "requestLayout() improperly called"
+                mAdapter.onBindViewHolder(viewHolder, row, column);
+            }
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getColumnWidth(column), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mManager.getRowHeight(row), MeasureSpec.EXACTLY));
             refreshItemViewHolder(viewHolder);
+            if (!createdNewView) {
+                // DO NOT REMOVE THIS!! Fix bug with request layout "requestLayout() improperly called"
+                mAdapter.onBindViewHolder(viewHolder, row, column);
+            }
+
+
         } else if (itemType == ViewHolderType.ROW_HEADER) {
             mHeaderRowViewHolders.put(row, viewHolder);
-            mAdapter.onBindHeaderRowViewHolder(viewHolder, row);
+            if (createdNewView) {
+                // DO NOT REMOVE THIS!! Fix bug with request layout "requestLayout() improperly called"
+                mAdapter.onBindHeaderRowViewHolder(viewHolder, row);
+            }
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderRowWidth(), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mManager.getRowHeight(row), MeasureSpec.EXACTLY));
+
             refreshHeaderRowViewHolder(viewHolder);
+            if (!createdNewView) {
+                // DO NOT REMOVE THIS!! Fix bug with request layout "requestLayout() improperly called"
+                mAdapter.onBindHeaderRowViewHolder(viewHolder, row);
+            }
+
         } else if (itemType == ViewHolderType.COLUMN_HEADER) {
             mHeaderColumnViewHolders.put(column, viewHolder);
-            mAdapter.onBindHeaderColumnViewHolder(viewHolder, column);
+            if (createdNewView) {
+                // DO NOT REMOVE THIS!! Fix bug with request layout "requestLayout() improperly called"
+                mAdapter.onBindHeaderColumnViewHolder(viewHolder, column);
+            }
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getColumnWidth(column), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderColumnHeight(), MeasureSpec.EXACTLY));
+
             refreshHeaderColumnViewHolder(viewHolder);
+
+            if (!createdNewView) {
+                // DO NOT REMOVE THIS!! Fix bug with request layout "requestLayout() improperly called"
+                mAdapter.onBindHeaderColumnViewHolder(viewHolder, column);
+            }
+//            mAdapter.onBindHeaderColumnViewHolder(viewHolder, column);
         }
     }
 

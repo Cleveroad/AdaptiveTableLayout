@@ -1,5 +1,6 @@
 package com.cleveroad.tablelayout;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,7 +17,6 @@ import com.cleveroad.library.TableLayout;
 import com.cleveroad.tablelayout.adapter.FifaLinkedTableAdapter;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 
@@ -27,26 +27,16 @@ public class TableLayoutFragment
     private static final String EXTRA_CSV_FILE = "EXTRA_CSV_FILE";
     private static final String EXTRA_ASSETS_FILE = "EXTRA_ASSETS_FILE";
     @Nullable
-    private File mCsvFile;
+    private Uri mCsvFile;
     @Nullable
     private String mAssetsFileName;
     private CsvFileDataSourceImpl mCsvFileDataSource;
     private TableLayout mTableLayout;
 
-    public static TableLayoutFragment newInstance(@NonNull File csvFile) {
-        Bundle args = new Bundle();
-        args.putSerializable(EXTRA_CSV_FILE, csvFile);
-
-        TableLayoutFragment fragment = new TableLayoutFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public static TableLayoutFragment newInstance(@NonNull String assetsFileName) {
+    public static TableLayoutFragment newInstance(@NonNull String filename) {
 
         Bundle args = new Bundle();
-        args.putString(EXTRA_ASSETS_FILE, assetsFileName);
-
+        args.putString(EXTRA_CSV_FILE, filename);
         TableLayoutFragment fragment = new TableLayoutFragment();
         fragment.setArguments(args);
         return fragment;
@@ -56,7 +46,7 @@ public class TableLayoutFragment
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        mCsvFile = (File) getArguments().getSerializable(EXTRA_CSV_FILE);
+        mCsvFile = Uri.parse(getArguments().getString(EXTRA_CSV_FILE));
         mAssetsFileName = getArguments().getString(EXTRA_ASSETS_FILE);
     }
 
@@ -67,12 +57,11 @@ public class TableLayoutFragment
 
         mTableLayout = (TableLayout) view.findViewById(R.id.tableLayout);
 
-
         mCsvFileDataSource = new CsvFileDataSourceImpl() {
             @Override
             protected InputStreamReader getInputStreamReader() throws Exception {
                 if (mCsvFile != null) {
-                    return new FileReader(mCsvFile);
+                    return new FileReader(mCsvFile.getEncodedPath());
                 } else {
                     return new InputStreamReader(getContext().getAssets().open(mAssetsFileName));
                 }

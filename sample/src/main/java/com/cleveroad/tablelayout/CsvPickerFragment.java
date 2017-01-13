@@ -14,8 +14,6 @@ import android.view.ViewGroup;
 
 import com.cleveroad.tablelayout.utils.PermissionHelper;
 
-import java.io.File;
-
 public class CsvPickerFragment extends Fragment implements View.OnClickListener {
     private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE = 1;
     private static final int REQUEST_CODE_PICK_CSV = 2;
@@ -38,7 +36,6 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_csv_picker, container, false);
         view.findViewById(R.id.bPickFile).setOnClickListener(this);
-
         return view;
     }
 
@@ -56,7 +53,8 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
         if (requestCode == REQUEST_CODE_PICK_CSV && data != null) {
             Activity activity = getActivity();
             if (activity instanceof OnCsvFileSelectedListener) {
-                ((OnCsvFileSelectedListener) activity).onCsvFileSelected(new File(data.getData().getPath()));
+                ((OnCsvFileSelectedListener) activity).onCsvFileSelected(
+                        UriHelper.getPath(getContext(), data.getData()));
             }
         }
     }
@@ -74,11 +72,11 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
     private void pickCsvFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("text/csv");
+        intent.setType("text/comma-separated-values");
         startActivityForResult(Intent.createChooser(intent, getString(R.string.pick_file)), REQUEST_CODE_PICK_CSV);
     }
 
     interface OnCsvFileSelectedListener {
-        void onCsvFileSelected(File file);
+        void onCsvFileSelected(String file);
     }
 }
