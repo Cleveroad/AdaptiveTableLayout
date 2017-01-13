@@ -1,9 +1,13 @@
 package com.cleveroad.library;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.ViewGroup;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is TableAdapter decorator (wrapper).
@@ -12,8 +16,10 @@ import android.view.ViewGroup;
  * @param <VH> Adapter's ViewHolder class
  */
 class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<VH> implements DataTableLayoutAdapter<VH> {
-    private static final String EXTRA_SAVE_STATE_COLUMNS = "EXTRA_SAVE_STATE_COLUMNS";
-    private static final String EXTRA_SAVE_STATE_ROWS = "EXTRA_SAVE_STATE_ROWS";
+    private static final String EXTRA_SAVE_STATE_COLUMN_INDEX_TO_ID = "EXTRA_SAVE_STATE_COLUMN_INDEX_TO_ID";
+    private static final String EXTRA_SAVE_STATE_COLUMN_ID_TO_INDEX = "EXTRA_SAVE_STATE_COLUMN_ID_TO_INDEX";
+    private static final String EXTRA_SAVE_STATE_ROW_INDEX_TO_ID = "EXTRA_SAVE_STATE_ROW_INDEX_TO_ID";
+    private static final String EXTRA_SAVE_STATE_ROW_ID_TO_INDEX = "EXTRA_SAVE_STATE_ROW_ID_TO_INDEX";
     /**
      * Decorated TableAdapter
      */
@@ -28,12 +34,14 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
     /**
      * Redirect column's ids
      */
-    private int[] mColumnIds;
+    private HashMap<Integer, Integer> mColumnIndexToId;
+    private HashMap<Integer, Integer> mColumnIdToIndex;
 
     /**
      * Redirect row's ids
      */
-    private int[] mRowIds;
+    private HashMap<Integer, Integer> mRowIndexToId;
+    private HashMap<Integer, Integer> mRowIdToIndex;
 
     /**
      * OnItemLongClickListener wrapper
@@ -43,7 +51,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
         public void onItemLongClick(int row, int column) {
             OnItemLongClickListener innerListener = mInner.getOnItemLongClickListener();
             if (innerListener != null) {
-                innerListener.onItemLongClick(mRowIds[row], mColumnIds[column]);
+                innerListener.onItemLongClick(rowIndexToId(row), columnIndexToId(column));
             }
         }
 
@@ -64,7 +72,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
         public void onItemClick(int row, int column) {
             OnItemClickListener innerListener = mInner.getOnItemClickListener();
             if (innerListener != null) {
-                innerListener.onItemClick(mRowIds[row], mColumnIds[column]);
+                innerListener.onItemClick(rowIndexToId(row), columnIndexToId(column));
             }
         }
 
@@ -72,7 +80,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
         public void onRowHeaderClick(int row) {
             OnItemClickListener innerListener = mInner.getOnItemClickListener();
             if (innerListener != null) {
-                innerListener.onRowHeaderClick(mRowIds[row]);
+                innerListener.onRowHeaderClick(rowIndexToId(row));
             }
         }
 
@@ -80,7 +88,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
         public void onColumnHeaderClick(int column) {
             OnItemClickListener innerListener = mInner.getOnItemClickListener();
             if (innerListener != null) {
-                innerListener.onColumnHeaderClick(mColumnIds[column]);
+                innerListener.onColumnHeaderClick(columnIndexToId(column));
             }
         }
 
@@ -93,35 +101,61 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
         }
     };
 
+    @SuppressLint("UseSparseArrays")
     LinkedTableAdapterImpl(@NonNull TableAdapter<VH> inner, boolean isSolidRowHeader) {
         mInner = inner;
         mIsSolidRowHeader = isSolidRowHeader;
 
         // init data
-        mColumnIds = new int[getColumnCount()];
-        mRowIds = new int[getRowCount()];
-
-        // fill data
-        fill(mColumnIds);
-        fill(mRowIds);
-    }
-
-    private void fill(int[] array) {
-        // filling its array indices
-        for (int count = array.length, i = 0; i < count; i++) {
-            array[i] = i;
-        }
+        mColumnIndexToId = new HashMap<>();
+        mColumnIdToIndex = new HashMap<>();
+        mRowIndexToId = new HashMap<>();
+        mRowIdToIndex = new HashMap<>();
     }
 
     @Override
     public void changeColumns(int columnIndex, int columnToIndex) {
-        switchTwoItems(mColumnIds, columnIndex, columnToIndex);
+        int fromId = columnIndexToId(columnIndex);
+        int toId = columnIndexToId(columnToIndex);
+        if(columnIndex != toId) {
+            mColumnIndexToId.put(columnIndex, toId);
+            mColumnIdToIndex.put(toId, columnIndex);
+        } else {
+            //remove excess modifications
+            mColumnIndexToId.remove(columnIndex);
+            mColumnIdToIndex.remove(toId);
+        }
+
+        if(columnToIndex != fromId) {
+            mColumnIndexToId.put(columnToIndex, fromId);
+            mColumnIdToIndex.put(fromId, columnToIndex);
+        } else {
+            //remove excess modifications
+            mColumnIndexToId.remove(columnToIndex);
+            mColumnIdToIndex.remove(fromId);
+        }
     }
 
     @Override
     public void changeRows(int rowIndex, int rowToIndex, boolean solidRowHeader) {
         mIsSolidRowHeader = solidRowHeader;
-        switchTwoItems(mRowIds, rowIndex, rowToIndex);
+        int fromId = rowIndexToId(rowIndex);
+        int toId = rowIndexToId(rowToIndex);
+        if(rowIndex != toId) {
+            mRowIndexToId.put(rowIndex, toId);
+            mRowIdToIndex.put(toId, rowIndex);
+        } else {
+            mRowIndexToId.remove(rowIndex);
+            mRowIdToIndex.remove(toId);
+        }
+
+        if(rowToIndex != fromId) {
+            mRowIndexToId.put(rowToIndex, fromId);
+            mRowIdToIndex.put(fromId, rowToIndex);
+        } else {
+            mRowIndexToId.remove(rowToIndex);
+            mRowIdToIndex.remove(fromId);
+        }
     }
 
     @Override
@@ -160,17 +194,17 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
 
     @Override
     public void onBindViewHolder(@NonNull VH viewHolder, int row, int column) {
-        mInner.onBindViewHolder(viewHolder, mRowIds[row], mColumnIds[column]);
+        mInner.onBindViewHolder(viewHolder, rowIndexToId(row), columnIndexToId(column));
     }
 
     @Override
     public void onBindHeaderColumnViewHolder(@NonNull VH viewHolder, int column) {
-        mInner.onBindHeaderColumnViewHolder(viewHolder, mColumnIds[column]);
+        mInner.onBindHeaderColumnViewHolder(viewHolder, columnIndexToId(column));
     }
 
     @Override
     public void onBindHeaderRowViewHolder(@NonNull VH viewHolder, int row) {
-        mInner.onBindHeaderRowViewHolder(viewHolder, mIsSolidRowHeader ? mRowIds[row] : row);
+        mInner.onBindHeaderRowViewHolder(viewHolder, mIsSolidRowHeader ? rowIndexToId(row) : row);
     }
 
     @Override
@@ -180,7 +214,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
 
     @Override
     public int getColumnWidth(int column) {
-        return mInner.getColumnWidth(mColumnIds[column]);
+        return mInner.getColumnWidth(columnIndexToId(column));
     }
 
     @Override
@@ -190,7 +224,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
 
     @Override
     public int getRowHeight(int row) {
-        return mInner.getRowHeight(mRowIds[row]);
+        return mInner.getRowHeight(rowIndexToId(row));
     }
 
     @Override
@@ -215,63 +249,65 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
         mInner.onViewHolderRecycled(viewHolder);
     }
 
-    /**
-     * Switched 2 values in the array
-     *
-     * @param array     array with values
-     * @param fromIndex first index
-     * @param toIndex   second index
-     */
-    void switchTwoItems(int[] array, int fromIndex, int toIndex) {
-        int cellData = array[toIndex];
-        array[toIndex] = array[fromIndex];
-        array[fromIndex] = cellData;
-    }
-
     @Override
     public void onSaveInstanceState(@NonNull Bundle bundle) {
-        bundle.putIntArray(EXTRA_SAVE_STATE_COLUMNS, mColumnIds);
-        bundle.putIntArray(EXTRA_SAVE_STATE_ROWS, mRowIds);
+        bundle.putSerializable(EXTRA_SAVE_STATE_COLUMN_INDEX_TO_ID, mColumnIndexToId);
+        bundle.putSerializable(EXTRA_SAVE_STATE_COLUMN_ID_TO_INDEX, mColumnIdToIndex);
+
+        bundle.putSerializable(EXTRA_SAVE_STATE_ROW_INDEX_TO_ID, mRowIndexToId);
+        bundle.putSerializable(EXTRA_SAVE_STATE_ROW_ID_TO_INDEX, mRowIdToIndex);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onRestoreInstanceState(@NonNull Bundle bundle) {
-        restoreColumns(bundle.getIntArray(EXTRA_SAVE_STATE_COLUMNS));
-        restoreRows(bundle.getIntArray(EXTRA_SAVE_STATE_ROWS));
+        mColumnIndexToId = (HashMap<Integer, Integer>) bundle.getSerializable(EXTRA_SAVE_STATE_COLUMN_INDEX_TO_ID);
+        mColumnIdToIndex = ((HashMap<Integer, Integer>) bundle.getSerializable(EXTRA_SAVE_STATE_COLUMN_ID_TO_INDEX));
+
+        mRowIndexToId = ((HashMap<Integer, Integer>) bundle.getSerializable(EXTRA_SAVE_STATE_ROW_INDEX_TO_ID));
+        mRowIdToIndex = ((HashMap<Integer, Integer>) bundle.getSerializable(EXTRA_SAVE_STATE_ROW_ID_TO_INDEX));
     }
 
     @Override
     public void notifyItemChanged(int rowIndex, int columnIndex) {
-        super.notifyItemChanged(mRowIds[rowIndex], mColumnIds[columnIndex]);
+        super.notifyItemChanged(rowIdToIndex(rowIndex), columnIdToIndex(columnIndex));
     }
 
     @Override
     public void notifyRowChanged(int rowIndex) {
-        super.notifyRowChanged(mRowIds[rowIndex]);
+        super.notifyRowChanged(rowIdToIndex(rowIndex));
     }
 
     @Override
     public void notifyColumnChanged(int columnIndex) {
-        super.notifyColumnChanged(mColumnIds[columnIndex]);
+        super.notifyColumnChanged(columnIdToIndex(columnIndex));
     }
 
-    private void restoreColumns(@Nullable int[] array) {
-        if (array != null) {
-            for (int count = array.length, i = 0; i < count; i++) {
-                if (mColumnIds.length > i) {
-                    mColumnIds[i] = array[i];
-                }
-            }
-        }
+    public Map<Integer, Integer> getRowsModifications() {
+        return mRowIndexToId;
     }
 
-    private void restoreRows(@Nullable int[] array) {
-        if (array != null) {
-            for (int count = array.length, i = 0; i < count; i++) {
-                if (mRowIds.length > i) {
-                    mRowIds[i] = array[i];
-                }
-            }
-        }
+    public Map<Integer, Integer> getColumnsModifications() {
+        return mColumnIndexToId;
+    }
+
+    private int columnIndexToId(int columnIndex) {
+        Integer id = mColumnIndexToId.get(columnIndex);
+        return id != null ? id : columnIndex;
+    }
+
+    private int columnIdToIndex(int columnId) {
+        Integer index = mColumnIdToIndex.get(columnId);
+        return index != null ? index : columnId;
+    }
+
+    private int rowIndexToId(int rowIndex) {
+        Integer id = mRowIndexToId.get(rowIndex);
+        return id != null ? id : rowIndex;
+    }
+
+    private int rowIdToIndex(int rowId) {
+        Integer index = mRowIdToIndex.get(rowId);
+        return index != null ? index : rowId;
     }
 }

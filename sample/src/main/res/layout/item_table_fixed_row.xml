@@ -20,7 +20,7 @@
         android:src="@drawable/ic_up_black_24dp"/>
 
     <View
-        android:layout_width="1dip"
+        android:layout_width="1dp"
         android:layout_height="match_parent"
         android:background="@drawable/separator_table_header" />
 </LinearLayout>

@@ -19,7 +19,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperListener, TableDataSetObserver {
 
@@ -257,6 +259,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      *
      * @param adapter TableLayout adapter
      */
+    @SuppressWarnings("unchecked")
     public void setAdapter(@Nullable TableAdapter adapter) {
         if (mAdapter != null) {
             // remove observers from old adapter
@@ -278,7 +281,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             // if layout has width and height
             initItems();
         }
-
     }
 
     /**
@@ -291,6 +293,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      *
      * @param adapter DataTableLayoutAdapter adapter
      */
+    @SuppressWarnings("unchecked")
     public void setAdapter(@Nullable DataTableLayoutAdapter adapter) {
         if (mAdapter != null) {
             mAdapter.unregisterDataSetObserver(this);
@@ -304,6 +307,30 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (mSettings.getLayoutHeight() != 0 && mSettings.getLayoutWidth() != 0) {
             initItems();
         }
+    }
+
+    /**
+     * When used adapter with IMMUTABLE data, returns rows position modifications
+     * (old position -> new position)
+     * @return row position modification map. Includes only modified row numbers
+     */
+    @SuppressWarnings("unchecked")
+    public Map<Integer, Integer> getLinkedAdapterRowsModifications() {
+        return mAdapter instanceof LinkedTableAdapterImpl ?
+                ((LinkedTableAdapterImpl) mAdapter).getRowsModifications() :
+                Collections.<Integer, Integer>emptyMap();
+    }
+
+    /**
+     * When used adapter with IMMUTABLE data, returns columns position modifications
+     * (old position -> new position)
+     * @return row position modification map. Includes only modified column numbers
+     */
+    @SuppressWarnings("unchecked")
+    public Map<Integer, Integer> getLinkedAdapterColumnsModifications() {
+        return mAdapter instanceof LinkedTableAdapterImpl ?
+                ((LinkedTableAdapterImpl) mAdapter).getColumnsModifications() :
+                Collections.<Integer, Integer>emptyMap();
     }
 
     @Override
@@ -1026,8 +1053,14 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
             // update row headers
             if (!mSettings.isSolidRowHeader()) {
-                mAdapter.onBindHeaderRowViewHolder(mHeaderRowViewHolders.get(fromRow), fromRow);
-                mAdapter.onBindHeaderRowViewHolder(mHeaderRowViewHolders.get(toRow), toRow);
+                ViewHolder fromViewHolder = mHeaderRowViewHolders.get(fromRow);
+                ViewHolder toViewHolder = mHeaderRowViewHolders.get(toRow);
+                if(fromViewHolder != null) {
+                    mAdapter.onBindHeaderRowViewHolder(fromViewHolder, fromRow);
+                }
+                if(toViewHolder != null) {
+                    mAdapter.onBindHeaderRowViewHolder(toViewHolder, toRow);
+                }
             }
         }
     }
