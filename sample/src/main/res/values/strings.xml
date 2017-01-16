@@ -34,4 +34,7 @@
     <string name="artists_header">Artists</string>
     <string name="save">Save</string>
 
+    <string name="changes_saved">All changes have been saved</string>
+    <string name="unexpected_error">Unexpected error</string>
+
 </resources>

@@ -1,12 +1,13 @@
 package com.cleveroad.tablelayout.datasource;
 
-import android.net.Uri;
-import android.util.Log;
-
 import com.cleveroad.tablelayout.utils.CsvUtils;
 import com.cleveroad.tablelayout.utils.StringUtils;
 
+import android.net.Uri;
+import android.util.Log;
+
 import java.io.Closeable;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         for (int i = 0, size = inputList.size(); i < size; i++) {
             Integer newPosition = null;
             if (i != 0) {
-                //do not move fixed first column
+                //do not move first fixed column
                 newPosition = modifications.get(i - 1); //TODO: simplify logic
                 if (newPosition != null) {
                     newPosition++;
@@ -115,29 +116,52 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
 
     //TODO: to worker thread
     //TODO: show error messages
-    public void applyChanges(Map<Integer, Integer> rowModifications, Map<Integer, Integer> columnModifications) {
+    public boolean applyChanges(
+            Map<Integer, Integer> rowModifications,
+            Map<Integer, Integer> columnModifications) {
         OutputStreamWriter writer = null;
+        final String oldFileName = mCsvFileUri.getEncodedPath();
+        final String newFileName = oldFileName + "_new.csv";
 
         try {
-            writer = new FileWriter(mCsvFileUri.getEncodedPath() + "_new.csv");
-            writer.write(StringUtils.toString(modifyListPositions(getColumnHeaders(), columnModifications), ","));
+            writer = new FileWriter(newFileName);
+            writer.write(StringUtils.toString(modifyListPositions(getColumnHeaders(),
+                    columnModifications), ","));
             writer.write("\n");
             for (int i = 0, size = getRowsCount(); i < size; i++) {
                 Integer newRowPosition = rowModifications.get(i);
                 List<String> row = getRow(newRowPosition != null ? newRowPosition : i);
-                writer.write(StringUtils.toString(modifyListPositions(row, columnModifications), ","));
-                if(i != size - 1) {
+                writer.write(StringUtils.toString(modifyListPositions(row, columnModifications),
+                        ","));
+                if (i != size - 1) {
                     writer.write("\n");
                 }
             }
             //TODO: delete old file
-            //TODO rename new file "XXX_new.csv" to "XXX"
             //TODO: refresh CsvFileDataSourceImpl - remove all cache & reload data
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
+            return false;
         } finally {
             closeWithoutException(writer);
         }
+
+        try {
+            File oldFile = new File(oldFileName);
+            File newFile = new File(newFileName);
+
+            boolean result = oldFile.exists() && oldFile.delete() && newFile.renameTo(new File
+                    (oldFileName));
+            if (result) {
+                destroy();
+                init();
+            }
+            return result;
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return false;
     }
 
     protected InputStreamReader getInputStreamReader() throws IOException {
@@ -145,9 +169,9 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
     }
 
     public void destroy() {
-//        mItemsCache.clear();
-//        mColumnHeaders.clear();
-//        mChangedItems.clear();
+        mItemsCache.clear();
+        mColumnHeaders.clear();
+        mChangedItems.clear();
     }
 
     private void init() {

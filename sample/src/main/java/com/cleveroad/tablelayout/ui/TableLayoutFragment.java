@@ -1,19 +1,5 @@
 package com.cleveroad.tablelayout.ui;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.cleveroad.library.LinkedTableAdapter;
 import com.cleveroad.library.OnItemClickListener;
 import com.cleveroad.library.OnItemLongClickListener;
@@ -22,9 +8,21 @@ import com.cleveroad.tablelayout.R;
 import com.cleveroad.tablelayout.adapter.SampleLinkedTableAdapter;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+
 import java.util.List;
 
 public class TableLayoutFragment
@@ -58,8 +56,9 @@ public class TableLayoutFragment
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_tab_layout, container, false);
+        final View view = inflater.inflate(R.layout.fragment_tab_layout, container, false);
 
+        mTableLayout = (TableLayout) view.findViewById(R.id.tableLayout);
         mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,21 +71,23 @@ public class TableLayoutFragment
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.actionSave) {
-                    mCsvFileDataSource.applyChanges(
+                    boolean result = mCsvFileDataSource.applyChanges(
                             mTableLayout.getLinkedAdapterRowsModifications(),
                             mTableLayout.getLinkedAdapterColumnsModifications());
+
+                    if (result) { //if data source have been changed
+                        initAdapter();
+                        mTableAdapter.notifyDataSetChanged();
+                        Snackbar.make(view, R.string.changes_saved, Snackbar.LENGTH_SHORT).show();
+                    } else {
+                        Snackbar.make(view, R.string.unexpected_error, Snackbar.LENGTH_SHORT).show();
+                    }
                 }
                 return true;
             }
         });
 
-        mTableLayout = (TableLayout) view.findViewById(R.id.tableLayout);
-
-        mTableAdapter = new SampleLinkedTableAdapter(getContext(), mCsvFileDataSource);
-        mTableAdapter.setOnItemClickListener(this);
-        mTableAdapter.setOnItemLongClickListener(this);
-
-        mTableLayout.setAdapter(mTableAdapter);
+       initAdapter();
 
         return view;
     }
@@ -99,12 +100,6 @@ public class TableLayoutFragment
             mCsvFileDataSource.updateRow(rowIndex, values);
             mTableAdapter.notifyRowChanged(rowIndex);
         }
-    }
-
-    @Override
-    public void onDestroyView() {
-        mCsvFileDataSource.destroy();
-        super.onDestroyView();
     }
 
     //------------------------------------- adapter callbacks --------------------------------------
@@ -142,5 +137,14 @@ public class TableLayoutFragment
     @Override
     public void onLeftTopHeaderLongClick() {
         Log.e(TAG, "onLeftTopHeaderLongClick ");
+    }
+
+    private void initAdapter() {
+
+        mTableAdapter = new SampleLinkedTableAdapter(getContext(), mCsvFileDataSource);
+        mTableAdapter.setOnItemClickListener(this);
+        mTableAdapter.setOnItemLongClickListener(this);
+
+        mTableLayout.setAdapter(mTableAdapter);
     }
 }
