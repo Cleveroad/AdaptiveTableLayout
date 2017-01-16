@@ -69,12 +69,12 @@ public class EditRowDialog extends DialogFragment implements View.OnClickListene
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onStart() {
+        super.onStart();
         updateUiAccordingToModel();
     }
 
-        @Override
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         updateModelAccordingToUi();
         mColumnsContainer.removeAllViews();
@@ -108,7 +108,7 @@ public class EditRowDialog extends DialogFragment implements View.OnClickListene
             View view = inflater.inflate(R.layout.item_edit_column, mColumnsContainer, false);
             mColumnsContainer.addView(view);
 
-            TextInputLayout inputLayout = ((TextInputLayout) view.findViewById(R.id.textInputLayout));
+            TextInputLayout inputLayout = (TextInputLayout) view.findViewById(R.id.textInputLayout);
             inputLayout.setHint(mTitles.get(i));
 
             EditText editText = (EditText) view.findViewById(R.id.etColumnValue);
