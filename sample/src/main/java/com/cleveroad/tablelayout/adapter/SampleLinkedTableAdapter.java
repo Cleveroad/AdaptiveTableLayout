@@ -1,6 +1,7 @@
 package com.cleveroad.tablelayout.adapter;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.NonNull;
 import android.support.v4.graphics.ColorUtils;
@@ -29,10 +30,19 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     private final LayoutInflater mLayoutInflater;
     private final TableDataSource<String, String, String, String> mTableDataSource;
+    private final int mColumnWidth;
+    private final int mRowHeight;
+    private final int mHeaderHeight;
+    private final int mHeaderWidth;
 
     public SampleLinkedTableAdapter(Context context, TableDataSource<String, String, String, String> tableDataSource) {
         mLayoutInflater = LayoutInflater.from(context);
         mTableDataSource = tableDataSource;
+        Resources res = context.getResources();
+        mColumnWidth = res.getDimensionPixelSize(R.dimen.column_width);
+        mRowHeight = res.getDimensionPixelSize(R.dimen.row_height);
+        mHeaderHeight = res.getDimensionPixelSize(R.dimen.column_header_height);
+        mHeaderWidth = res.getDimensionPixelSize(R.dimen.row_header_width);
     }
 
     @Override
@@ -122,7 +132,6 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     public void onBindHeaderRowViewHolder(@NonNull ViewHolderImpl viewHolder, int row) {
         TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
         vh.tvText.setText(String.valueOf(row + 1));
-
     }
 
     @Override
@@ -133,22 +142,22 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     @Override
     public int getColumnWidth(int column) {
-        return 200;
+        return mColumnWidth;
     }
 
     @Override
     public int getHeaderColumnHeight() {
-        return 200;
+        return mHeaderHeight;
     }
 
     @Override
     public int getRowHeight(int row) {
-        return 200;
+        return mRowHeight;
     }
 
     @Override
     public int getHeaderRowWidth() {
-        return 200;
+        return mHeaderWidth;
     }
 
     //------------------------------------- view holders ------------------------------------------

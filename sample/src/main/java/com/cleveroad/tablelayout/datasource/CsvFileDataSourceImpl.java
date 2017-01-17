@@ -2,20 +2,19 @@ package com.cleveroad.tablelayout.datasource;
 
 import com.cleveroad.tablelayout.utils.ClosableUtil;
 import com.cleveroad.tablelayout.utils.CsvUtils;
-import com.cleveroad.tablelayout.utils.StringUtils;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.util.Log;
 
-import java.io.Closeable;
-import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +25,7 @@ import java.util.WeakHashMap;
 public class CsvFileDataSourceImpl implements TableDataSource<String, String, String, String> {
     private static final String TAG = CsvFileDataSourceImpl.class.getSimpleName();
     private static final int READ_FILE_LINES_LIMIT = 50;
+    private final Context mContext;
     private final Uri mCsvFileUri;
     private final List<String> mColumnHeaders = new ArrayList<>();
     private final Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
@@ -33,7 +33,8 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
     private final Map<Integer, List<String>> mChangedItems = new HashMap<>();
     private int mRowsCount;
 
-    public CsvFileDataSourceImpl(Uri csvFileUri) {
+    public CsvFileDataSourceImpl(Context context, Uri csvFileUri) {
+        mContext = context;
         mCsvFileUri = csvFileUri;
         init();
     }
@@ -68,7 +69,8 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         try {
             return getRow(rowIndex).get(columnIndex + 1 /*column header*/);
         } catch (Exception e) {
-            Log.e(TAG, "get rowIndex=" + rowIndex + "; colIndex=" + columnIndex + ";\ncache = " + mItemsCache.toString(), e);
+            Log.e(TAG, "get rowIndex=" + rowIndex + "; colIndex=" + columnIndex + ";\ncache = " +
+                    mItemsCache.toString(), e);
             return null;
         }
     }
@@ -89,54 +91,32 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         mChangedItems.put(rowIndex, rowItems);
     }
 
-    //TODO: to worker thread
-    public boolean applyChanges(
-            Map<Integer, Integer> rowModifications,
-            Map<Integer, Integer> columnModifications) {
-//        OutputStreamWriter writer = null;
-//        final String oldFileName = mCsvFileUri.getEncodedPath();
-//        final String newFileName = oldFileName + "_new.csv";
-//
-//        try {
-//            writer = new FileWriter(newFileName);
-//            writer.write(StringUtils.toString(modifyListPositions(getColumnHeaders(),
-//                    columnModifications), ","));
-//            writer.write("\n");
-//            for (int i = 0, size = getRowsCount(); i < size; i++) {
-//                Integer newRowPosition = rowModifications.get(i);
-//                List<String> row = getRow(newRowPosition != null ? newRowPosition : i);
-//                writer.write(StringUtils.toString(modifyListPositions(row, columnModifications),
-//                        ","));
-//                if (i != size - 1) {
-//                    writer.write("\n");
-//                }
-//            }
-//        } catch (Exception e) {
-//            Log.e(TAG, e.getMessage());
-//            return false;
-//        } finally {
-//            ClosableUtil.closeWithoutException(writer);
-//        }
-//
-//        try {
-//            File oldFile = new File(oldFileName);
-//            File newFile = new File(newFileName);
-//
-//            //delete old file and rename new file
-//            boolean result = oldFile.exists()
-//                    && oldFile.delete()
-//                    && newFile.renameTo(new File(oldFileName));
-//            //invalidate cache
-//            if (result) {
-//                destroy();
-//                init();
-//            }
-//            return result;
-//        } catch (Exception e) {
-//            Log.e(TAG, e.getMessage());
-//        }
-//
-        return false;
+    public void applyChanges(
+            LoaderManager loaderManager,
+            final Map<Integer, Integer> rowModifications,
+            final Map<Integer, Integer> columnModifications,
+            final UpdateFileCallback callback) {
+
+        loaderManager.restartLoader(0, Bundle.EMPTY, new LoaderManager.LoaderCallbacks<Boolean>() {
+            @Override
+            public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+                return new UpdateCsvFileLoader(
+                        mContext,
+                        CsvFileDataSourceImpl.this,
+                        rowModifications,
+                        columnModifications);
+            }
+
+            @Override
+            public void onLoadFinished(Loader<Boolean> loader, Boolean data) {
+                callback.onFileUpdated(getCsvFileUri().getEncodedPath(), data);
+            }
+
+            @Override
+            public void onLoaderReset(Loader<Boolean> loader) {
+
+            }
+        });
     }
 
     protected InputStreamReader getInputStreamReader() throws IOException {
@@ -211,7 +191,8 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
             }
 
             //on scroll to bottom
-            for (int i = rowIndexInFile; i < getRowsCount() + 1 && i < rowIndexInFile + READ_FILE_LINES_LIMIT; i++) {
+            for (int i = rowIndexInFile; i < getRowsCount() + 1 && i < rowIndexInFile +
+                    READ_FILE_LINES_LIMIT; i++) {
                 if (i - 1 == rowIndex) {
                     result = new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
                     mItemsCache.put(i - 1, result);
@@ -226,7 +207,8 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
             }
 
             //on scroll to top
-            for (int i = rowIndexInFile - 1; i > 1/*rows header*/ && i > rowIndexInFile - READ_FILE_LINES_LIMIT; i--) {
+            for (int i = rowIndexInFile - 1; i > 1/*rows header*/ && i > rowIndexInFile -
+                    READ_FILE_LINES_LIMIT; i--) {
                 mItemsCache.put(i - 1, new ArrayList<>(CsvUtils.parseLine(scanner.nextLine())));
                 if (mItemsCache.containsKey(i - 2)) {
                     Log.i(TAG, "scroll to top -> contains #" + (i - 2) + "; break");

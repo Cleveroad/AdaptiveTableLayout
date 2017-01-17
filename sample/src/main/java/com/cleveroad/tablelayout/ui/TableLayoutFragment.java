@@ -7,6 +7,7 @@ import com.cleveroad.library.TableLayout;
 import com.cleveroad.tablelayout.R;
 import com.cleveroad.tablelayout.adapter.SampleLinkedTableAdapter;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
+import com.cleveroad.tablelayout.datasource.UpdateFileCallback;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -27,7 +28,7 @@ import java.util.List;
 
 public class TableLayoutFragment
         extends Fragment
-        implements OnItemClickListener, OnItemLongClickListener {
+        implements OnItemClickListener, OnItemLongClickListener, UpdateFileCallback {
     private static final String TAG = TableLayoutFragment.class.getSimpleName();
     private static final String EXTRA_CSV_FILE = "EXTRA_CSV_FILE";
     private Uri mCsvFile;
@@ -50,7 +51,7 @@ public class TableLayoutFragment
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         mCsvFile = Uri.parse(getArguments().getString(EXTRA_CSV_FILE));
-        mCsvFileDataSource = new CsvFileDataSourceImpl(mCsvFile);
+        mCsvFileDataSource = new CsvFileDataSourceImpl(getContext(), mCsvFile);
     }
 
     @Nullable
@@ -71,17 +72,11 @@ public class TableLayoutFragment
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.actionSave) {
-                    boolean result = mCsvFileDataSource.applyChanges(
+                    mCsvFileDataSource.applyChanges(
+                            getLoaderManager(),
                             mTableLayout.getLinkedAdapterRowsModifications(),
-                            mTableLayout.getLinkedAdapterColumnsModifications());
-
-                    if (result) { //if data source have been changed
-                        initAdapter();
-                        mTableAdapter.notifyDataSetChanged();
-                        Snackbar.make(view, R.string.changes_saved, Snackbar.LENGTH_SHORT).show();
-                    } else {
-                        Snackbar.make(view, R.string.unexpected_error, Snackbar.LENGTH_SHORT).show();
-                    }
+                            mTableLayout.getLinkedAdapterColumnsModifications(),
+                            TableLayoutFragment.this);
                 }
                 return true;
             }
@@ -137,6 +132,17 @@ public class TableLayoutFragment
     @Override
     public void onLeftTopHeaderLongClick() {
         Log.e(TAG, "onLeftTopHeaderLongClick ");
+    }
+
+    @Override
+    public void onFileUpdated(String fileName, boolean isSuccess) {
+        if (isSuccess) { //if data source have been changed
+            initAdapter();
+            mTableAdapter.notifyDataSetChanged();
+            Snackbar.make(getView(), R.string.changes_saved, Snackbar.LENGTH_SHORT).show();
+        } else {
+            Snackbar.make(getView(), R.string.unexpected_error, Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     private void initAdapter() {
