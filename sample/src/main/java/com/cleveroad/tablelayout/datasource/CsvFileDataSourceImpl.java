@@ -114,7 +114,7 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
 
             @Override
             public void onLoaderReset(Loader<Boolean> loader) {
-
+                //do nothing
             }
         });
     }

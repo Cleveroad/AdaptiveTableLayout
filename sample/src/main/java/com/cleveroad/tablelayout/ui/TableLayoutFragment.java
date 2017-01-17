@@ -136,12 +136,17 @@ public class TableLayoutFragment
 
     @Override
     public void onFileUpdated(String fileName, boolean isSuccess) {
+        View view = getView();
+        if(view == null) {
+            return;
+        }
+
         if (isSuccess) { //if data source have been changed
             initAdapter();
             mTableAdapter.notifyDataSetChanged();
-            Snackbar.make(getView(), R.string.changes_saved, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(view, R.string.changes_saved, Snackbar.LENGTH_SHORT).show();
         } else {
-            Snackbar.make(getView(), R.string.unexpected_error, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(view, R.string.unexpected_error, Snackbar.LENGTH_SHORT).show();
         }
     }
 

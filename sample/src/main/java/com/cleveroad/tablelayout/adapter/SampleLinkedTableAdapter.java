@@ -137,7 +137,7 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     @Override
     public void onBindLeftTopHeaderViewHolder(@NonNull ViewHolderImpl viewHolder) {
         TestHeaderLeftTopViewHolder vh = (TestHeaderLeftTopViewHolder) viewHolder;
-        vh.tvText.setText(R.string.artists_header);
+        vh.tvText.setText(mTableDataSource.getFirstHeaderData());
     }
 
     @Override
