@@ -1,8 +1,10 @@
 package com.cleveroad.tablelayout.datasource;
 
+import com.cleveroad.tablelayout.utils.ClosableUtil;
 import com.cleveroad.tablelayout.utils.CsvUtils;
 import com.cleveroad.tablelayout.utils.StringUtils;
 
+import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.util.Log;
 
@@ -25,46 +27,15 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
     private static final String TAG = CsvFileDataSourceImpl.class.getSimpleName();
     private static final int READ_FILE_LINES_LIMIT = 50;
     private final Uri mCsvFileUri;
-    private List<String> mColumnHeaders = new ArrayList<>();
-    private Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
-    private Map<Integer, List<String>> mChangedItems = new HashMap<>();
+    private final List<String> mColumnHeaders = new ArrayList<>();
+    private final Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
+    @SuppressLint("UseSparseArrays")
+    private final Map<Integer, List<String>> mChangedItems = new HashMap<>();
     private int mRowsCount;
 
     public CsvFileDataSourceImpl(Uri csvFileUri) {
         mCsvFileUri = csvFileUri;
         init();
-    }
-
-    private static void closeWithoutException(Closeable closeable) {
-        try {
-            if (closeable != null) {
-                closeable.close();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-    }
-
-    private static List<String> modifyListPositions(List<String> inputList, Map<Integer, Integer> modifications) {
-        List<String> result = new ArrayList<>(inputList.size());
-        for (int i = 0, size = inputList.size(); i < size; i++) {
-            Integer newPosition = null;
-            if (i != 0) {
-                //do not move first fixed column
-                newPosition = modifications.get(i - 1); //TODO: simplify logic
-                if (newPosition != null) {
-                    newPosition++;
-                }
-            }
-
-            String value = inputList.get(newPosition != null ? newPosition : i);
-            if (value.contains(",")) {
-                value = "\"" + value + "\"";
-            }
-            result.add(value);
-        }
-
-        return result;
     }
 
     @Override
@@ -110,57 +81,61 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         return getRow(rowIndex);
     }
 
+    public Uri getCsvFileUri() {
+        return mCsvFileUri;
+    }
+
     public void updateRow(int rowIndex, List<String> rowItems) {
         mChangedItems.put(rowIndex, rowItems);
     }
 
     //TODO: to worker thread
-    //TODO: show error messages
     public boolean applyChanges(
             Map<Integer, Integer> rowModifications,
             Map<Integer, Integer> columnModifications) {
-        OutputStreamWriter writer = null;
-        final String oldFileName = mCsvFileUri.getEncodedPath();
-        final String newFileName = oldFileName + "_new.csv";
-
-        try {
-            writer = new FileWriter(newFileName);
-            writer.write(StringUtils.toString(modifyListPositions(getColumnHeaders(),
-                    columnModifications), ","));
-            writer.write("\n");
-            for (int i = 0, size = getRowsCount(); i < size; i++) {
-                Integer newRowPosition = rowModifications.get(i);
-                List<String> row = getRow(newRowPosition != null ? newRowPosition : i);
-                writer.write(StringUtils.toString(modifyListPositions(row, columnModifications),
-                        ","));
-                if (i != size - 1) {
-                    writer.write("\n");
-                }
-            }
-            //TODO: delete old file
-            //TODO: refresh CsvFileDataSourceImpl - remove all cache & reload data
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-            return false;
-        } finally {
-            closeWithoutException(writer);
-        }
-
-        try {
-            File oldFile = new File(oldFileName);
-            File newFile = new File(newFileName);
-
-            boolean result = oldFile.exists() && oldFile.delete() && newFile.renameTo(new File
-                    (oldFileName));
-            if (result) {
-                destroy();
-                init();
-            }
-            return result;
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-
+//        OutputStreamWriter writer = null;
+//        final String oldFileName = mCsvFileUri.getEncodedPath();
+//        final String newFileName = oldFileName + "_new.csv";
+//
+//        try {
+//            writer = new FileWriter(newFileName);
+//            writer.write(StringUtils.toString(modifyListPositions(getColumnHeaders(),
+//                    columnModifications), ","));
+//            writer.write("\n");
+//            for (int i = 0, size = getRowsCount(); i < size; i++) {
+//                Integer newRowPosition = rowModifications.get(i);
+//                List<String> row = getRow(newRowPosition != null ? newRowPosition : i);
+//                writer.write(StringUtils.toString(modifyListPositions(row, columnModifications),
+//                        ","));
+//                if (i != size - 1) {
+//                    writer.write("\n");
+//                }
+//            }
+//        } catch (Exception e) {
+//            Log.e(TAG, e.getMessage());
+//            return false;
+//        } finally {
+//            ClosableUtil.closeWithoutException(writer);
+//        }
+//
+//        try {
+//            File oldFile = new File(oldFileName);
+//            File newFile = new File(newFileName);
+//
+//            //delete old file and rename new file
+//            boolean result = oldFile.exists()
+//                    && oldFile.delete()
+//                    && newFile.renameTo(new File(oldFileName));
+//            //invalidate cache
+//            if (result) {
+//                destroy();
+//                init();
+//            }
+//            return result;
+//        } catch (Exception e) {
+//            Log.e(TAG, e.getMessage());
+//        }
+//
         return false;
     }
 
@@ -174,7 +149,7 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         mChangedItems.clear();
     }
 
-    private void init() {
+    void init() {
         mRowsCount = calculateLinesCount() - 1 /*row header*/;
         mColumnHeaders.addAll(readColumnHeaders());
     }
@@ -191,8 +166,8 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
-            closeWithoutException(fileReader);
-            closeWithoutException(lineNumberReader);
+            ClosableUtil.closeWithoutException(fileReader);
+            ClosableUtil.closeWithoutException(lineNumberReader);
         }
         return 0;
     }
@@ -208,13 +183,13 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
-            closeWithoutException(fileReader);
+            ClosableUtil.closeWithoutException(fileReader);
         }
 
         return new ArrayList<>();
     }
 
-    private List<String> getRow(int rowIndex) {
+    List<String> getRow(int rowIndex) {
         List<String> result = mChangedItems.containsKey(rowIndex)
                 ? mChangedItems.get(rowIndex) : mItemsCache.get(rowIndex);
         if (result != null) {
@@ -262,7 +237,7 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
-            closeWithoutException(fileReader);
+            ClosableUtil.closeWithoutException(fileReader);
         }
 
         return result;
