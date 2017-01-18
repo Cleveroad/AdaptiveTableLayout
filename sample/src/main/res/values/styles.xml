@@ -8,6 +8,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:textColor">@color/colorTextWhite</item>
+        <item name="android:actionMenuTextColor">@color/colorTextWhite</item>
+        <item name="actionMenuTextColor">@color/colorTextWhite</item>
     </style>
 
 </resources>

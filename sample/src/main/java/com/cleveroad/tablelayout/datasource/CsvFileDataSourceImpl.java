@@ -1,42 +1,47 @@
 package com.cleveroad.tablelayout.datasource;
 
-import android.util.Log;
-
+import com.cleveroad.tablelayout.utils.ClosableUtil;
 import com.cleveroad.tablelayout.utils.CsvUtils;
 
-import java.io.Closeable;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.util.Log;
+
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.WeakHashMap;
 
-public abstract class CsvFileDataSourceImpl implements TableDataSource<String, String, String, String> {
+public class CsvFileDataSourceImpl implements TableDataSource<String, String, String, String> {
     private static final String TAG = CsvFileDataSourceImpl.class.getSimpleName();
     private static final int READ_FILE_LINES_LIMIT = 50;
-    private List<String> mColumnHeaders = new ArrayList<>();
-    private Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
+    private final Context mContext;
+    private final Uri mCsvFileUri;
+    private final List<String> mColumnHeaders = new ArrayList<>();
+    private final Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
+    @SuppressLint("UseSparseArrays")
+    private final Map<Integer, List<String>> mChangedItems = new HashMap<>();
     private int mRowsCount;
 
-    public CsvFileDataSourceImpl() {
+    public CsvFileDataSourceImpl(Context context, Uri csvFileUri) {
+        mContext = context;
+        mCsvFileUri = csvFileUri;
         init();
-    }
-
-    private static void closeWithoutException(Closeable closeable) {
-        try {
-            if (closeable != null) {
-                closeable.close();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
     }
 
     @Override
     public int getRowsCount() {
-        return mRowsCount;
+        return mRowsCount == 0 ? 0 : (mRowsCount + 1);
     }
 
     @Override
@@ -64,18 +69,67 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
         try {
             return getRow(rowIndex).get(columnIndex + 1 /*column header*/);
         } catch (Exception e) {
-            Log.e(TAG, "get rowIndex=" + rowIndex + "; colIndex=" + columnIndex + ";\ncache = " + mItemsCache.toString(), e);
+            Log.e(TAG, "get rowIndex=" + rowIndex + "; colIndex=" + columnIndex + ";\ncache = " +
+                    mItemsCache.toString(), e);
             return null;
         }
     }
 
-    protected abstract InputStreamReader getInputStreamReader() throws Exception;
-
-    public void destroy() {
-        //close streams
+    public List<String> getColumnHeaders() {
+        return new ArrayList<>(mColumnHeaders);
     }
 
-    private void init() {
+    public List<String> getRowValues(int rowIndex) {
+        return getRow(rowIndex);
+    }
+
+    public Uri getCsvFileUri() {
+        return mCsvFileUri;
+    }
+
+    public void updateRow(int rowIndex, List<String> rowItems) {
+        mChangedItems.put(rowIndex, rowItems);
+    }
+
+    public void applyChanges(
+            LoaderManager loaderManager,
+            final Map<Integer, Integer> rowModifications,
+            final Map<Integer, Integer> columnModifications,
+            final UpdateFileCallback callback) {
+
+        loaderManager.restartLoader(0, Bundle.EMPTY, new LoaderManager.LoaderCallbacks<Boolean>() {
+            @Override
+            public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+                return new UpdateCsvFileLoader(
+                        mContext,
+                        CsvFileDataSourceImpl.this,
+                        rowModifications,
+                        columnModifications);
+            }
+
+            @Override
+            public void onLoadFinished(Loader<Boolean> loader, Boolean data) {
+                callback.onFileUpdated(getCsvFileUri().getEncodedPath(), data);
+            }
+
+            @Override
+            public void onLoaderReset(Loader<Boolean> loader) {
+                //do nothing
+            }
+        });
+    }
+
+    protected InputStreamReader getInputStreamReader() throws IOException {
+        return new FileReader(mCsvFileUri.getEncodedPath());
+    }
+
+    public void destroy() {
+        mItemsCache.clear();
+        mColumnHeaders.clear();
+        mChangedItems.clear();
+    }
+
+    void init() {
         mRowsCount = calculateLinesCount() - 1 /*row header*/;
         mColumnHeaders.addAll(readColumnHeaders());
     }
@@ -88,24 +142,12 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
             fileReader = getInputStreamReader();
             lineNumberReader = new LineNumberReader(fileReader);
             lineNumberReader.skip(Long.MAX_VALUE);
-            return lineNumberReader.getLineNumber(); //Add 1 because line index starts at 0
+            return lineNumberReader.getLineNumber();
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
-            try {
-                if (fileReader != null) {
-                    fileReader.close();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-            }
-            try {
-                if (lineNumberReader != null) {
-                    lineNumberReader.close();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-            }
+            ClosableUtil.closeWithoutException(fileReader);
+            ClosableUtil.closeWithoutException(lineNumberReader);
         }
         return 0;
     }
@@ -121,15 +163,15 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         } finally {
-
-            closeWithoutException(fileReader);
+            ClosableUtil.closeWithoutException(fileReader);
         }
 
         return new ArrayList<>();
     }
 
-    private List<String> getRow(int rowIndex) {
-        List<String> result = mItemsCache.get(rowIndex);
+    List<String> getRow(int rowIndex) {
+        List<String> result = mChangedItems.containsKey(rowIndex)
+                ? mChangedItems.get(rowIndex) : mItemsCache.get(rowIndex);
         if (result != null) {
             return result;
         }
@@ -149,7 +191,8 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
             }
 
             //on scroll to bottom
-            for (int i = rowIndexInFile; i < getRowsCount() + 1 && i < rowIndexInFile + READ_FILE_LINES_LIMIT; i++) {
+            for (int i = rowIndexInFile; i < getRowsCount() + 1 && i < rowIndexInFile +
+                    READ_FILE_LINES_LIMIT; i++) {
                 if (i - 1 == rowIndex) {
                     result = new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
                     mItemsCache.put(i - 1, result);
@@ -164,17 +207,19 @@ public abstract class CsvFileDataSourceImpl implements TableDataSource<String, S
             }
 
             //on scroll to top
-            for (int i = rowIndexInFile - 1; i > 1/*rows header*/ && i > rowIndexInFile - READ_FILE_LINES_LIMIT; i--) {
+            for (int i = rowIndexInFile - 1; i > 1/*rows header*/ && i > rowIndexInFile -
+                    READ_FILE_LINES_LIMIT; i--) {
                 mItemsCache.put(i - 1, new ArrayList<>(CsvUtils.parseLine(scanner.nextLine())));
                 if (mItemsCache.containsKey(i - 2)) {
                     Log.i(TAG, "scroll to top -> contains #" + (i - 2) + "; break");
                     break;
                 }
             }
+
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
         } finally {
-            closeWithoutException(fileReader);
+            ClosableUtil.closeWithoutException(fileReader);
         }
 
         return result;

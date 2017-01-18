@@ -1,16 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <com.cleveroad.library.TableLayout
-        android:id="@+id/tableLayout"
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:cellMargin="2dp"
-        app:fixedHeaders="false"
-        app:solidRowHeaders="false"/>
+        android:orientation="vertical">
 
-</FrameLayout>
+    <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
+            app:title="@string/app_name"
+            app:titleTextColor="@android:color/white"/>
+
+    <com.cleveroad.library.TableLayout
+            android:id="@+id/tableLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cellMargin="2dp"
+            app:fixedHeaders="false"
+            app:solidRowHeaders="false"/>
+
+</LinearLayout>

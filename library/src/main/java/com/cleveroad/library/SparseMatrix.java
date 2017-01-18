@@ -123,6 +123,4 @@ class SparseMatrix<TObj> {
             array.remove(column);
         }
     }
-
-
 }

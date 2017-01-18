@@ -1,4 +1,4 @@
-package com.cleveroad.tablelayout;
+package com.cleveroad.tablelayout.utils;
 
 import android.content.ContentUris;
 import android.content.Context;
@@ -106,8 +106,8 @@ public class UriHelper {
         try {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
             if (cursor != null && cursor.moveToFirst()) {
-                final int column_index = cursor.getColumnIndexOrThrow(column);
-                return cursor.getString(column_index);
+                final int columnIndex = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(columnIndex);
             }
         } finally {
             if (cursor != null)

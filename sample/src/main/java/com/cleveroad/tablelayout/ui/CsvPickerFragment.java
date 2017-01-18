@@ -1,4 +1,4 @@
-package com.cleveroad.tablelayout;
+package com.cleveroad.tablelayout.ui;
 
 import android.Manifest;
 import android.app.Activity;
@@ -12,7 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.cleveroad.tablelayout.R;
 import com.cleveroad.tablelayout.utils.PermissionHelper;
+import com.cleveroad.tablelayout.utils.UriHelper;
 
 public class CsvPickerFragment extends Fragment implements View.OnClickListener {
     private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE = 1;
@@ -72,7 +74,8 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
     private void pickCsvFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("text/comma-separated-values");
+//        intent.setType("text/comma-separated-values"); //TODO: not working on OnePlus One
+        intent.setType("text/csv");
         startActivityForResult(Intent.createChooser(intent, getString(R.string.pick_file)), REQUEST_CODE_PICK_CSV);
     }
 

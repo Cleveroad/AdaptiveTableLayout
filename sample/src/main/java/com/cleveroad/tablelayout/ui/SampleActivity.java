@@ -1,12 +1,12 @@
-package com.cleveroad.tablelayout;
+package com.cleveroad.tablelayout.ui;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.cleveroad.tablelayout.R;
+
 public class SampleActivity extends AppCompatActivity implements
         CsvPickerFragment.OnCsvFileSelectedListener {
-
-    private static final String ASSETS_FIFA_PLAYERS_FILE = "fifa100.csv";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,10 +16,7 @@ public class SampleActivity extends AppCompatActivity implements
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container, CsvPickerFragment.newInstance(), CsvPickerFragment.class.getSimpleName())
-//                    .replace(R.id.container,
-//                            TableLayoutFragment.newInstance(ASSETS_FIFA_PLAYERS_FILE),
-//                            CsvPickerFragment.class.getSimpleName())
+                    .add(R.id.container, CsvPickerFragment.newInstance(), CsvPickerFragment.class.getSimpleName())
                     .commit();
         }
     }
@@ -30,6 +27,7 @@ public class SampleActivity extends AppCompatActivity implements
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, TableLayoutFragment.newInstance(file), CsvPickerFragment.class.getSimpleName())
+                .addToBackStack(CsvPickerFragment.class.getSimpleName())
                 .commit();
     }
 }

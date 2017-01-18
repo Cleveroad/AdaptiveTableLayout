@@ -134,4 +134,8 @@ public abstract class LinkedTableAdapter<VH extends ViewHolder> implements Table
         }
     }
 
+    @Override
+    public void onViewHolderRecycled(@NonNull VH viewHolder) {
+        //do something
+    }
 }

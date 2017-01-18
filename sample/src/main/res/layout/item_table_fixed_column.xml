@@ -6,14 +6,15 @@
 
     <TextView
         android:id="@android:id/text1"
-        android:layout_width="0dip"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:gravity="center_vertical|left"
+        android:gravity="center_vertical|start"
+        android:paddingStart="10dip"
         android:paddingLeft="10dip" />
 
     <View
-        android:layout_width="1.5dip"
+        android:layout_width="1.5dp"
         android:layout_height="match_parent"
         android:background="@drawable/separator_table_first" />
 

@@ -1,38 +1,48 @@
 package com.cleveroad.tablelayout.adapter;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.NonNull;
 import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.cleveroad.library.LinkedTableAdapter;
 import com.cleveroad.library.ViewHolderImpl;
 import com.cleveroad.tablelayout.R;
 import com.cleveroad.tablelayout.datasource.TableDataSource;
 
-public class FifaLinkedTableAdapterOld extends LinkedTableAdapter<ViewHolderImpl> {
-    private static final int COLUMN_PHOTO = 0;
-    private static final int COLUMN_NAME = 1;
-    private static final int COLUMN_POSITION = 2;
-    private static final int COLUMN_DATE_OF_BIRTH = 3;
-    private static final int COLUMN_FOOTBALL_TEAM = 4;
-    private final LayoutInflater mLayoutInflater;
-    private final TableDataSource<String, String, String, String> mTableDataSource;
-
-    private int[] mColors = new int[]{0xffe62a10, 0xffe91e63, 0xff9c27b0, 0xff673ab7, 0xff3f51b5,
+public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl> {
+    private static final int[] COLORS = new int[]{
+            0xffe62a10, 0xffe91e63, 0xff9c27b0, 0xff673ab7, 0xff3f51b5,
             0xff5677fc, 0xff03a9f4, 0xff00bcd4, 0xff009688, 0xff259b24,
             0xff8bc34a, 0xffcddc39, 0xffffeb3b, 0xffffc107, 0xffff9800, 0xffff5722};
 
-    public FifaLinkedTableAdapterOld(Context context, TableDataSource<String, String, String, String> tableDataSource) {
+    private final LayoutInflater mLayoutInflater;
+    private final TableDataSource<String, String, String, String> mTableDataSource;
+    private final int mColumnWidth;
+    private final int mRowHeight;
+    private final int mHeaderHeight;
+    private final int mHeaderWidth;
+
+    public SampleLinkedTableAdapter(Context context, TableDataSource<String, String, String, String> tableDataSource) {
         mLayoutInflater = LayoutInflater.from(context);
         mTableDataSource = tableDataSource;
+        Resources res = context.getResources();
+        mColumnWidth = res.getDimensionPixelSize(R.dimen.column_width);
+        mRowHeight = res.getDimensionPixelSize(R.dimen.row_height);
+        mHeaderHeight = res.getDimensionPixelSize(R.dimen.column_header_height);
+        mHeaderWidth = res.getDimensionPixelSize(R.dimen.row_header_width);
     }
 
     @Override
@@ -71,108 +81,83 @@ public class FifaLinkedTableAdapterOld extends LinkedTableAdapter<ViewHolderImpl
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
-        if (viewHolder instanceof TestViewHolder) {
-            TestViewHolder vh = (TestViewHolder) viewHolder;
-            String itemData = mTableDataSource.getItemData(row, column);
-            if (TextUtils.isEmpty(itemData)) {
-                Log.e("Adapter", "Item data = empty, row = " + row + ", column = " + column);
-                return;
-            }
-            itemData = itemData.trim();
-            vh.tvText.setVisibility(View.VISIBLE);
-            vh.ivImage.setVisibility(View.GONE);
-            vh.tvText.setText(itemData);
-//            switch (column) {
-//                case COLUMN_FOOTBALL_TEAM:
-//                case COLUMN_PHOTO: {
-//                    vh.tvText.setVisibility(View.GONE);
-//                    vh.ivImage.setVisibility(View.VISIBLE);
-//                    Glide.with(vh.ivImage.getContext())
-//                            .load(itemData)
-//                            .centerCrop()
-//                            .placeholder(R.mipmap.ic_launcher)
-//                            .error(R.mipmap.ic_launcher)
-//                            .into(vh.ivImage);
-//                    break;
-//                }
-//                case COLUMN_NAME:
-//                case COLUMN_POSITION:
-//                case COLUMN_DATE_OF_BIRTH: {
-//                    vh.tvText.setVisibility(View.VISIBLE);
-//                    vh.ivImage.setVisibility(View.GONE);
-//                    vh.tvText.setText(itemData);
-//                    break;
-//                }
-//            }
+        final TestViewHolder vh = (TestViewHolder) viewHolder;
+        String itemData = mTableDataSource.getItemData(row, column);
 
+        if (TextUtils.isEmpty(itemData)) {
+            itemData = "";
         }
+
+        itemData = itemData.trim();
+        vh.tvText.setVisibility(View.VISIBLE);
+        vh.ivImage.setVisibility(View.VISIBLE);
+        vh.tvText.setText(itemData);
+        Glide.with(vh.ivImage.getContext())
+                .load(itemData)
+                .fitCenter()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        vh.ivImage.setVisibility(View.INVISIBLE);
+                        vh.tvText.setVisibility(View.VISIBLE);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        vh.ivImage.setVisibility(View.VISIBLE);
+                        vh.tvText.setVisibility(View.INVISIBLE);
+                        return false;
+                    }
+                })
+                .into(vh.ivImage);
     }
 
     @Override
     public void onBindHeaderColumnViewHolder(@NonNull ViewHolderImpl viewHolder, int column) {
-        if (viewHolder instanceof TestHeaderColumnViewHolder) {
-            TestHeaderColumnViewHolder vh = (TestHeaderColumnViewHolder) viewHolder;
-            vh.tvText.setText(mTableDataSource.getColumnHeaderData(column));
-            int color = mColors[column % mColors.length];
-            GradientDrawable gd = new GradientDrawable(
-                    GradientDrawable.Orientation.LEFT_RIGHT,
-                    new int[]{ColorUtils.setAlphaComponent(color, 30), 0x00000000});
-            gd.setCornerRadius(0f);
-            vh.vGradient.setBackground(gd);
-            vh.vLine.setBackgroundColor(color);
-        }
+        TestHeaderColumnViewHolder vh = (TestHeaderColumnViewHolder) viewHolder;
+
+        vh.tvText.setText(mTableDataSource.getColumnHeaderData(column));
+        int color = COLORS[column % COLORS.length];
+        GradientDrawable gd = new GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[]{ColorUtils.setAlphaComponent(color, 30), 0x00000000});
+        gd.setCornerRadius(0f);
+        vh.vGradient.setBackground(gd);
+        vh.vLine.setBackgroundColor(color);
     }
 
+    @Override
     public void onBindHeaderRowViewHolder(@NonNull ViewHolderImpl viewHolder, int row) {
-        if (viewHolder instanceof TestHeaderRowViewHolder) {
-            TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
-            vh.tvText.setText(mTableDataSource.getRowHeaderData(row));
-        }
+        TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
+        vh.tvText.setText(String.valueOf(row + 1));
     }
 
     @Override
     public void onBindLeftTopHeaderViewHolder(@NonNull ViewHolderImpl viewHolder) {
-        if (viewHolder instanceof TestHeaderLeftTopViewHolder) {
-            TestHeaderLeftTopViewHolder vh = (TestHeaderLeftTopViewHolder) viewHolder;
-            vh.tvText.setText(mTableDataSource.getFirstHeaderData());
-        }
+        TestHeaderLeftTopViewHolder vh = (TestHeaderLeftTopViewHolder) viewHolder;
+        vh.tvText.setText(mTableDataSource.getFirstHeaderData());
     }
 
     @Override
     public int getColumnWidth(int column) {
-        switch (column) {
-            case COLUMN_DATE_OF_BIRTH:
-            case COLUMN_PHOTO:
-            case COLUMN_FOOTBALL_TEAM:
-                return 300;
-            case COLUMN_NAME:
-                return 400;
-            case COLUMN_POSITION:
-                return 200;
-            default:
-                return 100;
-
-        }
+        return mColumnWidth;
     }
 
     @Override
     public int getHeaderColumnHeight() {
-        return 180;
+        return mHeaderHeight;
     }
 
     @Override
     public int getRowHeight(int row) {
-        return 360;
+        return mRowHeight;
     }
 
     @Override
     public int getHeaderRowWidth() {
-        return 160;
-    }
-
-    @Override
-    public void onViewHolderRecycled(@NonNull ViewHolderImpl viewHolder) {
-        //do nothing
+        return mHeaderWidth;
     }
 
     //------------------------------------- view holders ------------------------------------------
@@ -208,7 +193,6 @@ public class FifaLinkedTableAdapterOld extends LinkedTableAdapter<ViewHolderImpl
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
-
     }
 
     private static class TestHeaderLeftTopViewHolder extends ViewHolderImpl {
@@ -219,5 +203,4 @@ public class FifaLinkedTableAdapterOld extends LinkedTableAdapter<ViewHolderImpl
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
     }
-
 }

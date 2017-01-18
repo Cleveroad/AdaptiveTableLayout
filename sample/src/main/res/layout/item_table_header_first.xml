@@ -9,11 +9,12 @@
         android:layout_width="0dip"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:gravity="center_vertical|left"
-        android:paddingLeft="10dip" />
+        android:gravity="center_vertical|start"
+        android:paddingLeft="10dp"
+        android:paddingStart="10dp" />
 
     <View
-        android:layout_width="1.5dip"
+        android:layout_width="1.5dp"
         android:layout_height="match_parent"
         android:background="@drawable/separator_table_header_first" />
 

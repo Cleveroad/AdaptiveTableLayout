@@ -131,7 +131,7 @@ public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<Vie
 
     @Override
     public void onViewHolderRecycled(@NonNull ViewHolderImpl viewHolder) {
-
+        //do nothing
     }
 
     @Override
@@ -151,47 +151,47 @@ public class SampleDataTableLayoutAdapter extends BaseDataTableLayoutAdapter<Vie
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle bundle) {
-
+        //save data
     }
 
     @Override
     public void onRestoreInstanceState(@NonNull Bundle bundle) {
-
+        //restore data
     }
 
-    static class TestViewHolder extends ViewHolderImpl {
+    private static class TestViewHolder extends ViewHolderImpl {
         TextView tvText;
 
-        public TestViewHolder(@NonNull View itemView) {
+        TestViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
 
     }
 
-    static class TestHeaderColumnViewHolder extends ViewHolderImpl {
+    private static class TestHeaderColumnViewHolder extends ViewHolderImpl {
         TextView tvText;
 
-        public TestHeaderColumnViewHolder(@NonNull View itemView) {
+        TestHeaderColumnViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
 
     }
 
-    static class TestHeaderRowViewHolder extends ViewHolderImpl {
+    private static class TestHeaderRowViewHolder extends ViewHolderImpl {
         TextView tvText;
 
-        public TestHeaderRowViewHolder(@NonNull View itemView) {
+        TestHeaderRowViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
     }
 
-    static class TestHeaderLeftTopViewHolder extends ViewHolderImpl {
+    private static class TestHeaderLeftTopViewHolder extends ViewHolderImpl {
         TextView tvText;
 
-        public TestHeaderLeftTopViewHolder(@NonNull View itemView) {
+        TestHeaderLeftTopViewHolder(@NonNull View itemView) {
             super(itemView);
             tvText = (TextView) itemView.findViewById(R.id.tvText);
         }
