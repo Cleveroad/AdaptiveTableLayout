@@ -1,14 +1,5 @@
 package com.cleveroad.tablelayout.ui;
 
-import com.cleveroad.library.LinkedTableAdapter;
-import com.cleveroad.library.OnItemClickListener;
-import com.cleveroad.library.OnItemLongClickListener;
-import com.cleveroad.library.TableLayout;
-import com.cleveroad.tablelayout.R;
-import com.cleveroad.tablelayout.adapter.SampleLinkedTableAdapter;
-import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
-import com.cleveroad.tablelayout.datasource.UpdateFileCallback;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -23,6 +14,15 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.cleveroad.library.LinkedTableAdapter;
+import com.cleveroad.library.OnItemClickListener;
+import com.cleveroad.library.OnItemLongClickListener;
+import com.cleveroad.library.TableLayout;
+import com.cleveroad.tablelayout.R;
+import com.cleveroad.tablelayout.adapter.SampleLinkedTableAdapter;
+import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
+import com.cleveroad.tablelayout.datasource.UpdateFileCallback;
 
 import java.util.List;
 
@@ -82,7 +82,7 @@ public class TableLayoutFragment
             }
         });
 
-       initAdapter();
+        initAdapter();
 
         return view;
     }
@@ -137,13 +137,14 @@ public class TableLayoutFragment
     @Override
     public void onFileUpdated(String fileName, boolean isSuccess) {
         View view = getView();
-        if(view == null) {
+        if (view == null) {
             return;
         }
 
         if (isSuccess) { //if data source have been changed
             initAdapter();
             mTableAdapter.notifyDataSetChanged();
+            Log.e("Done", " File path = " + fileName);
             Snackbar.make(view, R.string.changes_saved, Snackbar.LENGTH_SHORT).show();
         } else {
             Snackbar.make(view, R.string.unexpected_error, Snackbar.LENGTH_SHORT).show();

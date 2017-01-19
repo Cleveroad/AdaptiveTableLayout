@@ -74,7 +74,7 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
     private void pickCsvFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-//        intent.setType("text/comma-separated-values"); //TODO: not working on OnePlus One
+//        intent.setType("text/comma-separated-values");
         intent.setType("text/csv");
         startActivityForResult(Intent.createChooser(intent, getString(R.string.pick_file)), REQUEST_CODE_PICK_CSV);
     }

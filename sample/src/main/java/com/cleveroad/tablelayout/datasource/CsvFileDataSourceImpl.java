@@ -192,7 +192,7 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
 
             //on scroll to bottom
             for (int i = rowIndexInFile; i < getRowsCount() + 1 && i < rowIndexInFile +
-                    READ_FILE_LINES_LIMIT; i++) {
+                    READ_FILE_LINES_LIMIT && scanner.hasNextLine(); i++) {
                 if (i - 1 == rowIndex) {
                     result = new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
                     mItemsCache.put(i - 1, result);
@@ -208,7 +208,7 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
 
             //on scroll to top
             for (int i = rowIndexInFile - 1; i > 1/*rows header*/ && i > rowIndexInFile -
-                    READ_FILE_LINES_LIMIT; i--) {
+                    READ_FILE_LINES_LIMIT && scanner.hasNextLine(); i--) {
                 mItemsCache.put(i - 1, new ArrayList<>(CsvUtils.parseLine(scanner.nextLine())));
                 if (mItemsCache.containsKey(i - 2)) {
                     Log.i(TAG, "scroll to top -> contains #" + (i - 2) + "; break");
@@ -217,7 +217,8 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
             }
 
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            e.printStackTrace();
+//            Log.e(TAG, e.getMessage());
         } finally {
             ClosableUtil.closeWithoutException(fileReader);
         }

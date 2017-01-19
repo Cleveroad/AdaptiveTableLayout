@@ -1,11 +1,11 @@
 package com.cleveroad.tablelayout.datasource;
 
-import com.cleveroad.tablelayout.utils.ClosableUtil;
-import com.cleveroad.tablelayout.utils.StringUtils;
-
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
+
+import com.cleveroad.tablelayout.utils.ClosableUtil;
+import com.cleveroad.tablelayout.utils.StringUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -83,14 +83,17 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<Boolean> {
                 Integer newRowPosition = mRowModifications.get(i);
                 List<String> row = mCsvFileDataSource.getRow(newRowPosition != null ?
                         newRowPosition : i);
-                writer.write(StringUtils.toString(modifyListPositions(row, mColumnModifications),
-                        ","));
-                if (i != size - 1) {
-                    writer.write("\n");
+                if (row != null && !row.isEmpty()) {
+                    writer.write(StringUtils.toString(modifyListPositions(row, mColumnModifications),
+                            ","));
+                    if (i != size - 1) {
+                        writer.write("\n");
+                    }
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            e.printStackTrace();
+//            Log.e(TAG, e.getMessage());
             return false;
         } finally {
             ClosableUtil.closeWithoutException(writer);
