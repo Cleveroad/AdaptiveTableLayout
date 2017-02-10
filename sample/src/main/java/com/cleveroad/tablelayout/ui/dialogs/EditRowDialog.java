@@ -1,4 +1,4 @@
-package com.cleveroad.tablelayout.ui;
+package com.cleveroad.tablelayout.ui.dialogs;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -9,9 +9,11 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 
 import com.cleveroad.tablelayout.R;
@@ -66,6 +68,20 @@ public class EditRowDialog extends DialogFragment implements View.OnClickListene
         view.findViewById(R.id.bNegative).setOnClickListener(this);
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Window window = getDialog().getWindow();
+        if (window != null) {
+            DisplayMetrics dm = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
+            int height = dm.heightPixels;
+            int width = dm.widthPixels;
+            window.setLayout(width, height);
+            window.setLayout(Double.valueOf(width * 0.9D).intValue(), Double.valueOf(height * 0.7D).intValue());
+        }
     }
 
     @Override

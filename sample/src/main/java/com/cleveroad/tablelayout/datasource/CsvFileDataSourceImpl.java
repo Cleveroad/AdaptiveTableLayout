@@ -1,22 +1,24 @@
 package com.cleveroad.tablelayout.datasource;
 
-import com.cleveroad.tablelayout.utils.ClosableUtil;
-import com.cleveroad.tablelayout.utils.CsvUtils;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
+
+import com.cleveroad.tablelayout.utils.ClosableUtil;
+import com.cleveroad.tablelayout.utils.CsvUtils;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -27,11 +29,11 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
     private static final int READ_FILE_LINES_LIMIT = 50;
     private final Context mContext;
     private final Uri mCsvFileUri;
-    private final List<String> mColumnHeaders = new ArrayList<>();
     private final Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
     @SuppressLint("UseSparseArrays")
-    private final Map<Integer, List<String>> mChangedItems = new HashMap<>();
+    private final SparseArray<SparseArray<String>> mChangedItems = new SparseArray<>();
     private int mRowsCount;
+    private int mColumnsCount;
 
     public CsvFileDataSourceImpl(Context context, Uri csvFileUri) {
         mContext = context;
@@ -41,42 +43,39 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
 
     @Override
     public int getRowsCount() {
-        return mRowsCount == 0 ? 0 : (mRowsCount + 1);
+        return mRowsCount;
     }
 
     @Override
     public int getColumnsCount() {
-        return mColumnHeaders.size() - 1;
+        return mColumnsCount;
     }
 
     @Override
     public String getFirstHeaderData() {
-        return mColumnHeaders.get(0);
+        return getItemData(0, 0);
     }
 
     @Override
     public String getRowHeaderData(int index) {
-        return getRow(index).get(0 /*column header*/);
+        return getItemData(index, 0);
     }
 
     @Override
     public String getColumnHeaderData(int index) {
-        return mColumnHeaders.get(index + 1 /*first header*/);
+        return getItemData(0, index);
     }
 
     @Override
     public String getItemData(int rowIndex, int columnIndex) {
         try {
-            return getRow(rowIndex).get(columnIndex + 1 /*column header*/);
+            List<String> rowList = getRow(rowIndex);
+            return rowList == null ? "" : rowList.get(columnIndex);
         } catch (Exception e) {
             Log.e(TAG, "get rowIndex=" + rowIndex + "; colIndex=" + columnIndex + ";\ncache = " +
                     mItemsCache.toString(), e);
             return null;
         }
-    }
-
-    public List<String> getColumnHeaders() {
-        return new ArrayList<>(mColumnHeaders);
     }
 
     public List<String> getRowValues(int rowIndex) {
@@ -87,8 +86,17 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         return mCsvFileUri;
     }
 
-    public void updateRow(int rowIndex, List<String> rowItems) {
-        mChangedItems.put(rowIndex, rowItems);
+//    public void updateRow(int rowIndex, List<String> rowItems) {
+//        mChangedItems.put(rowIndex, rowItems);
+//    }
+
+    public void updateItem(int rowIndex, int columnIndex, String value) {
+        SparseArray<String> rowItems = mChangedItems.get(rowIndex);
+        if (rowItems == null) {
+            rowItems = new SparseArray<>();
+            mChangedItems.put(rowIndex, rowItems);
+        }
+        rowItems.put(columnIndex, value);
     }
 
     public void applyChanges(
@@ -119,19 +127,18 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         });
     }
 
-    protected InputStreamReader getInputStreamReader() throws IOException {
+    private InputStreamReader getInputStreamReader() throws IOException {
         return new FileReader(mCsvFileUri.getEncodedPath());
     }
 
     public void destroy() {
         mItemsCache.clear();
-        mColumnHeaders.clear();
         mChangedItems.clear();
     }
 
     void init() {
-        mRowsCount = calculateLinesCount() - 1 /*row header*/;
-        mColumnHeaders.addAll(readColumnHeaders());
+        mRowsCount = calculateLinesCount();
+        mColumnsCount = getRow(0).size();
     }
 
     private int calculateLinesCount() {
@@ -152,67 +159,77 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         return 0;
     }
 
-    private List<String> readColumnHeaders() {
-
-        InputStreamReader fileReader = null;
-
-        try {
-            fileReader = getInputStreamReader();
-            Scanner scanner = new Scanner(fileReader);
-            return new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        } finally {
-            ClosableUtil.closeWithoutException(fileReader);
-        }
-
-        return new ArrayList<>();
-    }
+//    private List<String> readColumnHeaders() {
+//
+//        InputStreamReader fileReader = null;
+//
+//        try {
+//            fileReader = getInputStreamReader();
+//            Scanner scanner = new Scanner(fileReader);
+//            return new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
+//        } catch (Exception e) {
+//            Log.e(TAG, e.getMessage());
+//        } finally {
+//            ClosableUtil.closeWithoutException(fileReader);
+//        }
+//
+//        return new ArrayList<>();
+//    }
 
     List<String> getRow(int rowIndex) {
-        List<String> result = mChangedItems.containsKey(rowIndex)
-                ? mChangedItems.get(rowIndex) : mItemsCache.get(rowIndex);
-        if (result != null) {
+        List<String> result = new ArrayList<>();
+
+        // cache logic. Show field after not saved changes
+        List<String> cachedRow = mItemsCache.get(rowIndex);
+        if (cachedRow != null && !cachedRow.isEmpty()) {
+            SparseArray<String> changedRow = mChangedItems.get(rowIndex);
+            if (changedRow != null && changedRow.size() > 0) {
+                for (int count = cachedRow.size(), i = 0; i < count; i++) {
+                    String cachedItem = cachedRow.get(i);
+                    String changedItem = changedRow.get(i);
+                    result.add(TextUtils.isEmpty(changedItem) ? cachedItem : changedItem);
+                }
+            } else {
+                result = cachedRow;
+            }
+        }
+
+
+        if (!result.isEmpty()) {
             return result;
         }
 
         //read from file
-        final int rowIndexInFile = rowIndex + 1 /*skip header*/;
-
         InputStreamReader fileReader = null;
 
         try {
             Log.i(TAG, "Load row #" + rowIndex);
             fileReader = getInputStreamReader();
             Scanner scanner = new Scanner(fileReader);
-            //skip rowIndexInFile lines
-            for (int i = 0; i < rowIndexInFile; i++) {
+
+            int cacheRowIndex = rowIndex < READ_FILE_LINES_LIMIT ? 0 : rowIndex - READ_FILE_LINES_LIMIT;
+
+            //skip upper lines
+            for (int i = 0; i < cacheRowIndex; i++) {
                 scanner.nextLine();
             }
 
+            int cacheRowLimitIndex = cacheRowIndex + READ_FILE_LINES_LIMIT + READ_FILE_LINES_LIMIT;
             //on scroll to bottom
-            for (int i = rowIndexInFile; i < getRowsCount() + 1 && i < rowIndexInFile +
-                    READ_FILE_LINES_LIMIT && scanner.hasNextLine(); i++) {
-                if (i - 1 == rowIndex) {
-                    result = new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
-                    mItemsCache.put(i - 1, result);
-                } else {
-                    mItemsCache.put(i - 1, new ArrayList<>(CsvUtils.parseLine(scanner.nextLine())));
-                }
-
-                if (mItemsCache.containsKey(i)) {
-                    Log.i(TAG, "scroll to bottom -> contains #" + i + "; break");
-                    break;
+            for (int i = cacheRowIndex; i < getRowsCount() && i < cacheRowLimitIndex && scanner.hasNextLine(); i++) {
+                List<String> line = new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
+                mItemsCache.put(i, line);
+                if (i == rowIndex) {
+                    result.addAll(line);
                 }
             }
 
-            //on scroll to top
-            for (int i = rowIndexInFile - 1; i > 1/*rows header*/ && i > rowIndexInFile -
-                    READ_FILE_LINES_LIMIT && scanner.hasNextLine(); i--) {
-                mItemsCache.put(i - 1, new ArrayList<>(CsvUtils.parseLine(scanner.nextLine())));
-                if (mItemsCache.containsKey(i - 2)) {
-                    Log.i(TAG, "scroll to top -> contains #" + (i - 2) + "; break");
-                    break;
+            // clear cache
+            Iterator<Map.Entry<Integer, List<String>>> iterator = mItemsCache.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<Integer, List<String>> entry = iterator.next();
+                if (entry.getKey() < cacheRowIndex || entry.getKey() > cacheRowLimitIndex) {
+                    iterator.remove();
                 }
             }
 

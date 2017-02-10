@@ -1,6 +1,7 @@
 package com.cleveroad.tablelayout.datasource;
 
 import android.content.Context;
+import android.os.Environment;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
@@ -69,53 +70,62 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<Boolean> {
     }
 
     public boolean applyChanges() {
-        OutputStreamWriter writer = null;
-        final String oldFileName = mCsvFileDataSource.getCsvFileUri().getEncodedPath();
-        final String newFileName = oldFileName + "_new.csv";
-
-        try {
-            writer = new FileWriter(newFileName);
-            writer.write(StringUtils.toString(modifyListPositions(mCsvFileDataSource
-                            .getColumnHeaders(),
-                    mColumnModifications), ","));
-            writer.write("\n");
-            for (int i = 0, size = mCsvFileDataSource.getRowsCount(); i < size; i++) {
-                Integer newRowPosition = mRowModifications.get(i);
-                List<String> row = mCsvFileDataSource.getRow(newRowPosition != null ?
-                        newRowPosition : i);
-                if (row != null && !row.isEmpty()) {
-                    writer.write(StringUtils.toString(modifyListPositions(row, mColumnModifications),
-                            ","));
-                    if (i != size - 1) {
-                        writer.write("\n");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+//        OutputStreamWriter writer = null;
+//        final String oldFileName = mCsvFileDataSource.getCsvFileUri().getEncodedPath();
+//
+//        final String newFileName = oldFileName.replace(".csv", "_new.csv");
+//        File realCsvFile = new File(newFileName);
+//        File file = new File(Environment.getExternalStorageDirectory(), realCsvFile.getName());
+//        try {
+//            if (file.exists()) {
+//                file.delete();
+//            }
+//            if (file.createNewFile()) {
+//                writer = new FileWriter(file);
+//                writer.write(StringUtils.toString(modifyListPositions(mCsvFileDataSource
+//                                .getColumnHeaders(),
+//                        mColumnModifications), ","));
+//                writer.write("\n");
+//                for (int i = 0, size = mCsvFileDataSource.getRowsCount(); i < size; i++) {
+//                    Integer newRowPosition = mRowModifications.get(i);
+//                    List<String> row = mCsvFileDataSource.getRow(newRowPosition != null ?
+//                            newRowPosition : i);
+//                    if (row != null && !row.isEmpty()) {
+//                        writer.write(StringUtils.toString(modifyListPositions(row, mColumnModifications),
+//                                ","));
+//                        if (i != size - 1) {
+//                            writer.write("\n");
+//                        }
+//                    }
+//                }
+//            } else {
+//                Log.e("Files", "Not created file path = " + newFileName);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+////            Log.e(TAG, e.getMessage());
+//            return false;
+//        } finally {
+//            ClosableUtil.closeWithoutException(writer);
+//        }
+//
+//        try {
+//            File oldFile = new File(oldFileName);
+//            File newFile = new File(newFileName);
+//
+//            //delete old file and rename new file
+//            boolean result = oldFile.exists()
+//                    && oldFile.delete()
+//                    && newFile.renameTo(new File(oldFileName));
+//            //invalidate cache
+//            if (result) {
+//                mCsvFileDataSource.destroy();
+//                mCsvFileDataSource.init();
+//            }
+//            return result;
+//        } catch (Exception e) {
 //            Log.e(TAG, e.getMessage());
-            return false;
-        } finally {
-            ClosableUtil.closeWithoutException(writer);
-        }
-
-        try {
-            File oldFile = new File(oldFileName);
-            File newFile = new File(newFileName);
-
-            //delete old file and rename new file
-            boolean result = oldFile.exists()
-                    && oldFile.delete()
-                    && newFile.renameTo(new File(oldFileName));
-            //invalidate cache
-            if (result) {
-                mCsvFileDataSource.destroy();
-                mCsvFileDataSource.init();
-            }
-            return result;
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
+//        }
 
         return false;
     }

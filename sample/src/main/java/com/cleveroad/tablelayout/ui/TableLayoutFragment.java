@@ -23,8 +23,7 @@ import com.cleveroad.tablelayout.R;
 import com.cleveroad.tablelayout.adapter.SampleLinkedTableAdapter;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
 import com.cleveroad.tablelayout.datasource.UpdateFileCallback;
-
-import java.util.List;
+import com.cleveroad.tablelayout.ui.dialogs.EditItemDialog;
 
 public class TableLayoutFragment
         extends Fragment
@@ -83,17 +82,17 @@ public class TableLayoutFragment
         });
 
         initAdapter();
-
         return view;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == EditRowDialog.REQUEST_CODE_EDIT_SONG && resultCode == Activity.RESULT_OK && data != null) {
-            int rowIndex = data.getIntExtra(EditRowDialog.EXTRA_ROW_NUMBER, 0);
-            List<String> values = data.getStringArrayListExtra(EditRowDialog.EXTRA_VALUES);
-            mCsvFileDataSource.updateRow(rowIndex, values);
-            mTableAdapter.notifyRowChanged(rowIndex);
+        if (requestCode == EditItemDialog.REQUEST_CODE_EDIT_SONG && resultCode == Activity.RESULT_OK && data != null) {
+            int columnIndex = data.getIntExtra(EditItemDialog.EXTRA_COLUMN_NUMBER, 0);
+            int rowIndex = data.getIntExtra(EditItemDialog.EXTRA_ROW_NUMBER, 0);
+            String value = data.getStringExtra(EditItemDialog.EXTRA_VALUE);
+            mCsvFileDataSource.updateItem(rowIndex, columnIndex, value);
+            mTableAdapter.notifyRowChanged(rowIndex - 1);
         }
     }
 
@@ -101,6 +100,12 @@ public class TableLayoutFragment
     @Override
     public void onItemClick(int row, int column) {
         Log.e(TAG, "onItemClick = " + row + " | " + column);
+        EditItemDialog.newInstance(
+                row + 1,
+                column + 1,
+                mCsvFileDataSource.getColumnHeaderData(column),
+                mCsvFileDataSource.getItemData(row + 1, column + 1))
+                .show(getChildFragmentManager(), EditItemDialog.class.getSimpleName());
     }
 
     @Override
@@ -122,10 +127,12 @@ public class TableLayoutFragment
     public void onItemLongClick(int row, int column) {
         Log.e(TAG, "onItemLongClick = " + row + " | " + column);
 
-        EditRowDialog.newInstance(
-                mCsvFileDataSource.getColumnHeaders(),
-                mCsvFileDataSource.getRowValues(row),
-                row).show(getChildFragmentManager(), EditRowDialog.class.getSimpleName());
+//        EditItemDialog.newInstance(
+//                row,
+//                column,
+//                mCsvFileDataSource.getColumnHeaderData(column),
+//                mCsvFileDataSource.getItemData(row, column)).show(getChildFragmentManager(),
+//                EditItemDialog.class.getSimpleName());
     }
 
 

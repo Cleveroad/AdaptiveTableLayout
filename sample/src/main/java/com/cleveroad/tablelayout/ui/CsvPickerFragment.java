@@ -72,10 +72,17 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
     }
 
     private void pickCsvFile() {
+
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        intent.setType("*/*");
+        String[] mimetypes = {"text/comma-separated-values", "text/csv"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+
+
 //        intent.setType("text/comma-separated-values");
-        intent.setType("text/csv");
+//        intent.setType("text/csv");
         startActivityForResult(Intent.createChooser(intent, getString(R.string.pick_file)), REQUEST_CODE_PICK_CSV);
     }
 

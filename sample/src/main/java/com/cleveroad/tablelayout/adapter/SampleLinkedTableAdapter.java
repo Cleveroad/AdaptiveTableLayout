@@ -82,7 +82,8 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     @Override
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
         final TestViewHolder vh = (TestViewHolder) viewHolder;
-        String itemData = mTableDataSource.getItemData(row, column);
+        //TODO FIX issues with headers!!
+        String itemData = mTableDataSource.getItemData(row , column ); // skip headers
 
         if (TextUtils.isEmpty(itemData)) {
             itemData = "";
