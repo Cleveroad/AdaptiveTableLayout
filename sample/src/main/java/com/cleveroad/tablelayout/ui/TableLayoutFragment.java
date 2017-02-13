@@ -91,8 +91,10 @@ public class TableLayoutFragment
             int columnIndex = data.getIntExtra(EditItemDialog.EXTRA_COLUMN_NUMBER, 0);
             int rowIndex = data.getIntExtra(EditItemDialog.EXTRA_ROW_NUMBER, 0);
             String value = data.getStringExtra(EditItemDialog.EXTRA_VALUE);
+            Log.e("UpdateItem", "onActivityResult: rowIndex = " + rowIndex + " | columnIndex = " + columnIndex);
             mCsvFileDataSource.updateItem(rowIndex, columnIndex, value);
-            mTableAdapter.notifyRowChanged(rowIndex - 1);
+//            mTableAdapter.notifyItemChanged(Math.max(rowIndex - 1, 0), Math.max(columnIndex - 1, 0));
+            mTableAdapter.notifyItemChanged(rowIndex, columnIndex);
         }
     }
 
@@ -101,21 +103,33 @@ public class TableLayoutFragment
     public void onItemClick(int row, int column) {
         Log.e(TAG, "onItemClick = " + row + " | " + column);
         EditItemDialog.newInstance(
-                row + 1,
-                column + 1,
+                row,
+                column,
                 mCsvFileDataSource.getColumnHeaderData(column),
-                mCsvFileDataSource.getItemData(row + 1, column + 1))
+                mCsvFileDataSource.getItemData(row, column))
                 .show(getChildFragmentManager(), EditItemDialog.class.getSimpleName());
     }
 
     @Override
     public void onRowHeaderClick(int row) {
         Log.e(TAG, "onRowHeaderClick = " + row);
+        EditItemDialog.newInstance(
+                row,
+                0,
+                mCsvFileDataSource.getColumnHeaderData(0),
+                mCsvFileDataSource.getItemData(row, 0))
+                .show(getChildFragmentManager(), EditItemDialog.class.getSimpleName());
     }
 
     @Override
     public void onColumnHeaderClick(int column) {
         Log.e(TAG, "onColumnHeaderClick = " + column);
+        EditItemDialog.newInstance(
+                0,
+                column,
+                mCsvFileDataSource.getColumnHeaderData(column),
+                mCsvFileDataSource.getItemData(0, column))
+                .show(getChildFragmentManager(), EditItemDialog.class.getSimpleName());
     }
 
     @Override

@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.util.SparseArrayCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -312,6 +313,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     /**
      * When used adapter with IMMUTABLE data, returns rows position modifications
      * (old position -> new position)
+     *
      * @return row position modification map. Includes only modified row numbers
      */
     @SuppressWarnings("unchecked")
@@ -324,6 +326,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     /**
      * When used adapter with IMMUTABLE data, returns columns position modifications
      * (old position -> new position)
+     *
      * @return row position modification map. Includes only modified column numbers
      */
     @SuppressWarnings("unchecked")
@@ -1055,10 +1058,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             if (!mSettings.isSolidRowHeader()) {
                 ViewHolder fromViewHolder = mHeaderRowViewHolders.get(fromRow);
                 ViewHolder toViewHolder = mHeaderRowViewHolders.get(toRow);
-                if(fromViewHolder != null) {
+                if (fromViewHolder != null) {
                     mAdapter.onBindHeaderRowViewHolder(fromViewHolder, fromRow);
                 }
-                if(toViewHolder != null) {
+                if (toViewHolder != null) {
                     mAdapter.onBindHeaderRowViewHolder(toViewHolder, toRow);
                 }
             }
@@ -1469,7 +1472,17 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
     @Override
     public void notifyItemChanged(int rowIndex, int columnIndex) {
-        ViewHolder holder = mViewHolders.get(rowIndex, columnIndex);
+        Log.e("UpdateItem", "notifyItemChanged: rowIndex = " + rowIndex + " | columnIndex = " + columnIndex);
+        ViewHolder holder;
+        if (rowIndex == 0 && columnIndex == 0) {
+            holder = mLeftTopViewHolder;
+        } else if (rowIndex == 0) {
+            holder = mHeaderColumnViewHolders.get(columnIndex - 1);
+        } else if (columnIndex == 0) {
+            holder = mHeaderRowViewHolders.get(rowIndex - 1);
+        } else {
+            holder = mViewHolders.get(rowIndex - 1, columnIndex - 1);
+        }
         if (holder != null) {
             viewHolderChanged(holder);
         }
@@ -1492,9 +1505,22 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     }
 
     private void viewHolderChanged(@NonNull ViewHolder holder) {
-        mViewHolders.remove(holder.getRowIndex(), holder.getColumnIndex());
-        recycleViewHolder(holder);
-        addViewHolder(holder.getRowIndex(), holder.getColumnIndex(), holder.getItemType());
+        if (holder.getItemType() == ViewHolderType.FIRST_HEADER) {
+            mLeftTopViewHolder = holder;
+            mAdapter.onBindLeftTopHeaderViewHolder(mLeftTopViewHolder);
+        } else if (holder.getItemType() == ViewHolderType.COLUMN_HEADER) {
+            mHeaderColumnViewHolders.remove(holder.getColumnIndex());
+            recycleViewHolder(holder);
+            addViewHolder(holder.getRowIndex(), holder.getColumnIndex(), holder.getItemType());
+        } else if (holder.getItemType() == ViewHolderType.ROW_HEADER) {
+            mHeaderRowViewHolders.remove(holder.getRowIndex());
+            recycleViewHolder(holder);
+            addViewHolder(holder.getRowIndex(), holder.getColumnIndex(), holder.getItemType());
+        } else {
+            mViewHolders.remove(holder.getRowIndex(), holder.getColumnIndex());
+            recycleViewHolder(holder);
+            addViewHolder(holder.getRowIndex(), holder.getColumnIndex(), holder.getItemType());
+        }
     }
 
     public boolean isHeaderFixed() {

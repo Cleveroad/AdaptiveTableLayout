@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import java.util.HashMap;
@@ -41,8 +42,6 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
      * Redirect row's ids
      */
     private HashMap<Integer, Integer> mRowIndexToId;
-    private HashMap<Integer, Integer> mRowIdToIndex;
-
     /**
      * OnItemLongClickListener wrapper
      */
@@ -63,7 +62,6 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
             }
         }
     };
-
     /**
      * OnItemClickListener wrapper
      */
@@ -72,6 +70,8 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
         public void onItemClick(int row, int column) {
             OnItemClickListener innerListener = mInner.getOnItemClickListener();
             if (innerListener != null) {
+                row++;
+                column++;
                 innerListener.onItemClick(rowIndexToId(row), columnIndexToId(column));
             }
         }
@@ -80,7 +80,8 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
         public void onRowHeaderClick(int row) {
             OnItemClickListener innerListener = mInner.getOnItemClickListener();
             if (innerListener != null) {
-                innerListener.onRowHeaderClick(rowIndexToId(row));
+                row++;
+                innerListener.onRowHeaderClick(mIsSolidRowHeader ? rowIndexToId(row) : row);
             }
         }
 
@@ -88,6 +89,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
         public void onColumnHeaderClick(int column) {
             OnItemClickListener innerListener = mInner.getOnItemClickListener();
             if (innerListener != null) {
+                column++;
                 innerListener.onColumnHeaderClick(columnIndexToId(column));
             }
         }
@@ -100,6 +102,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
             }
         }
     };
+    private HashMap<Integer, Integer> mRowIdToIndex;
 
     @SuppressLint("UseSparseArrays")
     LinkedTableAdapterImpl(@NonNull TableAdapter<VH> inner, boolean isSolidRowHeader) {
@@ -115,9 +118,12 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
 
     @Override
     public void changeColumns(int columnIndex, int columnToIndex) {
+        columnIndex++;
+        columnToIndex++;
+        Log.e("Linked", "changeColumns columnIndex = " + columnIndex + " columnToIndex = " + columnToIndex);
         int fromId = columnIndexToId(columnIndex);
         int toId = columnIndexToId(columnToIndex);
-        if(columnIndex != toId) {
+        if (columnIndex != toId) {
             mColumnIndexToId.put(columnIndex, toId);
             mColumnIdToIndex.put(toId, columnIndex);
         } else {
@@ -126,7 +132,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
             mColumnIdToIndex.remove(toId);
         }
 
-        if(columnToIndex != fromId) {
+        if (columnToIndex != fromId) {
             mColumnIndexToId.put(columnToIndex, fromId);
             mColumnIdToIndex.put(fromId, columnToIndex);
         } else {
@@ -138,10 +144,13 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
 
     @Override
     public void changeRows(int rowIndex, int rowToIndex, boolean solidRowHeader) {
+        rowIndex++;
+        rowToIndex++;
+        Log.e("Linked", "changeRows rowIndex = " + rowIndex + " solidRowHeader = " + solidRowHeader);
         mIsSolidRowHeader = solidRowHeader;
         int fromId = rowIndexToId(rowIndex);
         int toId = rowIndexToId(rowToIndex);
-        if(rowIndex != toId) {
+        if (rowIndex != toId) {
             mRowIndexToId.put(rowIndex, toId);
             mRowIdToIndex.put(toId, rowIndex);
         } else {
@@ -149,7 +158,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
             mRowIdToIndex.remove(toId);
         }
 
-        if(rowToIndex != fromId) {
+        if (rowToIndex != fromId) {
             mRowIndexToId.put(rowToIndex, fromId);
             mRowIdToIndex.put(fromId, rowToIndex);
         } else {
@@ -194,16 +203,20 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
 
     @Override
     public void onBindViewHolder(@NonNull VH viewHolder, int row, int column) {
+        row++;
+        column++;
         mInner.onBindViewHolder(viewHolder, rowIndexToId(row), columnIndexToId(column));
     }
 
     @Override
     public void onBindHeaderColumnViewHolder(@NonNull VH viewHolder, int column) {
+        column++;
         mInner.onBindHeaderColumnViewHolder(viewHolder, columnIndexToId(column));
     }
 
     @Override
     public void onBindHeaderRowViewHolder(@NonNull VH viewHolder, int row) {
+        row++;
         mInner.onBindHeaderRowViewHolder(viewHolder, mIsSolidRowHeader ? rowIndexToId(row) : row);
     }
 
@@ -214,6 +227,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
 
     @Override
     public int getColumnWidth(int column) {
+        column++;
         return mInner.getColumnWidth(columnIndexToId(column));
     }
 
@@ -224,6 +238,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
 
     @Override
     public int getRowHeight(int row) {
+        row++;
         return mInner.getRowHeight(rowIndexToId(row));
     }
 
@@ -271,6 +286,7 @@ class LinkedTableAdapterImpl<VH extends ViewHolder> extends LinkedTableAdapter<V
     @Override
     public void notifyItemChanged(int rowIndex, int columnIndex) {
         super.notifyItemChanged(rowIdToIndex(rowIndex), columnIdToIndex(columnIndex));
+//        super.notifyItemChanged(rowIndex, columnIndex);
     }
 
     @Override

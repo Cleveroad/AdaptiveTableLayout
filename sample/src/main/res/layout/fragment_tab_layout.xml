@@ -21,6 +21,6 @@
             android:layout_height="match_parent"
             app:cellMargin="2dp"
             app:fixedHeaders="false"
-            app:solidRowHeaders="false"/>
+            app:solidRowHeaders="true"/>
 
 </LinearLayout>

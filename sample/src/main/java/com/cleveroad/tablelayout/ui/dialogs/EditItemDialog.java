@@ -31,7 +31,7 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
     private TextInputLayout mTilValue;
     private TextInputEditText mEtValue;
 
-    public static EditItemDialog newInstance( int row, int column,String title, String value) {
+    public static EditItemDialog newInstance(int row, int column, String title, String value) {
         EditItemDialog dialog = new EditItemDialog();
         Bundle args = new Bundle();
         args.putInt(EXTRA_COLUMN_NUMBER, column);

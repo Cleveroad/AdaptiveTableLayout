@@ -6,6 +6,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.NonNull;
 import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,12 +48,12 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
 
     @Override
     public int getRowCount() {
-        return mTableDataSource.getRowsCount();
+        return mTableDataSource.getRowsCount() - 1;
     }
 
     @Override
     public int getColumnCount() {
-        return mTableDataSource.getColumnsCount();
+        return mTableDataSource.getColumnsCount() - 1;
     }
 
     @NonNull
@@ -82,8 +83,8 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     @Override
     public void onBindViewHolder(@NonNull ViewHolderImpl viewHolder, int row, int column) {
         final TestViewHolder vh = (TestViewHolder) viewHolder;
-        //TODO FIX issues with headers!!
-        String itemData = mTableDataSource.getItemData(row , column ); // skip headers
+        Log.e("UpdateItem", "onBindViewHolder: rowIndex = " + row + " | columnIndex = " + column);
+        String itemData = mTableDataSource.getItemData(row, column); // skip headers
 
         if (TextUtils.isEmpty(itemData)) {
             itemData = "";
@@ -119,7 +120,7 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     public void onBindHeaderColumnViewHolder(@NonNull ViewHolderImpl viewHolder, int column) {
         TestHeaderColumnViewHolder vh = (TestHeaderColumnViewHolder) viewHolder;
 
-        vh.tvText.setText(mTableDataSource.getColumnHeaderData(column));
+        vh.tvText.setText(mTableDataSource.getColumnHeaderData(column));  // skip left top header
         int color = COLORS[column % COLORS.length];
         GradientDrawable gd = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
@@ -132,7 +133,7 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
     @Override
     public void onBindHeaderRowViewHolder(@NonNull ViewHolderImpl viewHolder, int row) {
         TestHeaderRowViewHolder vh = (TestHeaderRowViewHolder) viewHolder;
-        vh.tvText.setText(String.valueOf(row + 1));
+        vh.tvText.setText(mTableDataSource.getItemData(row, 0));
     }
 
     @Override
