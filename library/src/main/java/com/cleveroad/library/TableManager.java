@@ -76,6 +76,7 @@ class TableManager {
         }
 
         // calculate heights
+        mFullHeight = 0;
         for (int itemHeight : mRowHeights) {
             mFullHeight += itemHeight;
         }

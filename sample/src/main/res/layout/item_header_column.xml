@@ -24,8 +24,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:gravity="center_vertical"
-        android:padding="8dp"
-        android:textSize="12sp"
+        android:padding="16dp"
+        android:textSize="14sp"
         android:textStyle="bold"
         tools:text="text"/>
 

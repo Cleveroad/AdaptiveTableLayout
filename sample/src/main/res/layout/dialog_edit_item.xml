@@ -31,6 +31,7 @@
             android:id="@+id/tilValue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/llButtonsContainer"
             android:layout_below="@+id/tvTitle"
             android:layout_marginTop="16dp">
 
@@ -45,6 +46,7 @@
 
 
         <LinearLayout
+            android:id="@+id/llButtonsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -57,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:text="@string/cancel"
-                android:textColor="@color/colorAccent"/>
+                android:textColor="@color/colorTextWhite"/>
 
 
             <android.support.v7.widget.AppCompatButton
@@ -66,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:text="@string/ok"
-                android:textColor="@color/colorAccent"/>
+                android:textColor="@color/colorTextWhite"/>
         </LinearLayout>
 
     </RelativeLayout>

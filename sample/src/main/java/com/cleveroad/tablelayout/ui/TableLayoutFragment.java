@@ -75,6 +75,7 @@ public class TableLayoutFragment
                             getLoaderManager(),
                             mTableLayout.getLinkedAdapterRowsModifications(),
                             mTableLayout.getLinkedAdapterColumnsModifications(),
+                            mTableLayout.isSolidRowHeader(),
                             TableLayoutFragment.this);
                 }
                 return true;
@@ -165,7 +166,7 @@ public class TableLayoutFragment
         if (isSuccess) { //if data source have been changed
             initAdapter();
             mTableAdapter.notifyDataSetChanged();
-            Log.e("Done", " File path = " + fileName);
+            Log.e("Done", "File path = " + fileName);
             Snackbar.make(view, R.string.changes_saved, Snackbar.LENGTH_SHORT).show();
         } else {
             Snackbar.make(view, R.string.unexpected_error, Snackbar.LENGTH_SHORT).show();

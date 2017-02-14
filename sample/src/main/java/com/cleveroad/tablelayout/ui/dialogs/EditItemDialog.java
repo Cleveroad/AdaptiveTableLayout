@@ -78,7 +78,7 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
             int height = dm.heightPixels;
             int width = dm.widthPixels;
             window.setLayout(width, height);
-            window.setLayout(Double.valueOf(width * 0.9D).intValue(), Double.valueOf(height * 0.7D).intValue());
+            window.setLayout(Double.valueOf(width * 0.6D).intValue(), Double.valueOf(height * 0.4D).intValue());
         }
     }
 

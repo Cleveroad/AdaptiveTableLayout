@@ -103,6 +103,7 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
             LoaderManager loaderManager,
             final Map<Integer, Integer> rowModifications,
             final Map<Integer, Integer> columnModifications,
+            final boolean isSolidRowHeader,
             final UpdateFileCallback callback) {
 
         loaderManager.restartLoader(0, Bundle.EMPTY, new LoaderManager.LoaderCallbacks<Boolean>() {
@@ -112,7 +113,8 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
                         mContext,
                         CsvFileDataSourceImpl.this,
                         rowModifications,
-                        columnModifications);
+                        columnModifications,
+                        isSolidRowHeader);
             }
 
             @Override
@@ -159,23 +161,6 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         return 0;
     }
 
-//    private List<String> readColumnHeaders() {
-//
-//        InputStreamReader fileReader = null;
-//
-//        try {
-//            fileReader = getInputStreamReader();
-//            Scanner scanner = new Scanner(fileReader);
-//            return new ArrayList<>(CsvUtils.parseLine(scanner.nextLine()));
-//        } catch (Exception e) {
-//            Log.e(TAG, e.getMessage());
-//        } finally {
-//            ClosableUtil.closeWithoutException(fileReader);
-//        }
-//
-//        return new ArrayList<>();
-//    }
-
     List<String> getRow(int rowIndex) {
         List<String> result = new ArrayList<>();
 
@@ -190,7 +175,7 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
                     result.add(TextUtils.isEmpty(changedItem) ? cachedItem : changedItem);
                 }
             } else {
-                result = cachedRow;
+                result.addAll(cachedRow);
             }
         }
 
