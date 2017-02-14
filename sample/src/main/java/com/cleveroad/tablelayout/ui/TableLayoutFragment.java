@@ -70,6 +70,7 @@ public class TableLayoutFragment
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                Log.e("Menu", "onMenuItemClick");
                 if (item.getItemId() == R.id.actionSave) {
                     mCsvFileDataSource.applyChanges(
                             getLoaderManager(),

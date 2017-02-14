@@ -29,7 +29,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     private static final String EXTRA_STATE_SUPER = "EXTRA_STATE_SUPER";
     private static final String EXTRA_STATE_VIEW_GROUP = "EXTRA_STATE_VIEW_GROUP";
 
-    private static final int SHADOW_THICK = 25;
+    private static final int SHADOW_THICK = 10;
 
     /**
      * Matrix with item view holders
@@ -447,6 +447,14 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      */
     private void refreshViewHolders() {
         if (mAdapter != null) {
+
+            for (ViewHolder holder : mViewHolders.getAll()) {
+                if (holder != null) {
+                    // cell item
+                    refreshItemViewHolder(holder, mState.isRowDragging(), mState.isColumnDragging());
+                }
+            }
+
             for (int count = mHeaderColumnViewHolders.size(), i = 0; i < count; i++) {
                 int key = mHeaderColumnViewHolders.keyAt(i);
                 // get the object by the key.
@@ -455,7 +463,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                     // column header
                     refreshHeaderColumnViewHolder(holder);
                 }
-
             }
 
             for (int count = mHeaderRowViewHolders.size(), i = 0; i < count; i++) {
@@ -466,19 +473,25 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                     // column header
                     refreshHeaderRowViewHolder(holder);
                 }
+            }
 
+            // need to bring to front all column headers after row headers shadows
+            for (int count = mHeaderColumnViewHolders.size(), i = 0; i < count; i++) {
+                int key = mHeaderColumnViewHolders.keyAt(i);
+                // get the object by the key.
+                ViewHolder holder = mHeaderColumnViewHolders.get(key);
+                if (holder != null) {
+                    // column header
+                    holder.getItemView().bringToFront();
+                }
             }
 
             if (mLeftTopViewHolder != null) {
                 refreshLeftTopHeaderViewHolder(mLeftTopViewHolder);
+                mLeftTopViewHolder.getItemView().bringToFront();
             }
 
-            for (ViewHolder holder : mViewHolders.getAll()) {
-                if (holder != null) {
-                    // cell item
-                    refreshItemViewHolder(holder, mState.isRowDragging(), mState.isColumnDragging());
-                }
-            }
+
         }
     }
 
@@ -575,7 +588,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 mManager.getHeaderColumnHeight() + topMargin);
     }
 
-
     /**
      * Refresh current row header view holder.
      *
@@ -596,6 +608,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         if (holder.isDragging()) {
             View topShadow = mShadowHelper.getTopShadow();
             View bottomShadow = mShadowHelper.getBottomShadow();
+
             if (topShadow != null) {
                 int shadowTop = top - mState.getScrollY();
                 topShadow.layout(0,
@@ -622,6 +635,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 top - mState.getScrollY() + topMargin,
                 mManager.getHeaderRowWidth() + leftMargin,
                 top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY() + topMargin);
+        view.bringToFront();
     }
 
     /**
@@ -645,7 +659,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 top + topMargin,
                 left + mManager.getHeaderRowWidth() + leftMargin,
                 top + mManager.getHeaderColumnHeight() + topMargin);
-
     }
 
     /**
@@ -1166,8 +1179,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         final boolean result;
         final ViewHolder viewHolder = (ViewHolder) child.getTag(R.id.tag_view_holder);
         canvas.save();
-        int headerFixedX = (mSettings.isHeaderFixed() ? 0 : mState.getScrollX());
-        int headerFixedY = (mSettings.isHeaderFixed() ? 0 : mState.getScrollY());
+        int headerFixedX = mSettings.isHeaderFixed() ? 0 : mState.getScrollX();
+        int headerFixedY = mSettings.isHeaderFixed() ? 0 : mState.getScrollY();
         //noinspection StatementWithEmptyBody
         if (viewHolder == null) {
             //ignore

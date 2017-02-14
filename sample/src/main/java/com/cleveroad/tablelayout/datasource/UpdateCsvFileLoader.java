@@ -11,12 +11,16 @@ import com.cleveroad.tablelayout.utils.StringUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class UpdateCsvFileLoader extends AsyncTaskLoader<Boolean> {
-    private static final String TAG = UpdateCsvFileLoader.class.getSimpleName();
+    //    private static final String TAG = UpdateCsvFileLoader.class.getSimpleName();
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd_hh_mm_ss", Locale.getDefault());
     private final CsvFileDataSourceImpl mCsvFileDataSource;
     private final Map<Integer, Integer> mRowModifications;
     private final Map<Integer, Integer> mColumnModifications;
@@ -64,10 +68,12 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<Boolean> {
     }
 
     private boolean applyChanges() {
+        Log.e("Menu", "applyChanges");
+        //TODO FIX SAVING FILE!!!!
         OutputStreamWriter writer = null;
         final String oldFileName = mCsvFileDataSource.getCsvFileUri().getEncodedPath();
 
-        final String newFileName = oldFileName.replace(".csv", "_new.csv");
+        final String newFileName = oldFileName.replace(".csv", DATE_FORMATTER.format(new Date()) + ".csv");
         File realCsvFile = new File(newFileName);
         File file = new File(Environment.getExternalStorageDirectory(), realCsvFile.getName());
         try {
@@ -104,24 +110,9 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<Boolean> {
             ClosableUtil.closeWithoutException(writer);
         }
 
-        try {
-            File oldFile = new File(oldFileName);
-            File newFile = new File(newFileName);
+        mCsvFileDataSource.destroy();
+        mCsvFileDataSource.init();
 
-            //delete old file and rename new file
-            boolean result = oldFile.exists()
-                    && oldFile.delete()
-                    && newFile.renameTo(new File(oldFileName));
-            //invalidate cache
-            if (result) {
-                mCsvFileDataSource.destroy();
-                mCsvFileDataSource.init();
-            }
-            return result;
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-
-        return false;
+        return true;
     }
 }

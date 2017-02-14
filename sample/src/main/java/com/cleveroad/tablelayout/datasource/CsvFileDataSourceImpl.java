@@ -26,7 +26,7 @@ import java.util.WeakHashMap;
 
 public class CsvFileDataSourceImpl implements TableDataSource<String, String, String, String> {
     private static final String TAG = CsvFileDataSourceImpl.class.getSimpleName();
-    private static final int READ_FILE_LINES_LIMIT = 50;
+    private static final int READ_FILE_LINES_LIMIT = 1;
     private final Context mContext;
     private final Uri mCsvFileUri;
     private final Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
