@@ -16,28 +16,18 @@ import android.view.Window;
 
 import com.cleveroad.tablelayout.R;
 
-public class EditItemDialog extends DialogFragment implements View.OnClickListener {
-    public static final int REQUEST_CODE_EDIT_SONG = 663;
-    public static final String EXTRA_TITLE = "EXTRA_TITLE";
-    public static final String EXTRA_VALUE = "EXTRA_VALUE";
-    public static final String EXTRA_COLUMN_NUMBER = "EXTRA_COLUMN_NUMBER";
-    public static final String EXTRA_ROW_NUMBER = "EXTRA_ROW_NUMBER";
+public class EditFileNameDialog extends DialogFragment implements View.OnClickListener {
+    public static final int REQUEST_CODE_EDIT_FILE_NAME = 673;
+    public static final String EXTRA_VALUE_FILE_NAME = "EXTRA_VALUE_FILE_NAME";
 
-    private String mTitle;
-    private String mValue;
-    private int mColumn;
-    private int mRow;
+    private String mFileName;
 
-    private TextInputLayout mTilValue;
-    private TextInputEditText mEtValue;
+    private TextInputEditText etFileName;
 
-    public static EditItemDialog newInstance(int row, int column, String title, String value) {
-        EditItemDialog dialog = new EditItemDialog();
+    public static EditFileNameDialog newInstance(String fileName) {
+        EditFileNameDialog dialog = new EditFileNameDialog();
         Bundle args = new Bundle();
-        args.putInt(EXTRA_COLUMN_NUMBER, column);
-        args.putInt(EXTRA_ROW_NUMBER, row);
-        args.putString(EXTRA_TITLE, title);
-        args.putString(EXTRA_VALUE, value);
+        args.putString(EXTRA_VALUE_FILE_NAME, fileName);
         dialog.setArguments(args);
         return dialog;
     }
@@ -45,10 +35,7 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mColumn = getArguments().getInt(EXTRA_COLUMN_NUMBER);
-        mRow = getArguments().getInt(EXTRA_ROW_NUMBER);
-        mTitle = getArguments().getString(EXTRA_TITLE);
-        mValue = getArguments().getString(EXTRA_VALUE);
+        mFileName = getArguments().getString(EXTRA_VALUE_FILE_NAME);
     }
 
     @Nullable
@@ -57,10 +44,9 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
                              @Nullable Bundle savedInstanceState) {
         //noinspection ConstantConditions
         getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        View view = inflater.inflate(R.layout.dialog_edit_item, container, false);
+        View view = inflater.inflate(R.layout.dialog_edit_file_name, container, false);
 
-        mTilValue = (TextInputLayout) view.findViewById(R.id.tilValue);
-        mEtValue = (TextInputEditText) view.findViewById(R.id.etValue);
+        etFileName = (TextInputEditText) view.findViewById(R.id.etFileName);
 
         view.findViewById(R.id.bPositive).setOnClickListener(this);
         view.findViewById(R.id.bNegative).setOnClickListener(this);
@@ -98,14 +84,11 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
         switch (v.getId()) {
             case R.id.bPositive:
                 Intent intent = new Intent();
-                intent.putExtra(EXTRA_VALUE, mEtValue.getText().toString().trim());
-                intent.putExtra(EXTRA_COLUMN_NUMBER, mColumn);
-                intent.putExtra(EXTRA_ROW_NUMBER, mRow);
-
-                getParentFragment().onActivityResult(REQUEST_CODE_EDIT_SONG, Activity.RESULT_OK, intent);
+                intent.putExtra(EXTRA_VALUE_FILE_NAME, etFileName.getText().toString().trim());
+                getParentFragment().onActivityResult(REQUEST_CODE_EDIT_FILE_NAME, Activity.RESULT_OK, intent);
                 break;
             case R.id.bNegative:
-                getParentFragment().onActivityResult(REQUEST_CODE_EDIT_SONG, Activity.RESULT_CANCELED, null);
+                getParentFragment().onActivityResult(REQUEST_CODE_EDIT_FILE_NAME, Activity.RESULT_CANCELED, null);
                 break;
             default:
                 //do nothing
@@ -115,7 +98,6 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
     }
 
     private void updateUiAccordingToModel() {
-        mTilValue.setHint(mTitle);
-        mEtValue.setText(mValue);
+        etFileName.setHint(mFileName);
     }
 }

@@ -23,12 +23,14 @@ import com.cleveroad.tablelayout.R;
 import com.cleveroad.tablelayout.adapter.SampleLinkedTableAdapter;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
 import com.cleveroad.tablelayout.datasource.UpdateFileCallback;
+import com.cleveroad.tablelayout.ui.dialogs.EditFileNameDialog;
 import com.cleveroad.tablelayout.ui.dialogs.EditItemDialog;
 
 public class TableLayoutFragment
         extends Fragment
         implements OnItemClickListener, OnItemLongClickListener, UpdateFileCallback {
     private static final String TAG = TableLayoutFragment.class.getSimpleName();
+
     private static final String EXTRA_CSV_FILE = "EXTRA_CSV_FILE";
     private Uri mCsvFile;
     private LinkedTableAdapter mTableAdapter;
@@ -70,7 +72,6 @@ public class TableLayoutFragment
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Log.e("Menu", "onMenuItemClick");
                 if (item.getItemId() == R.id.actionSave) {
                     mCsvFileDataSource.applyChanges(
                             getLoaderManager(),
@@ -93,17 +94,16 @@ public class TableLayoutFragment
             int columnIndex = data.getIntExtra(EditItemDialog.EXTRA_COLUMN_NUMBER, 0);
             int rowIndex = data.getIntExtra(EditItemDialog.EXTRA_ROW_NUMBER, 0);
             String value = data.getStringExtra(EditItemDialog.EXTRA_VALUE);
-            Log.e("UpdateItem", "onActivityResult: rowIndex = " + rowIndex + " | columnIndex = " + columnIndex);
             mCsvFileDataSource.updateItem(rowIndex, columnIndex, value);
-//            mTableAdapter.notifyItemChanged(Math.max(rowIndex - 1, 0), Math.max(columnIndex - 1, 0));
             mTableAdapter.notifyItemChanged(rowIndex, columnIndex);
+        } else if (requestCode == EditFileNameDialog.REQUEST_CODE_EDIT_FILE_NAME && resultCode == Activity.RESULT_OK && data != null) {
+
         }
     }
 
     //------------------------------------- adapter callbacks --------------------------------------
     @Override
     public void onItemClick(int row, int column) {
-        Log.e(TAG, "onItemClick = " + row + " | " + column);
         EditItemDialog.newInstance(
                 row,
                 column,
@@ -114,7 +114,6 @@ public class TableLayoutFragment
 
     @Override
     public void onRowHeaderClick(int row) {
-        Log.e(TAG, "onRowHeaderClick = " + row);
         EditItemDialog.newInstance(
                 row,
                 0,
@@ -125,7 +124,6 @@ public class TableLayoutFragment
 
     @Override
     public void onColumnHeaderClick(int column) {
-        Log.e(TAG, "onColumnHeaderClick = " + column);
         EditItemDialog.newInstance(
                 0,
                 column,
@@ -136,25 +134,16 @@ public class TableLayoutFragment
 
     @Override
     public void onLeftTopHeaderClick() {
-        Log.e(TAG, "onLeftTopHeaderClick ");
     }
 
     @Override
     public void onItemLongClick(int row, int column) {
-        Log.e(TAG, "onItemLongClick = " + row + " | " + column);
 
-//        EditItemDialog.newInstance(
-//                row,
-//                column,
-//                mCsvFileDataSource.getColumnHeaderData(column),
-//                mCsvFileDataSource.getItemData(row, column)).show(getChildFragmentManager(),
-//                EditItemDialog.class.getSimpleName());
     }
 
 
     @Override
     public void onLeftTopHeaderLongClick() {
-        Log.e(TAG, "onLeftTopHeaderLongClick ");
     }
 
     @Override

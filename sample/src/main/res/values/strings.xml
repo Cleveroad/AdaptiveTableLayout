@@ -8,6 +8,7 @@
 
     <!-- edit song dialog -->
     <string name="edit_song">Edit song</string>
+    <string name="edit_file_name">Edit file name</string>
     <string name="position">Position</string>
     <string name="photo_url">Photo url</string>
     <string name="artist_name">Artist name</string>
@@ -36,5 +37,6 @@
 
     <string name="changes_saved">All changes have been saved</string>
     <string name="unexpected_error">Unexpected error</string>
+    <string name="not_csv_file_error">Not csv file</string>
 
 </resources>

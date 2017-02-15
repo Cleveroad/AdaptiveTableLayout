@@ -18,6 +18,56 @@ public class ShadowHelper {
     @Nullable
     private View mBottomShadow;
 
+    @Nullable
+    private View mColumnsHeadersShadow;
+
+    @Nullable
+    private View mRowsHeadersShadow;
+
+    @NonNull
+    public View addColumnsHeadersShadow(ViewGroup group) {
+        if (mColumnsHeadersShadow == null) {
+            mColumnsHeadersShadow = new View(group.getContext());
+            mColumnsHeadersShadow.setBackgroundResource(R.drawable.shadow_bottom);
+            group.addView(mColumnsHeadersShadow, 0);
+        }
+        return mColumnsHeadersShadow;
+    }
+
+    @Nullable
+    public View getColumnsHeadersShadow() {
+        return mColumnsHeadersShadow;
+    }
+
+    @NonNull
+    public View addRowsHeadersShadow(ViewGroup group) {
+        if (mRowsHeadersShadow == null) {
+            mRowsHeadersShadow = new View(group.getContext());
+            mRowsHeadersShadow.setBackgroundResource(R.drawable.shadow_right);
+            group.addView(mRowsHeadersShadow, 0);
+        }
+        return mRowsHeadersShadow;
+    }
+
+    @Nullable
+    public View getRowsHeadersShadow() {
+        return mRowsHeadersShadow;
+    }
+
+    public void removeColumnsHeadersShadow(ViewGroup group) {
+        if (mColumnsHeadersShadow != null) {
+            group.removeView(mColumnsHeadersShadow);
+            mColumnsHeadersShadow = null;
+        }
+    }
+
+    public void removeRowsHeadersShadow(ViewGroup group) {
+        if (mRowsHeadersShadow != null) {
+            group.removeView(mRowsHeadersShadow);
+            mRowsHeadersShadow = null;
+        }
+    }
+
     @NonNull
     public View addLeftShadow(ViewGroup group) {
         if (mLeftShadow == null) {
@@ -78,7 +128,7 @@ public class ShadowHelper {
         return mBottomShadow;
     }
 
-    public void removeAll(ViewGroup group) {
+    public void removeAllDragAndDropShadows(ViewGroup group) {
         if (mLeftShadow != null) {
             group.removeView(mLeftShadow);
             mLeftShadow = null;

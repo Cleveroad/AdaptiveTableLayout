@@ -1,11 +1,11 @@
 package com.cleveroad.tablelayout.datasource;
 
 import android.content.Context;
-import android.os.Environment;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.cleveroad.tablelayout.utils.ClosableUtil;
+import com.cleveroad.tablelayout.utils.FileUtils;
 import com.cleveroad.tablelayout.utils.StringUtils;
 
 import java.io.File;
@@ -13,14 +13,13 @@ import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class UpdateCsvFileLoader extends AsyncTaskLoader<Boolean> {
+public class UpdateCsvFileLoader extends AsyncTaskLoader<String> {
     //    private static final String TAG = UpdateCsvFileLoader.class.getSimpleName();
-    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd_hh_mm_ss", Locale.getDefault());
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("_yyyymmddhhmmss", Locale.getDefault());
     private final CsvFileDataSourceImpl mCsvFileDataSource;
     private final Map<Integer, Integer> mRowModifications;
     private final Map<Integer, Integer> mColumnModifications;
@@ -63,25 +62,20 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<Boolean> {
     }
 
     @Override
-    public Boolean loadInBackground() {
+    public String loadInBackground() {
         return applyChanges();
     }
 
-    private boolean applyChanges() {
-        Log.e("Menu", "applyChanges");
-        //TODO FIX SAVING FILE!!!!
+    private String applyChanges() {
         OutputStreamWriter writer = null;
-        final String oldFileName = mCsvFileDataSource.getCsvFileUri().getEncodedPath();
+        final String originalFileName = mCsvFileDataSource.getCsvFileUri().getEncodedPath();
+//        final String tempFileName = mCsvFileDataSource.getCsvTempFileUri().getEncodedPath();
+        final String newFileName = originalFileName.replace(".csv", "_new_new_new_new.csv");
+        File changedFile = new File(newFileName);
 
-        final String newFileName = oldFileName.replace(".csv", DATE_FORMATTER.format(new Date()) + ".csv");
-        File realCsvFile = new File(newFileName);
-        File file = new File(Environment.getExternalStorageDirectory(), realCsvFile.getName());
         try {
-            if (file.exists()) {
-                file.delete();
-            }
-            if (file.createNewFile()) {
-                writer = new FileWriter(file);
+            if (changedFile.createNewFile() && changedFile.exists()) {
+                writer = new FileWriter(changedFile);
                 for (int i = 0, size = mCsvFileDataSource.getRowsCount(); i < size; i++) {
                     Integer newRowPosition = mRowModifications.get(i);
                     List<String> row = mCsvFileDataSource.getRow(newRowPosition != null ?
@@ -100,19 +94,35 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<Boolean> {
                     }
                 }
             } else {
-                Log.e("Files", "Not created file path = " + newFileName);
+                Log.e("Files", "Not created file path = " + changedFile);
             }
         } catch (Exception e) {
             e.printStackTrace();
-//            Log.e(TAG, e.getMessage());
-            return false;
+            return "";
         } finally {
             ClosableUtil.closeWithoutException(writer);
         }
 
+        try {
+            File originalFile = new File(originalFileName);
+//            File newFile = new File(newFileName);
+
+            //delete old file and rename new file
+            boolean result = originalFile.exists()
+                    && originalFile.delete()
+                    && changedFile.renameTo(new File(originalFileName));
+            //invalidate cache
+            if (result) {
+                mCsvFileDataSource.destroy();
+                mCsvFileDataSource.init();
+            }
+            return originalFileName;
+        } catch (Exception e) {
+            Log.e("ERROR", e.getMessage());
+        }
+
         mCsvFileDataSource.destroy();
         mCsvFileDataSource.init();
-
-        return true;
+        return originalFileName;
     }
 }

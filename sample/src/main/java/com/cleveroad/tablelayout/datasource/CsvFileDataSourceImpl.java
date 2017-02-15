@@ -12,7 +12,9 @@ import android.util.SparseArray;
 
 import com.cleveroad.tablelayout.utils.ClosableUtil;
 import com.cleveroad.tablelayout.utils.CsvUtils;
+import com.cleveroad.tablelayout.utils.FileUtils;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,6 +34,7 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
     private final Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
     @SuppressLint("UseSparseArrays")
     private final SparseArray<SparseArray<String>> mChangedItems = new SparseArray<>();
+    private Uri mCsvTempFileUri;
     private int mRowsCount;
     private int mColumnsCount;
 
@@ -86,9 +89,9 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
         return mCsvFileUri;
     }
 
-//    public void updateRow(int rowIndex, List<String> rowItems) {
-//        mChangedItems.put(rowIndex, rowItems);
-//    }
+    public Uri getCsvTempFileUri() {
+        return mCsvTempFileUri;
+    }
 
     public void updateItem(int rowIndex, int columnIndex, String value) {
         SparseArray<String> rowItems = mChangedItems.get(rowIndex);
@@ -106,9 +109,9 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
             final boolean isSolidRowHeader,
             final UpdateFileCallback callback) {
 
-        loaderManager.restartLoader(0, Bundle.EMPTY, new LoaderManager.LoaderCallbacks<Boolean>() {
+        loaderManager.restartLoader(0, Bundle.EMPTY, new LoaderManager.LoaderCallbacks<String>() {
             @Override
-            public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+            public Loader<String> onCreateLoader(int id, Bundle args) {
                 return new UpdateCsvFileLoader(
                         mContext,
                         CsvFileDataSourceImpl.this,
@@ -118,27 +121,41 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
             }
 
             @Override
-            public void onLoadFinished(Loader<Boolean> loader, Boolean data) {
-                callback.onFileUpdated(getCsvFileUri().getEncodedPath(), data);
+            public void onLoadFinished(Loader<String> loader, String data) {
+                callback.onFileUpdated(getCsvFileUri().getEncodedPath(), data != null && !data.isEmpty());
             }
 
             @Override
-            public void onLoaderReset(Loader<Boolean> loader) {
+            public void onLoaderReset(Loader<String> loader) {
                 //do nothing
             }
         });
     }
 
     private InputStreamReader getInputStreamReader() throws IOException {
-        return new FileReader(mCsvFileUri.getEncodedPath());
+        return new FileReader(mCsvTempFileUri.getEncodedPath());
     }
 
     public void destroy() {
+        File originalFile = new File(mCsvTempFileUri.getEncodedPath());
+        if (originalFile.exists()) {
+            originalFile.delete();
+        }
         mItemsCache.clear();
         mChangedItems.clear();
     }
 
     void init() {
+        File tempFile = FileUtils.createTempFile(mContext);
+
+        try {
+            File originalFile = new File(mCsvFileUri.getEncodedPath());
+            FileUtils.copy(originalFile, tempFile);
+        } catch (IOException e) {
+
+        } finally {
+            mCsvTempFileUri = Uri.fromFile(tempFile);
+        }
         mRowsCount = calculateLinesCount();
         mColumnsCount = getRow(0).size();
     }
@@ -220,7 +237,6 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
 
         } catch (Exception e) {
             e.printStackTrace();
-//            Log.e(TAG, e.getMessage());
         } finally {
             ClosableUtil.closeWithoutException(fileReader);
         }
