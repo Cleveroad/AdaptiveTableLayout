@@ -1,8 +1,10 @@
 package com.cleveroad.tablelayout.ui;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,15 +25,25 @@ import com.cleveroad.tablelayout.R;
 import com.cleveroad.tablelayout.adapter.SampleLinkedTableAdapter;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
 import com.cleveroad.tablelayout.datasource.UpdateFileCallback;
-import com.cleveroad.tablelayout.ui.dialogs.EditFileNameDialog;
 import com.cleveroad.tablelayout.ui.dialogs.EditItemDialog;
+import com.cleveroad.tablelayout.utils.PermissionHelper;
+import com.cleveroad.tablelayout.utils.UriHelper;
+
+import static android.content.Intent.EXTRA_MIME_TYPES;
 
 public class TableLayoutFragment
         extends Fragment
         implements OnItemClickListener, OnItemLongClickListener, UpdateFileCallback {
     private static final String TAG = TableLayoutFragment.class.getSimpleName();
-
+    private static final int REQUEST_CODE_PICK_CSV = 3;
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1132;
     private static final String EXTRA_CSV_FILE = "EXTRA_CSV_FILE";
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
     private Uri mCsvFile;
     private LinkedTableAdapter mTableAdapter;
     private CsvFileDataSourceImpl mCsvFileDataSource;
@@ -73,12 +85,19 @@ public class TableLayoutFragment
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.actionSave) {
-                    mCsvFileDataSource.applyChanges(
-                            getLoaderManager(),
-                            mTableLayout.getLinkedAdapterRowsModifications(),
-                            mTableLayout.getLinkedAdapterColumnsModifications(),
-                            mTableLayout.isSolidRowHeader(),
-                            TableLayoutFragment.this);
+                    if (PermissionHelper.checkOrRequest(
+                            getActivity(),
+                            REQUEST_EXTERNAL_STORAGE,
+                            PERMISSIONS_STORAGE)) {
+
+                        mCsvFileDataSource.applyChanges(
+                                getLoaderManager(),
+                                mTableLayout.getLinkedAdapterRowsModifications(),
+                                mTableLayout.getLinkedAdapterColumnsModifications(),
+                                mTableLayout.isSolidRowHeader(),
+                                TableLayoutFragment.this);
+
+                    }
                 }
                 return true;
             }
@@ -90,14 +109,18 @@ public class TableLayoutFragment
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == EditItemDialog.REQUEST_CODE_EDIT_SONG && resultCode == Activity.RESULT_OK && data != null) {
+        if (requestCode == REQUEST_CODE_PICK_CSV && data != null) {
+            Activity activity = getActivity();
+            if (activity instanceof CsvPickerFragment.OnCsvFileSelectedListener) {
+                ((CsvPickerFragment.OnCsvFileSelectedListener) activity).onCsvFileSelected(
+                        UriHelper.getPath(getContext(), data.getData()));
+            }
+        } else if (requestCode == EditItemDialog.REQUEST_CODE_EDIT_SONG && resultCode == Activity.RESULT_OK && data != null) {
             int columnIndex = data.getIntExtra(EditItemDialog.EXTRA_COLUMN_NUMBER, 0);
             int rowIndex = data.getIntExtra(EditItemDialog.EXTRA_ROW_NUMBER, 0);
             String value = data.getStringExtra(EditItemDialog.EXTRA_VALUE);
             mCsvFileDataSource.updateItem(rowIndex, columnIndex, value);
             mTableAdapter.notifyItemChanged(rowIndex, columnIndex);
-        } else if (requestCode == EditFileNameDialog.REQUEST_CODE_EDIT_FILE_NAME && resultCode == Activity.RESULT_OK && data != null) {
-
         }
     }
 
@@ -147,7 +170,7 @@ public class TableLayoutFragment
     }
 
     @Override
-    public void onFileUpdated(String fileName, boolean isSuccess) {
+    public void onFileUpdated(final String filePath, boolean isSuccess) {
         View view = getView();
         if (view == null) {
             return;
@@ -156,10 +179,18 @@ public class TableLayoutFragment
         if (isSuccess) { //if data source have been changed
             initAdapter();
             mTableAdapter.notifyDataSetChanged();
-            Log.e("Done", "File path = " + fileName);
-            Snackbar.make(view, R.string.changes_saved, Snackbar.LENGTH_SHORT).show();
+            Log.e("Done", "File path = " + filePath);
+            String text = getString(R.string.changes_saved) + " path = " + filePath;
+            Snackbar.make(view, text, Snackbar.LENGTH_LONG)
+                    .setAction("Open", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            pickCsvFile(Uri.parse(filePath));
+                        }
+                    })
+                    .show();
         } else {
-            Snackbar.make(view, R.string.unexpected_error, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(view, R.string.unexpected_error, Snackbar.LENGTH_LONG).show();
         }
     }
 
@@ -171,4 +202,18 @@ public class TableLayoutFragment
 
         mTableLayout.setAdapter(mTableAdapter);
     }
+
+    private void pickCsvFile(Uri csvFileUri) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        intent.setDataAndType(csvFileUri, "*/*");
+        String[] mimetypes = {"text/comma-separated-values", "text/csv"};
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            intent.putExtra(EXTRA_MIME_TYPES, mimetypes);
+        }
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.pick_file)), REQUEST_CODE_PICK_CSV);
+    }
+
+
 }
