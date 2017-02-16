@@ -122,7 +122,7 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
 
             @Override
             public void onLoadFinished(Loader<String> loader, String data) {
-                callback.onFileUpdated(getCsvFileUri().getEncodedPath(), data != null && !data.isEmpty());
+                callback.onFileUpdated(data, data != null && !data.isEmpty());
             }
 
             @Override
