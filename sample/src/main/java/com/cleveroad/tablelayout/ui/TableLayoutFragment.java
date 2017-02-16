@@ -25,13 +25,13 @@ import com.cleveroad.tablelayout.adapter.SampleLinkedTableAdapter;
 import com.cleveroad.tablelayout.datasource.CsvFileDataSourceImpl;
 import com.cleveroad.tablelayout.datasource.UpdateFileCallback;
 import com.cleveroad.tablelayout.ui.dialogs.EditItemDialog;
+import com.cleveroad.tablelayout.ui.dialogs.SettingsDialog;
 import com.cleveroad.tablelayout.utils.PermissionHelper;
 
 public class TableLayoutFragment
         extends Fragment
         implements OnItemClickListener, OnItemLongClickListener, UpdateFileCallback {
     private static final String TAG = TableLayoutFragment.class.getSimpleName();
-    private static final int REQUEST_CODE_PICK_CSV = 3;
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1132;
     private static final String EXTRA_CSV_FILE = "EXTRA_CSV_FILE";
@@ -94,6 +94,9 @@ public class TableLayoutFragment
                                 TableLayoutFragment.this);
 
                     }
+                } else if (item.getItemId() == R.id.actionSettings) {
+                    SettingsDialog.newInstance(mTableLayout.isHeaderFixed(), mTableLayout.isSolidRowHeader())
+                            .show(getChildFragmentManager(), SettingsDialog.class.getSimpleName());
                 }
                 return true;
             }
@@ -111,6 +114,11 @@ public class TableLayoutFragment
             String value = data.getStringExtra(EditItemDialog.EXTRA_VALUE);
             mCsvFileDataSource.updateItem(rowIndex, columnIndex, value);
             mTableAdapter.notifyItemChanged(rowIndex, columnIndex);
+        } else if (requestCode == SettingsDialog.REQUEST_CODE_SETTINGS && resultCode == Activity.RESULT_OK && data != null) {
+            mTableLayout.setHeaderFixed(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_HEADER_FIXED, mTableLayout.isHeaderFixed()));
+            mTableLayout.setSolidRowHeader(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_SOLID_HEADER, mTableLayout.isSolidRowHeader()));
+            mTableAdapter.notifyDataSetChanged();
+//            mTableLayout.setAdapter(mTableAdapter);
         }
     }
 

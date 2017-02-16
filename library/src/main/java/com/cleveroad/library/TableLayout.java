@@ -688,12 +688,12 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
      * @param holder current view holder
      */
     private void refreshLeftTopHeaderViewHolder(ViewHolder holder) {
-        if (mSettings.isHeaderFixed()) {
-            return;
-        }
+//        if (mSettings.isHeaderFixed()) {
+//            return;
+//        }
 
-        int left = -mState.getScrollX();
-        int top = -mState.getScrollY();
+        int left = mSettings.isHeaderFixed() ? 0 : -mState.getScrollX();
+        int top = mSettings.isHeaderFixed() ? 0 : -mState.getScrollY();
         View view = holder.getItemView();
 
         int leftMargin = mSettings.getCellMargin();

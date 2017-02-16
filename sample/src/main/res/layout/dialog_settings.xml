@@ -22,28 +22,30 @@
             android:id="@+id/tvFileName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/edit_file_name"
+            android:text="@string/settings"
             android:textColor="@color/colorTextWhite"
             android:textSize="18sp"
             android:textStyle="bold"/>
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/tilFileName"
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swSolidRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/llButtonsContainer"
             android:layout_below="@+id/tvFileName"
-            android:layout_marginTop="16dp">
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_solid_row"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="18sp"/>
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/etFileName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/colorTextWhite"
-                android:textColorHint="@color/colorAccent"/>
-
-        </android.support.design.widget.TextInputLayout>
-
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swFixedHeaders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/swSolidRow"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_fixed_header"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="18sp"/>
 
         <LinearLayout
             android:id="@+id/llButtonsContainer"
