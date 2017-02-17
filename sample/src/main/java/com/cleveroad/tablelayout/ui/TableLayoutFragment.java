@@ -118,7 +118,6 @@ public class TableLayoutFragment
             mTableLayout.setHeaderFixed(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_HEADER_FIXED, mTableLayout.isHeaderFixed()));
             mTableLayout.setSolidRowHeader(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_SOLID_HEADER, mTableLayout.isSolidRowHeader()));
             mTableAdapter.notifyDataSetChanged();
-//            mTableLayout.setAdapter(mTableAdapter);
         }
     }
 

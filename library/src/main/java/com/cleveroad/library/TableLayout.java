@@ -30,6 +30,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
     private static final String EXTRA_STATE_VIEW_GROUP = "EXTRA_STATE_VIEW_GROUP";
 
     private static final int SHADOW_THICK = 10;
+    private static final int SHADOW_HEADERS_THICK = 5;
 
     /**
      * Matrix with item view holders
@@ -456,11 +457,11 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             }
 
             if (mState.isColumnDragging()) {
-                refreshAllColumnHeadersHoldrs();
+                refreshAllColumnHeadersHolders();
                 refreshAllRowHeadersHolders();
             } else {
                 refreshAllRowHeadersHolders();
-                refreshAllColumnHeadersHoldrs();
+                refreshAllColumnHeadersHolders();
             }
 
             if (mLeftTopViewHolder != null) {
@@ -472,7 +473,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
         }
     }
 
-    private void refreshAllColumnHeadersHoldrs() {
+    private void refreshAllColumnHeadersHolders() {
         for (int count = mHeaderColumnViewHolders.size(), i = 0; i < count; i++) {
             int key = mHeaderColumnViewHolders.keyAt(i);
             // get the object by the key.
@@ -581,7 +582,6 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             }
         }
 
-
         //noinspection ResourceType
         view.layout(left - mState.getScrollX() + leftMargin,
                 top + topMargin,
@@ -601,11 +601,10 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
 
             //noinspection ResourceType
             shadow.layout(mState.isRowDragging() ? 0 :
-                            mSettings.isHeaderFixed() ? mManager.getHeaderRowWidth() :
-                                    mManager.getHeaderRowWidth() - mState.getScrollX(),
+                            mSettings.isHeaderFixed() ? 0 : -mState.getScrollX(),
                     top + mManager.getHeaderColumnHeight(),
                     mSettings.getLayoutWidth(),
-                    top + mManager.getHeaderColumnHeight() + SHADOW_THICK);
+                    top + mManager.getHeaderColumnHeight() + SHADOW_HEADERS_THICK);
 
             shadow.bringToFront();
         }
@@ -659,6 +658,7 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                 top - mState.getScrollY() + topMargin,
                 left + mManager.getHeaderRowWidth() + leftMargin,
                 top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY() + topMargin);
+
         if (mState.isColumnDragging()) {
             view.bringToFront();
         }
@@ -673,9 +673,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             //noinspection ResourceType
             shadow.layout(left + mManager.getHeaderRowWidth(),
                     mState.isColumnDragging() ? 0 :
-                            mSettings.isHeaderFixed() ? mManager.getHeaderColumnHeight() :
-                                    mManager.getHeaderColumnHeight() - mState.getScrollY(),
-                    left + mManager.getHeaderRowWidth() + SHADOW_THICK,
+                            mSettings.isHeaderFixed() ? 0 : -mState.getScrollY(),
+                    left + mManager.getHeaderRowWidth() + SHADOW_HEADERS_THICK,
                     mSettings.getLayoutHeight());
 
             shadow.bringToFront();
@@ -812,6 +811,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             ViewHolder viewHolder = mHeaderRowViewHolders.get(i);
             if (viewHolder == null && mAdapter != null) {
                 addViewHolder(i, 0, ViewHolderType.ROW_HEADER);
+            } else if (viewHolder != null && mAdapter != null) {
+                refreshHeaderRowViewHolder(viewHolder);
             }
         }
         for (int i = leftColumn; i <= rightColumn; i++) {
@@ -819,6 +820,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
             ViewHolder viewHolder = mHeaderColumnViewHolders.get(i);
             if (viewHolder == null && mAdapter != null) {
                 addViewHolder(0, i, ViewHolderType.COLUMN_HEADER);
+            } else if (viewHolder != null && mAdapter != null) {
+                refreshHeaderColumnViewHolder(viewHolder);
             }
         }
 
@@ -837,6 +840,8 @@ public class TableLayout extends ViewGroup implements ScrollHelper.ScrollHelperL
                     mSettings.getCellMargin(),
                     mManager.getHeaderRowWidth() + mSettings.getCellMargin(),
                     mManager.getHeaderColumnHeight() + mSettings.getCellMargin());
+        } else if (mLeftTopViewHolder != null && mAdapter != null) {
+            refreshLeftTopHeaderViewHolder(mLeftTopViewHolder);
         }
     }
 

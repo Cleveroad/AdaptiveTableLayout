@@ -124,7 +124,7 @@ public class SampleLinkedTableAdapter extends LinkedTableAdapter<ViewHolderImpl>
         int color = COLORS[column % COLORS.length];
         GradientDrawable gd = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
-                new int[]{ColorUtils.setAlphaComponent(color, 60), 0x00000000});
+                new int[]{ColorUtils.setAlphaComponent(color, 50), 0x00000000});
         gd.setCornerRadius(0f);
         vh.vGradient.setBackground(gd);
         vh.vLine.setBackgroundColor(color);
