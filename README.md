@@ -6,10 +6,9 @@
 Pay your attention to our new library that makes it possible to read, edit and write CSV files. If you use Android-based device, you can easily use our library for implementation of all aforementioned actions. In addition, you will be able to change rows and columns, display the picture via link, and align the required data. It will surely help you cope with your tasks faster and make your output higher. TableLayout library is at your disposal.
 
 ![Demo image](/images/demo.gif)
-####Take a look at the animation of <strong><a target="_blank" href="https://www.youtube.com/watch?v=YTwpEPIlhuE">TableLayout for Android on YouTube</a></strong> in HD quality.
 
 ####Take a look at the animation of <strong><a target="_blank" href="https://www.youtube.com/watch?v=YTwpEPIlhuE">TableLayout for Android on YouTube</a></strong> in HD quality. For using this library in a valuable way, you can find our CSV Editor app on the Google Play Store or on Appetize.
-<br><br>[![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)[![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)[![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)
+<br>[![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)[![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)[![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)
 
 The main goal of the library is to apply all its functions in the process of working with CSV files. Moreover, it will give you a competitive edge over others. 
 
