@@ -8,14 +8,9 @@ Pay your attention to our new library that makes it possible to read, edit and w
 ![Demo image](/images/demo.gif)
 ####Take a look at the animation of <strong><a target="_blank" href="https://www.youtube.com/watch?v=YTwpEPIlhuE">TableLayout for Android on YouTube</a></strong> in HD quality.
 
-For using this library in a valuable way, you can find our CSV Editor app on the Google Play Store. [![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)
+For using this library in a valuable way, you can find our CSV Editor app on the Google Play Store.
+<br>[![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)
 
-<table>
-  <tr>
-    <td>For using this library in a valuable way, you can find our CSV Editor app on the Google Play Store.</td>
-<td>[![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)</td>
-  </tr>
-</table>
 
 [![Awesome](/images/logo-footer.png)](https://www.cleveroad.com/?utm_source=github&utm_medium=label&utm_campaign=contacts)
 <br/>
