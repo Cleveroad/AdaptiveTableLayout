@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/charcoal">
+
+    <View
+        android:id="@+id/vGradient"
+        android:layout_width="48dp"
+        android:layout_height="match_parent"
+        />
+
+    <View
+        android:id="@+id/vLine"
+        android:layout_width="2dp"
+        android:layout_height="match_parent"
+        />
+
+    <TextView
+        android:id="@+id/tvText"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:maxLines="1"
+        android:padding="16dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        tools:text="text"/>
+
+</RelativeLayout>
