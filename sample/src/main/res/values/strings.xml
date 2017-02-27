@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">CSV Editor</string>
+
+    <string name="pick_csv_file">Add CSV table from your phone memory and you can read and edit it.</string>
+    <string name="pick_csv_or_demo_file">Open any CSVor you can use this DEMO file</string>
+    <string name="pick_file">Pick CSV-file</string>
+    <string name="demo">Demo</string>
+    <!-- edit song dialog -->
+    <string name="edit_song">Edit song</string>
+    <string name="settings">Settings</string>
+    <string name="settings_fixed_header">Fixed headers</string>
+    <string name="settings_solid_row">Solid row</string>
+    <string name="position">Position</string>
+    <string name="photo_url">Photo url</string>
+    <string name="artist_name">Artist name</string>
+    <string name="album_name">Album name</string>
+    <string name="song">Song</string>
+    <string name="genres">Genres</string>
+    <string name="time">Time</string>
+    <string name="chart_number">WLS on chart</string>
+    <string name="votes">Votes count</string>
+
+    <string name="rock">Rock</string>
+    <string name="r_and_b">R&amp;B</string>
+    <string name="pop">Pop</string>
+    <string name="jazz">Jazz</string>
+    <string name="hip_hop">Hip hop</string>
+    <string name="electronic">Electronic</string>
+    <string name="blues">Blues</string>
+    <string name="country">Country</string>
+
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="artists_header">Artists</string>
+    <string name="save">Save</string>
+
+    <string name="changes_saved">All changes have been saved</string>
+    <string name="unexpected_error">Unexpected error</string>
+    <string name="not_csv_file_error">Not csv file</string>
+
+</resources>

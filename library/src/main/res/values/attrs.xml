@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AdaptiveTableLayout">
+        <attr name="fixedHeaders" format="boolean"/>
+        <attr name="cellMargin" format="dimension"/>
+        <attr name="solidRowHeaders" format="boolean"/>
+    </declare-styleable>
+</resources>

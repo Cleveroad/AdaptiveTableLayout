@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="42dp"
+    android:layout_marginLeft="42dp"
+    android:layout_marginRight="42dp"
+    android:layout_marginStart="42dp"
+    app:cardBackgroundColor="@color/medium_jungle_green"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="3sp"
+    app:contentPadding="16dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:id="@+id/tvFileName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swSolidRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvFileName"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_solid_row"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="18sp"/>
+
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swFixedHeaders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/swSolidRow"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_fixed_header"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="18sp"/>
+
+        <LinearLayout
+            android:id="@+id/llButtonsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/bNegative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:text="@string/cancel"
+                android:textColor="@color/colorTextWhite"/>
+
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/bPositive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:text="@string/ok"
+                android:textColor="@color/colorTextWhite"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+</android.support.v7.widget.CardView>
+
