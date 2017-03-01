@@ -16,8 +16,74 @@ The main goal of the library is to apply all its functions in the process of wor
 <br/>
 ## Setup and usage
 ### Installation
+by gradle : 
+```groovy
+dependencies {
+    compile "com.cleveroad:adaptivetablelayout:1.0.0"
+}
+```
+#### Features ####
+Library consist from three parts:
+- AdaptiveTableLayout (View)
+- LinkedAdaptiveTableAdapter (Adapter)
+- ViewHolderImpl (ViewHolder)
 
+#### Usage ####
+- AdaptiveTableLayout
+```XML
+  <com.cleveroad.adaptivetablelayout.AdaptiveTableLayout
+        android:id="@+id/tableLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"      
+        app:cellMargin="1dp"
+        app:fixedHeaders="true"
+        app:solidRowHeaders="true" />
+```
+|  attribute name | description |
+|---|---|
+| cellMargin  | margin between cards |
+| fixedHeaders  | fixed headers mode. If enable, headers always will display in the corners. |
+| solidRowHeaders  | solid row headers mode. If enable, row header will change his position with dragging row. |
 
+```groovy
+// return fixed headers mode
+boolean isHeaderFixed(); 
+
+// return solid row headers mode
+boolean isSolidRowHeader()
+
+// Set fixed headers mode
+void setHeaderFixed(boolean headerFixed)
+
+// Set solid row headers mode
+void setSolidRowHeader(boolean solidRowHeader)
+
+/**
+ * Set adapter with IMMUTABLE data.
+ * Create wrapper with links between layout rows, columns and data rows, columns.
+ * On drag and drop event just change links but not change data in adapter.
+ */
+void setAdapter(@Nullable AdaptiveTableAdapter adapter)
+
+/**
+ * Set adapter with MUTABLE data.
+ * You need to implement switch rows and columns methods.    
+ * DO NOT USE WITH BIG DATA!!
+ */
+void setAdapter(@Nullable DataAdaptiveTableLayoutAdapter adapter)
+
+// Notify any registered observers that the data set has changed.
+void notifyDataSetChanged()
+
+// Notify any registered observers that the item has changed.
+void notifyItemChanged(int rowIndex, int columnIndex)
+
+// Notify any registered observers that the row with rowIndex has changed.
+void notifyRowChanged(int rowIndex)
+
+// Notify any registered observers that the column with columnIndex has changed.
+void notifyColumnChanged(int columnIndex)
+```
 
 #### Support ####
 If you have any questions, issues or propositions, please create a <a href="../../issues/new">new issue</a> in this repository.
