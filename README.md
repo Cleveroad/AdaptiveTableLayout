@@ -29,7 +29,7 @@ Library consist from three parts:
 - ViewHolderImpl (ViewHolder)
 
 #### Usage ####
-- AdaptiveTableLayout
+## AdaptiveTableLayout ##
 ```XML
   <com.cleveroad.adaptivetablelayout.AdaptiveTableLayout
         android:id="@+id/tableLayout"
@@ -84,6 +84,15 @@ void notifyRowChanged(int rowIndex)
 // Notify any registered observers that the column with columnIndex has changed.
 void notifyColumnChanged(int columnIndex)
 ```
+## Adapter ##
+You could use adapter interfaces: AdaptiveTableAdapter and DataAdaptiveTableLayoutAdapter. But for simplier usege library contains base adapters: <b>BaseDataAdaptiveTableLayoutAdapter</b> and <b>LinkedAdaptiveTableAdapter</b>.
+
+<b>BaseDataAdaptiveTableLayoutAdapter</b> - simple adapter which work with light data. WARNING! on each row/column switch, original data will be changed. 
+
+<b>LinkedAdaptiveTableAdapter</b> - adapter which work with heavy data. WARNING! This type of adapter doesn't change original data. It contains matrix with changed items with links on it. To get changed data you need use AdaptiveTableLayout.getLinkedAdapterRowsModifications() and AdaptiveTableLayout.getLinkedAdapterColumnsModifications().
+Don't forget to check AdaptiveTableLayout.isSolidRowHeader() flag. If it's false, you need to ignore switching first elemet in each row.
+
+<b>For both adapters you need to know all rows/columns widths, height for and rows/columns count before set adapter to AdaptiveTableLayout.</b>
 
 #### Support ####
 If you have any questions, issues or propositions, please create a <a href="../../issues/new">new issue</a> in this repository.
