@@ -7,7 +7,7 @@ Pay your attention to our new library that makes it possible to read, edit and w
 
 ![Demo image](/images/demo.gif)
 
-####Take a look at the animation of <strong><a target="_blank" href="https://www.youtube.com/watch?v=YTwpEPIlhuE">AdaptiveTableLayout for Android on YouTube</a></strong> in HD quality. For using this library in a valuable way, you can find our CSV Editor app on the <a target="_blank"  href="https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout">Google Play Store</a> or on <a target="_blank"  href="https://appetize.io/app/wgacjavwr57fec241bq802gzcg?device=nexus5&scale=75&orientation=portrait&osVersion=7.0">Appetize</a>.
+#### Take a look at the animation of <strong><a target="_blank" href="https://www.youtube.com/watch?v=YTwpEPIlhuE">AdaptiveTableLayout for Android on YouTube</a></strong> in HD quality. For using this library in a valuable way, you can find our CSV Editor app on the <a target="_blank"  href="https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout">Google Play Store</a> or on <a target="_blank"  href="https://appetize.io/app/wgacjavwr57fec241bq802gzcg?device=nexus5&scale=75&orientation=portrait&osVersion=7.0">Appetize</a>.
 [![Awesome](/images/youtube.png)](https://www.youtube.com/watch?v=YTwpEPIlhuE)[![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)[![Awesome](/images/appertize.png)](https://appetize.io/app/wgacjavwr57fec241bq802gzcg?device=nexus5&scale=75&orientation=portrait&osVersion=7.0)
 
 The main goal of the library is to apply all its functions in the process of working with CSV files. Moreover, it will give you a competitive edge over others. 
