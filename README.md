@@ -22,14 +22,14 @@ dependencies {
     compile "com.cleveroad:adaptivetablelayout:1.0.0"
 }
 ```
-#### Features ####
+### Features ###
 Library consist from three parts:
 - AdaptiveTableLayout (View)
 - LinkedAdaptiveTableAdapter (Adapter)
 - ViewHolderImpl (ViewHolder)
 
-#### Usage ####
-## AdaptiveTableLayout ##
+### Usage ###
+#### AdaptiveTableLayout ####
 ```XML
   <com.cleveroad.adaptivetablelayout.AdaptiveTableLayout
         android:id="@+id/tableLayout"
@@ -84,7 +84,7 @@ void notifyRowChanged(int rowIndex)
 // Notify any registered observers that the column with columnIndex has changed.
 void notifyColumnChanged(int columnIndex)
 ```
-## Adapter ##
+#### Adapter ####
 You could use adapter interfaces: AdaptiveTableAdapter and DataAdaptiveTableLayoutAdapter. But for simplier usege library contains base adapters: <b>BaseDataAdaptiveTableLayoutAdapter</b> and <b>LinkedAdaptiveTableAdapter</b>.
 
 <b>BaseDataAdaptiveTableLayoutAdapter</b> - simple adapter which work with light data. WARNING! on each row/column switch, original data will be changed. 
@@ -93,8 +93,34 @@ You could use adapter interfaces: AdaptiveTableAdapter and DataAdaptiveTableLayo
 Don't forget to check AdaptiveTableLayout.isSolidRowHeader() flag. If it's false, you need to ignore switching first elemet in each row.
 
 <b>For both adapters you need to know all rows/columns widths, height for and rows/columns count before set adapter to AdaptiveTableLayout.</b>
+#### Fragment/Activity usage ####
+```groovy
+mTableLayout = (AdaptiveTableLayout) view.findViewById(R.id.tableLayout);
+...
+mTableAdapter = new SampleLinkedTableAdapter(getContext(), mCsvFileDataSource);
+mTableAdapter.setOnItemClickListener(...);
+mTableAdapter.setOnItemLongClickListener(...);
+mTableLayout.setAdapter(mTableAdapter);
+...
+mTableLayout.setHeaderFixed(true);
+mTableLayout.setSolidRowHeader(true);
+mTableAdapter.notifyDataSetChanged();
+```
+#### XML usage ####
+```groovy
+ <com.cleveroad.adaptivetablelayout.AdaptiveTableLayout
+        android:id="@+id/tableLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"
+        app:cellMargin="1dp"
+        app:fixedHeaders="true"
+        app:solidRowHeaders="true" />
+```
+#### Adapter usage ####
+<a href="sample/src/main/java/com/cleveroad/sample/adapter/SampleLinkedTableAdapter.java"> Adapter sample </a>
 
-#### Support ####
+### Support ###
 If you have any questions, issues or propositions, please create a <a href="../../issues/new">new issue</a> in this repository.
 
 If you want to hire us, send an email to sales@cleveroad.com or fill the form on <a href="https://www.cleveroad.com/contact">contact page</a>
@@ -103,7 +129,7 @@ Follow us:
 
 [![Awesome](/images/social/facebook.png)](https://www.facebook.com/cleveroadinc/)   [![Awesome](/images/social/twitter.png)](https://twitter.com/cleveroadinc)   [![Awesome](/images/social/google.png)](https://plus.google.com/+CleveroadInc)   [![Awesome](/images/social/linkedin.png)](https://www.linkedin.com/company/cleveroad-inc-)   [![Awesome](/images/social/youtube.png)](https://www.youtube.com/channel/UCFNHnq1sEtLiy0YCRHG2Vaw)
 <br/>
-#### License ####
+### License ###
 * * *
     The MIT License (MIT)
     
