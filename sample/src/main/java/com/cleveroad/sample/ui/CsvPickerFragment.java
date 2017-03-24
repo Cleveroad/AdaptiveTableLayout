@@ -35,6 +35,7 @@ import static android.content.Intent.EXTRA_MIME_TYPES;
 
 public class CsvPickerFragment extends Fragment implements View.OnClickListener {
     private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE = 1;
+    private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE_DEMO = 3;
     private static final int REQUEST_CODE_PICK_CSV = 2;
     private TextView tvPickFile;
 
@@ -67,7 +68,10 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View textView) {
-                createDemoFile();
+                if (PermissionHelper.checkOrRequest(CsvPickerFragment.this, REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE_DEMO,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    createDemoFile();
+                }
             }
 
             @Override
@@ -126,10 +130,6 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
     }
 
     private void createDemoFile() {
-
-        if (PermissionHelper.checkOrRequest(getActivity(), REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE)) {
-        }
 
         File file = createDemoTempFile();
         try {

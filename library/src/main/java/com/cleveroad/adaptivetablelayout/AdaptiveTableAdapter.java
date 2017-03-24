@@ -56,14 +56,14 @@ interface AdaptiveTableAdapter<VH extends ViewHolder> extends AdaptiveTableDataS
     /**
      * How many rows are in the data table represented by this Adapter.
      *
-     * @return count of rows.
+     * @return count of rows with header
      */
     int getRowCount();
 
     /**
      * How many columns are in the data table represented by this Adapter.
      *
-     * @return count of columns.
+     * @return count of columns with header
      */
     int getColumnCount();
 

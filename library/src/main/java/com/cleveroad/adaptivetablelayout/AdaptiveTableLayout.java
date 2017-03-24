@@ -220,8 +220,8 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             return;
         }
 
-        // init manager
-        mManager.init(mAdapter.getRowCount(), mAdapter.getColumnCount());
+        // init manager. Not include headers
+        mManager.init(mAdapter.getRowCount() - 1, mAdapter.getColumnCount() - 1);
 
         // calculate widths
         for (int count = mManager.getColumnCount(), i = 0; i < count; i++) {

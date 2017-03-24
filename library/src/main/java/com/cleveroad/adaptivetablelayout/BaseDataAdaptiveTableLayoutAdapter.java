@@ -33,7 +33,7 @@ public abstract class BaseDataAdaptiveTableLayoutAdapter<VH extends ViewHolder> 
      * @param columnToIndex column to
      */
     void switchTwoColumns(int columnIndex, int columnToIndex) {
-        for (int i = 0; i < getRowCount(); i++) {
+        for (int i = 0; i < getRowCount() - 1; i++) {
             Object cellData = getItems()[i][columnToIndex];
             getItems()[i][columnToIndex] = getItems()[i][columnIndex];
             getItems()[i][columnIndex] = cellData;

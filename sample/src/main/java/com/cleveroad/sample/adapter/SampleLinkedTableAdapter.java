@@ -47,12 +47,12 @@ public class SampleLinkedTableAdapter extends LinkedAdaptiveTableAdapter<ViewHol
 
     @Override
     public int getRowCount() {
-        return mTableDataSource.getRowsCount() - 1;
+        return mTableDataSource.getRowsCount();
     }
 
     @Override
     public int getColumnCount() {
-        return mTableDataSource.getColumnsCount() - 1;
+        return mTableDataSource.getColumnsCount();
     }
 
     @NonNull
