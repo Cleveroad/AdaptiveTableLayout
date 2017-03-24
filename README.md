@@ -23,7 +23,7 @@ dependencies {
 }
 ```
 ### Features ###
-Library consist from three parts:
+Library consists of three parts:
 - AdaptiveTableLayout (View)
 - LinkedAdaptiveTableAdapter (Adapter)
 - ViewHolderImpl (ViewHolder)
@@ -42,8 +42,8 @@ Library consist from three parts:
 |  attribute name | description |
 |---|---|
 | cellMargin  | margin between cards |
-| fixedHeaders  | fixed headers mode. If enable, headers always will display in the corners. |
-| solidRowHeaders  | solid row headers mode. If enable, row header will change his position with dragging row. |
+| fixedHeaders  | fixed headers mode. If enable, headers always will be displayed in the corners. |
+| solidRowHeaders  | solid row headers mode. If enable, row header will change its position with dragging row. |
 
 ```groovy
 // return fixed headers mode
@@ -85,14 +85,14 @@ void notifyRowChanged(int rowIndex)
 void notifyColumnChanged(int columnIndex)
 ```
 #### Adapter ####
-You could use adapter interfaces: AdaptiveTableAdapter and DataAdaptiveTableLayoutAdapter. But for simplier usege library contains base adapters: <b>BaseDataAdaptiveTableLayoutAdapter</b> and <b>LinkedAdaptiveTableAdapter</b>.
+You could use adapter interfaces: AdaptiveTableAdapter and DataAdaptiveTableLayoutAdapter. But to simplify the usage, library contains base adapters: <b>BaseDataAdaptiveTableLayoutAdapter</b> and <b>LinkedAdaptiveTableAdapter</b>.
 
-<b>BaseDataAdaptiveTableLayoutAdapter</b> - simple adapter which work with light data. WARNING! on each row/column switch, original data will be changed. 
+<b>BaseDataAdaptiveTableLayoutAdapter</b> - simple adapter which works with light data. WARNING! on each row/column switch, original data will be changed. 
 
-<b>LinkedAdaptiveTableAdapter</b> - adapter which work with heavy data. WARNING! This type of adapter doesn't change original data. It contains matrix with changed items with links on it. To get changed data you need use AdaptiveTableLayout.getLinkedAdapterRowsModifications() and AdaptiveTableLayout.getLinkedAdapterColumnsModifications().
+<b>LinkedAdaptiveTableAdapter</b> - adapter which works with heavy data. WARNING! This type of adapter doesn't change original data. It contains matrix with changed items with links on it. To get changed data you need use AdaptiveTableLayout.getLinkedAdapterRowsModifications() and AdaptiveTableLayout.getLinkedAdapterColumnsModifications().
 Don't forget to check AdaptiveTableLayout.isSolidRowHeader() flag. If it's false, you need to ignore switching first elemet in each row.
 
-<b>For both adapters you need to know all rows/columns widths, height for and rows/columns count before set adapter to AdaptiveTableLayout.</b>
+<b>For both adapters you need to know all rows/columns widths, heights and rows/columns count before set adapter to AdaptiveTableLayout.</b>
 #### Fragment/Activity usage ####
 ```groovy
 mTableLayout = (AdaptiveTableLayout) view.findViewById(R.id.tableLayout);
