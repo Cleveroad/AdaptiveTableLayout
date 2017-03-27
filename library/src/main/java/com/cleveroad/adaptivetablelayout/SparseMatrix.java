@@ -100,13 +100,12 @@ class SparseMatrix<TObj> {
     Collection<TObj> getAll() {
         Collection<TObj> result = new LinkedList<>();
         for (int countR = mData.size(), i = 0; i < countR; i++) {
-            int rowKey = mData.indexOfKey(i);
+            int rowKey = mData.keyAt(i);
             SparseArrayCompat<TObj> columns = mData.get(rowKey);
             for (int countC = columns.size(), j = 0; j < countC; j++) {
                 int key = columns.keyAt(j);
                 result.add(columns.get(key));
             }
-
         }
         return result;
     }
