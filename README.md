@@ -7,7 +7,7 @@ Pay your attention to our new library that makes it possible to read, edit and w
 
 ![Demo image](/images/demo.gif)
 
-####Take a look at the animation of <strong><a target="_blank" href="https://www.youtube.com/watch?v=YTwpEPIlhuE">AdaptiveTableLayout for Android on YouTube</a></strong> in HD quality. For using this library in a valuable way, you can find our CSV Editor app on the <a target="_blank"  href="https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout">Google Play Store</a> or on <a target="_blank"  href="https://appetize.io/app/wgacjavwr57fec241bq802gzcg?device=nexus5&scale=75&orientation=portrait&osVersion=7.0">Appetize</a>.
+#### Take a look at the animation of <strong><a target="_blank" href="https://www.youtube.com/watch?v=YTwpEPIlhuE">AdaptiveTableLayout for Android on YouTube</a></strong> in HD quality. For using this library in a valuable way, you can find our CSV Editor app on the <a target="_blank"  href="https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout">Google Play Store</a> or on <a target="_blank"  href="https://appetize.io/app/wgacjavwr57fec241bq802gzcg?device=nexus5&scale=75&orientation=portrait&osVersion=7.0">Appetize</a>.
 [![Awesome](/images/youtube.png)](https://www.youtube.com/watch?v=YTwpEPIlhuE)[![Awesome](/images/google-play.png)](https://play.google.com/store/apps/details?id=com.cleveroad.tablelayout)[![Awesome](/images/appertize.png)](https://appetize.io/app/wgacjavwr57fec241bq802gzcg?device=nexus5&scale=75&orientation=portrait&osVersion=7.0)
 
 The main goal of the library is to apply all its functions in the process of working with CSV files. Moreover, it will give you a competitive edge over others. 
@@ -22,14 +22,14 @@ dependencies {
     compile "com.cleveroad:adaptivetablelayout:1.0.0"
 }
 ```
-#### Features ####
-Library consist from three parts:
+### Features ###
+Library consists of three parts:
 - AdaptiveTableLayout (View)
 - LinkedAdaptiveTableAdapter (Adapter)
 - ViewHolderImpl (ViewHolder)
 
-#### Usage ####
-- AdaptiveTableLayout
+### Usage ###
+#### AdaptiveTableLayout ####
 ```XML
   <com.cleveroad.adaptivetablelayout.AdaptiveTableLayout
         android:id="@+id/tableLayout"
@@ -42,8 +42,8 @@ Library consist from three parts:
 |  attribute name | description |
 |---|---|
 | cellMargin  | margin between cards |
-| fixedHeaders  | fixed headers mode. If enable, headers always will display in the corners. |
-| solidRowHeaders  | solid row headers mode. If enable, row header will change his position with dragging row. |
+| fixedHeaders  | fixed headers mode. If enable, headers always will be displayed in the corners. |
+| solidRowHeaders  | solid row headers mode. If enable, row header will change its position with dragging row. |
 
 ```groovy
 // return fixed headers mode
@@ -84,8 +84,43 @@ void notifyRowChanged(int rowIndex)
 // Notify any registered observers that the column with columnIndex has changed.
 void notifyColumnChanged(int columnIndex)
 ```
+#### Adapter ####
+You could use adapter interfaces: AdaptiveTableAdapter and DataAdaptiveTableLayoutAdapter. But to simplify the usage, library contains base adapters: <b>BaseDataAdaptiveTableLayoutAdapter</b> and <b>LinkedAdaptiveTableAdapter</b>.
 
-#### Support ####
+<b>BaseDataAdaptiveTableLayoutAdapter</b> - simple adapter which works with light data. WARNING! on each row/column switch, original data will be changed. 
+
+<b>LinkedAdaptiveTableAdapter</b> - adapter which works with heavy data. WARNING! This type of adapter doesn't change original data. It contains matrix with changed items with links on it. To get changed data you need use AdaptiveTableLayout.getLinkedAdapterRowsModifications() and AdaptiveTableLayout.getLinkedAdapterColumnsModifications().
+Don't forget to check AdaptiveTableLayout.isSolidRowHeader() flag. If it's false, you need to ignore switching first elemet in each row.
+
+<b>For both adapters you need to know all rows/columns widths, heights and rows/columns count before set adapter to AdaptiveTableLayout.</b>
+#### Fragment/Activity usage ####
+```groovy
+mTableLayout = (AdaptiveTableLayout) view.findViewById(R.id.tableLayout);
+...
+mTableAdapter = new SampleLinkedTableAdapter(getContext(), mCsvFileDataSource);
+mTableAdapter.setOnItemClickListener(...);
+mTableAdapter.setOnItemLongClickListener(...);
+mTableLayout.setAdapter(mTableAdapter);
+...
+mTableLayout.setHeaderFixed(true);
+mTableLayout.setSolidRowHeader(true);
+mTableAdapter.notifyDataSetChanged();
+```
+#### XML usage ####
+```groovy
+ <com.cleveroad.adaptivetablelayout.AdaptiveTableLayout
+        android:id="@+id/tableLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"
+        app:cellMargin="1dp"
+        app:fixedHeaders="true"
+        app:solidRowHeaders="true" />
+```
+#### Adapter usage ####
+<a href="sample/src/main/java/com/cleveroad/sample/adapter/SampleLinkedTableAdapter.java"> Adapter sample </a>
+
+### Support ###
 If you have any questions, issues or propositions, please create a <a href="../../issues/new">new issue</a> in this repository.
 
 If you want to hire us, send an email to sales@cleveroad.com or fill the form on <a href="https://www.cleveroad.com/contact">contact page</a>
@@ -94,7 +129,7 @@ Follow us:
 
 [![Awesome](/images/social/facebook.png)](https://www.facebook.com/cleveroadinc/)   [![Awesome](/images/social/twitter.png)](https://twitter.com/cleveroadinc)   [![Awesome](/images/social/google.png)](https://plus.google.com/+CleveroadInc)   [![Awesome](/images/social/linkedin.png)](https://www.linkedin.com/company/cleveroad-inc-)   [![Awesome](/images/social/youtube.png)](https://www.youtube.com/channel/UCFNHnq1sEtLiy0YCRHG2Vaw)
 <br/>
-#### License ####
+### License ###
 * * *
     The MIT License (MIT)
     
