@@ -51,7 +51,7 @@ public class FileUtils {
      */
     @SuppressWarnings("ResultOfMethodCallIgnored, unused")
     public static File createTempFile(Context context) {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.getDefault()).format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US).format(new Date());
         String tempFileName = PREFIX + timeStamp + "_";
         File cacheDir = context.getCacheDir();
         if (!cacheDir.exists()) {
