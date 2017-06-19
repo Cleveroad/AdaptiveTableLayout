@@ -109,6 +109,8 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
     @Nullable
     private TableInstanceSaver mSaver;
 
+    private boolean isRTL;
+
     public AdaptiveTableLayout(Context context) {
         super(context);
         init(context);
@@ -177,6 +179,11 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         mScrollHelper = new ScrollHelper(context);
         mScrollHelper.setListener(this);
         mShadowHelper = new ShadowHelper();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            isRTL = context.getResources().getConfiguration().getLayoutDirection()
+                    == View.LAYOUT_DIRECTION_RTL;
+        }
     }
 
 
@@ -522,9 +529,9 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         int leftMargin = holder.getColumnIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
         int topMargin = holder.getRowIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
         // update layout position
-        view.layout(left - mState.getScrollX() + mManager.getHeaderRowWidth() + leftMargin,
+        view.layout(left - mState.getScrollX() /* + mManager.getHeaderRowWidth()*/ + leftMargin,
                 top - mState.getScrollY() + mManager.getHeaderColumnHeight() + topMargin,
-                left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX() + mManager.getHeaderRowWidth() + leftMargin,
+                left + mManager.getColumnWidth(holder.getColumnIndex()) - mState.getScrollX() /*+ mManager.getHeaderRowWidth()*/ + leftMargin,
                 top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY() + mManager.getHeaderColumnHeight() + topMargin);
     }
 
@@ -545,7 +552,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
      */
     private void refreshHeaderColumnViewHolder(ViewHolder holder) {
 
-        int left = mManager.getColumnsWidth(0, Math.max(0, holder.getColumnIndex())) + mManager.getHeaderRowWidth();
+        int left = mManager.getColumnsWidth(0, Math.max(0, holder.getColumnIndex())) /*+ mManager.getHeaderRowWidth()*/;
         int top = mSettings.isHeaderFixed() ? 0 : -mState.getScrollY();
         View view = holder.getItemView();
 
@@ -618,7 +625,8 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
      */
     private void refreshHeaderRowViewHolder(ViewHolder holder) {
         int top = mManager.getRowsHeight(0, Math.max(0, holder.getRowIndex())) + mManager.getHeaderColumnHeight();
-        int left = mSettings.isHeaderFixed() ? 0 : -mState.getScrollX();
+//        int left = mSettings.isHeaderFixed() ? 0 : -mState.getScrollX();
+        int left = mSettings.isHeaderFixed() ? getRowHeaderStartXrtl() : -mState.getScrollX();
         View view = holder.getItemView();
 
         int leftMargin = holder.getColumnIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
@@ -654,7 +662,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         }
 
         //noinspection ResourceType
-        view.layout(left + leftMargin,
+        view.layout(left + leftMargin * (isRTL ? -1 : 1),
                 top - mState.getScrollY() + topMargin,
                 left + mManager.getHeaderRowWidth() + leftMargin,
                 top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY() + topMargin);
@@ -671,10 +679,10 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             }
 
             //noinspection ResourceType
-            shadow.layout(left + mManager.getHeaderRowWidth(),
+            shadow.layout(left + mManager.getHeaderRowWidth() * (isRTL ? 0 : 1),
                     mState.isColumnDragging() ? 0 :
                             mSettings.isHeaderFixed() ? 0 : -mState.getScrollY(),
-                    left + mManager.getHeaderRowWidth() + SHADOW_HEADERS_THICK,
+                    left + mManager.getHeaderRowWidth() * (isRTL ? 0 : 1) + SHADOW_HEADERS_THICK,
                     mSettings.getLayoutHeight());
 
             shadow.bringToFront();
@@ -688,7 +696,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
      */
     private void refreshLeftTopHeaderViewHolder(ViewHolder holder) {
 
-        int left = mSettings.isHeaderFixed() ? 0 : -mState.getScrollX();
+        int left = mSettings.isHeaderFixed() ? getRowHeaderStartXrtl() : -mState.getScrollX();
         int top = mSettings.isHeaderFixed() ? 0 : -mState.getScrollY();
         View view = holder.getItemView();
 
@@ -803,7 +811,8 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             // row view headers holders
             ViewHolder viewHolder = mHeaderRowViewHolders.get(i);
             if (viewHolder == null && mAdapter != null) {
-                addViewHolder(i, 0, ViewHolderType.ROW_HEADER);
+//                addViewHolder(i, 0, ViewHolderType.ROW_HEADER);
+                addViewHolder(i, mManager.getColumnCount(), ViewHolderType.ROW_HEADER);
             } else if (viewHolder != null && mAdapter != null) {
                 refreshHeaderRowViewHolder(viewHolder);
             }
@@ -829,9 +838,9 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             view.measure(
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderRowWidth(), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderColumnHeight(), MeasureSpec.EXACTLY));
-            view.layout(mSettings.getCellMargin(),
+            view.layout(mSettings.getCellMargin() * (isRTL ? 0 : 1) + getRowHeaderStartXrtl(),
                     mSettings.getCellMargin(),
-                    mManager.getHeaderRowWidth() + mSettings.getCellMargin(),
+                    mManager.getHeaderRowWidth() + mSettings.getCellMargin() + getRowHeaderStartXrtl(),
                     mManager.getHeaderColumnHeight() + mSettings.getCellMargin());
         } else if (mLeftTopViewHolder != null && mAdapter != null) {
             refreshLeftTopHeaderViewHolder(mLeftTopViewHolder);
@@ -1214,12 +1223,16 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         }
     }
 
+    private int getRowHeaderStartXrtl() {
+        return isRTL ? getRight() - mManager.getHeaderRowWidth() : 0;
+    }
+
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         final boolean result;
         final ViewHolder viewHolder = (ViewHolder) child.getTag(R.id.tag_view_holder);
         canvas.save();
-        int headerFixedX = mSettings.isHeaderFixed() ? 0 : mState.getScrollX();
+        int headerFixedX = mSettings.isHeaderFixed() ? getRowHeaderStartXrtl() : mState.getScrollX();
         int headerFixedY = mSettings.isHeaderFixed() ? 0 : mState.getScrollY();
         //noinspection StatementWithEmptyBody
         if (viewHolder == null) {
@@ -1227,30 +1240,30 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         } else if (viewHolder.getItemType() == ViewHolderType.COLUMN_HEADER) {
             // prepare canvas rect area for draw column header
             canvas.clipRect(
-                    Math.max(0, mManager.getHeaderRowWidth() - headerFixedX),
+                    Math.max(0, 0/*mManager.getHeaderRowWidth() - headerFixedX*/),
                     0,
-                    mSettings.getLayoutWidth(),
+                    mSettings.getLayoutWidth() - mManager.getHeaderRowWidth(),
                     Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY));
         } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
             // prepare canvas rect area for draw row header
             canvas.clipRect(
-                    0,
+                    getRowHeaderStartXrtl(),
                     Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY),
-                    Math.max(0, mManager.getHeaderRowWidth() - headerFixedX),
+                    Math.max(0, getRowHeaderStartXrtl() + mManager.getHeaderRowWidth() /*- headerFixedX*/),
                     mSettings.getLayoutHeight());
         } else if (viewHolder.getItemType() == ViewHolderType.ITEM) {
             // prepare canvas rect area for draw item (cell in table)
             canvas.clipRect(
-                    Math.max(0, mManager.getHeaderRowWidth() - headerFixedX),
+                    Math.max(0, 0/*mManager.getHeaderRowWidth() - headerFixedX -mManager.getHeaderRowWidth()*/),
                     Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY),
-                    mSettings.getLayoutWidth(),
+                    mSettings.getLayoutWidth() - mManager.getHeaderRowWidth(),
                     mSettings.getLayoutHeight());
         } else if (viewHolder.getItemType() == ViewHolderType.FIRST_HEADER) {
             // prepare canvas rect area for draw item (cell in table)
             canvas.clipRect(
+                    headerFixedX,
                     0,
-                    0,
-                    Math.max(0, mManager.getHeaderRowWidth() - headerFixedX),
+                    Math.max(0, getRowHeaderStartXrtl() + mManager.getHeaderRowWidth() /*- headerFixedX */),
                     Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY));
         }
         result = super.drawChild(canvas, child, drawingTime);
