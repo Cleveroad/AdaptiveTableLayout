@@ -636,8 +636,8 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
     private void refreshHeaderRowViewHolder(ViewHolder holder) {
         int top = mManager.getRowsHeight(0, Math.max(0, holder.getRowIndex())) + mManager.getHeaderColumnHeight();
         int left = calculateRowHeadersLeft();
-//        if (isRTL() && !isHeaderFixed())
-//            left += SHADOW_HEADERS_THICK;
+        if (isRTL())
+            left += mSettings.getCellMargin();
         View view = holder.getItemView();
 
         int leftMargin = holder.getColumnIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
@@ -710,8 +710,8 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
      */
     private void refreshLeftTopHeaderViewHolder(ViewHolder holder) {
         int left = calculateRowHeadersLeft();
-//        if (isRTL() && !isHeaderFixed())
-//            left += SHADOW_HEADERS_THICK;
+        if (isRTL())
+            left += mSettings.getCellMargin();
 
         int top = mSettings.isHeaderFixed() ? 0 : -mState.getScrollY();
         View view = holder.getItemView();
