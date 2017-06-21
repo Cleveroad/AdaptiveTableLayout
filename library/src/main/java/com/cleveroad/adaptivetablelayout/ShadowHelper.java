@@ -1,28 +1,38 @@
 package com.cleveroad.adaptivetablelayout;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 
 class ShadowHelper {
+    private static final int LAYOUT_DIRECTION_LTR = 0;
     @Nullable
     private View mRightShadow;
-
     @Nullable
     private View mLeftShadow;
-
     @Nullable
     private View mTopShadow;
-
     @Nullable
     private View mBottomShadow;
-
     @Nullable
     private View mColumnsHeadersShadow;
-
     @Nullable
     private View mRowsHeadersShadow;
+    private View mParentView;
+
+    public ShadowHelper(View v) {
+        mParentView = v;
+    }
+
+    private int getLayoutDirection() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return mParentView.getLayoutDirection();
+        } else {
+            return 0;
+        }
+    }
 
     @NonNull
     View addColumnsHeadersShadow(ViewGroup group) {
@@ -43,7 +53,9 @@ class ShadowHelper {
     View addRowsHeadersShadow(ViewGroup group) {
         if (mRowsHeadersShadow == null) {
             mRowsHeadersShadow = new View(group.getContext());
-            mRowsHeadersShadow.setBackgroundResource(R.drawable.shadow_right);
+            mRowsHeadersShadow.setBackgroundResource(getLayoutDirection() == LAYOUT_DIRECTION_LTR
+                    ? R.drawable.shadow_right
+                    : R.drawable.shadow_left);
             group.addView(mRowsHeadersShadow, 0);
         }
         return mRowsHeadersShadow;
@@ -149,5 +161,4 @@ class ShadowHelper {
             mBottomShadow = null;
         }
     }
-
 }

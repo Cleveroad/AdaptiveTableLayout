@@ -21,6 +21,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
 
     public static final String EXTRA_VALUE_SOLID_HEADER = "EXTRA_VALUE_SOLID_HEADER";
     public static final String EXTRA_VALUE_HEADER_FIXED = "EXTRA_VALUE_HEADER_FIXED";
+    public static final String EXTRA_VALUE_RTL_DIRECTION = "EXTRA_VALUE_RTL_DIRECTION";
 
     /**
      * if true - value of row header fixed to the row. Fixed to the data
@@ -30,15 +31,24 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
 
     private boolean mIsHeaderFixed;
 
+    private boolean mIsRtlDirection;
+
     private SwitchCompat swSolidRow;
 
     private SwitchCompat swFixedHeaders;
 
+    private SwitchCompat swRtlDirection;
+
     public static SettingsDialog newInstance(boolean isHeaderFixed, boolean solidRowHeader) {
+        return newInstance(isHeaderFixed, solidRowHeader, false);
+    }
+
+    public static SettingsDialog newInstance(boolean isHeaderFixed, boolean solidRowHeader, boolean isRtlDirection) {
         SettingsDialog dialog = new SettingsDialog();
         Bundle args = new Bundle();
         args.putBoolean(EXTRA_VALUE_HEADER_FIXED, isHeaderFixed);
         args.putBoolean(EXTRA_VALUE_SOLID_HEADER, solidRowHeader);
+        args.putBoolean(EXTRA_VALUE_RTL_DIRECTION, isRtlDirection);
         dialog.setArguments(args);
         return dialog;
     }
@@ -48,6 +58,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
         super.onCreate(savedInstanceState);
         mSolidRowHeader = getArguments().getBoolean(EXTRA_VALUE_SOLID_HEADER);
         mIsHeaderFixed = getArguments().getBoolean(EXTRA_VALUE_HEADER_FIXED);
+        mIsRtlDirection = getArguments().getBoolean(EXTRA_VALUE_RTL_DIRECTION);
     }
 
     @Nullable
@@ -59,6 +70,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
         View view = inflater.inflate(R.layout.dialog_settings, container, false);
         swSolidRow = (SwitchCompat) view.findViewById(R.id.swSolidRow);
         swFixedHeaders = (SwitchCompat) view.findViewById(R.id.swFixedHeaders);
+        swRtlDirection = (SwitchCompat) view.findViewById(R.id.swRtlDirection);
 
         return view;
     }
@@ -72,6 +84,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
 
         swFixedHeaders.setChecked(mIsHeaderFixed);
         swSolidRow.setChecked(mSolidRowHeader);
+        swRtlDirection.setChecked(mIsRtlDirection);
 
         swFixedHeaders.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -83,6 +96,12 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mSolidRowHeader = isChecked;
+            }
+        });
+        swRtlDirection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                mIsRtlDirection = isChecked;
             }
         });
 
@@ -110,6 +129,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
                 Intent intent = new Intent();
                 intent.putExtra(EXTRA_VALUE_SOLID_HEADER, mSolidRowHeader);
                 intent.putExtra(EXTRA_VALUE_HEADER_FIXED, mIsHeaderFixed);
+                intent.putExtra(EXTRA_VALUE_RTL_DIRECTION, mIsRtlDirection);
                 getParentFragment().onActivityResult(REQUEST_CODE_SETTINGS, Activity.RESULT_OK, intent);
                 break;
             case R.id.bNegative:
