@@ -675,7 +675,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         //noinspection ResourceType
         view.layout(left + leftMargin * (isRTL() ? 0 : 1),
                 top - mState.getScrollY() + topMargin,
-                left + mManager.getHeaderRowWidth() + leftMargin,
+                left + mManager.getHeaderRowWidth() + leftMargin * (isRTL() ? 1 : 0),
                 top + mManager.getRowHeight(holder.getRowIndex()) - mState.getScrollY() + topMargin);
 
         if (mState.isColumnDragging()) {
