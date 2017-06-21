@@ -415,7 +415,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             // scroll over view to the top
             diffY = mState.getScrollY();
             mState.setScrollY(0);
-        } else if (mState.getScrollY() > maxY) {
+        } else if (mSettings.getLayoutHeight() > maxY) {
             // few items and we have free space.
             diffY = 0;
             mState.setScrollY(0);
