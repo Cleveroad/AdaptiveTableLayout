@@ -101,7 +101,7 @@ public class TableLayoutFragment
             }
         });
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            mTableLayout.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+//            mTableLayout.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         }
         initAdapter();
 
