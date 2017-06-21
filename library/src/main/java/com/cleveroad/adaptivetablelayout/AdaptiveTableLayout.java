@@ -848,7 +848,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             }
         }
         for (int i = leftColumn; i <= rightColumn; i++) {
-//            // column view header holders
+            // column view header holders
             ViewHolder viewHolder = mHeaderColumnViewHolders.get(i);
             if (viewHolder == null && mAdapter != null) {
                 addViewHolder(0, i, ViewHolderType.COLUMN_HEADER);
@@ -857,7 +857,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             }
         }
 
-//        // add view left top view.
+        // add view left top view.
         if (mLeftTopViewHolder == null && mAdapter != null) {
             mLeftTopViewHolder = mAdapter.onCreateLeftTopHeaderViewHolder(AdaptiveTableLayout.this);
             mLeftTopViewHolder.setItemType(ViewHolderType.FIRST_HEADER);
@@ -1097,7 +1097,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         if (mAdapter != null) {
 
             // change data
-            mAdapter.changeColumns(fromColumn, toColumn);
+            mAdapter.changeColumns(getBindColumn(fromColumn), getBindColumn(toColumn));
 
             // change view holders
             switchHeaders(mHeaderColumnViewHolders, fromColumn, toColumn, ViewHolderType.COLUMN_HEADER);
@@ -1337,7 +1337,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             OnItemClickListener onItemClickListener = mAdapter.getOnItemClickListener();
             if (onItemClickListener != null) {
                 if (viewHolder.getItemType() == ViewHolderType.ITEM) {
-                    onItemClickListener.onItemClick(viewHolder.getRowIndex(), viewHolder.getColumnIndex());
+                    onItemClickListener.onItemClick(viewHolder.getRowIndex(), getBindColumn(viewHolder.getColumnIndex()));
                 } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
                     onItemClickListener.onRowHeaderClick(viewHolder.getRowIndex());
                 } else if (viewHolder.getItemType() == ViewHolderType.COLUMN_HEADER) {
