@@ -19,6 +19,7 @@ class ShadowHelper {
     private View mColumnsHeadersShadow;
     @Nullable
     private View mRowsHeadersShadow;
+
     private View mParentView;
 
     public ShadowHelper(View v) {
@@ -48,7 +49,7 @@ class ShadowHelper {
     View addRowsHeadersShadow(ViewGroup group) {
         if (mRowsHeadersShadow == null) {
             mRowsHeadersShadow = new View(group.getContext());
-            mRowsHeadersShadow.setBackgroundResource(getLayoutDirection() == LayoutDirection.RTL
+            mRowsHeadersShadow.setBackgroundResource(getLayoutDirection() == LayoutDirection.LTR
                     ? R.drawable.shadow_right
                     : R.drawable.shadow_left);
             group.addView(mRowsHeadersShadow, 0);
@@ -154,6 +155,16 @@ class ShadowHelper {
         if (mBottomShadow != null) {
             group.removeView(mBottomShadow);
             mBottomShadow = null;
+        }
+    }
+
+    public void onLayoutDirectionChanged() {
+        if (getRowsHeadersShadow() != null) {
+            getRowsHeadersShadow().setBackgroundResource(
+                    getLayoutDirection() == LayoutDirection.LTR
+                            ? R.drawable.shadow_right
+                            : R.drawable.shadow_left);
+            getRowsHeadersShadow().requestLayout();
         }
     }
 }

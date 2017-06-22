@@ -141,6 +141,12 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
     }
 
     @Override
+    public void setLayoutDirection(int layoutDirection) {
+        super.setLayoutDirection(layoutDirection);
+        mShadowHelper.onLayoutDirectionChanged();
+    }
+
+    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         if (changed) {
             // calculate layout width and height
@@ -161,6 +167,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             mSettings.setHeaderFixed(a.getBoolean(R.styleable.AdaptiveTableLayout_fixedHeaders, true));
             mSettings.setCellMargin(a.getDimensionPixelSize(R.styleable.AdaptiveTableLayout_cellMargin, 0));
             mSettings.setSolidRowHeader(a.getBoolean(R.styleable.AdaptiveTableLayout_solidRowHeaders, true));
+            mSettings.setDragAndDropEnabled(a.getBoolean(R.styleable.AdaptiveTableLayout_dragAndDropEnabled, true));
         } finally {
             a.recycle();
         }
@@ -1375,6 +1382,11 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         // search view holder by x, y
         ViewHolder viewHolder = getViewHolderByPosition((int) e.getX(), (int) e.getY());
         if (viewHolder != null) {
+
+            if (!mSettings.isDragAndDropEnabled()){
+                checkLongPressForItemAndFirstHeader(viewHolder);
+                return;
+            }
             // save start dragging touch position
             mDragAndDropPoints.setStart((int) (mState.getScrollX() + e.getX()), (int) (mState.getScrollY() + e.getY()));
             if (viewHolder.getItemType() == ViewHolderType.COLUMN_HEADER) {
@@ -1410,14 +1422,18 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 refreshViewHolders();
 
             } else {
-                OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
-                if (onItemClickListener != null) {
-                    if (viewHolder.getItemType() == ViewHolderType.ITEM) {
-                        onItemClickListener.onItemLongClick(viewHolder.getRowIndex(), viewHolder.getColumnIndex());
-                    } else if (viewHolder.getItemType() == ViewHolderType.FIRST_HEADER) {
-                        onItemClickListener.onLeftTopHeaderLongClick();
-                    }
-                }
+                checkLongPressForItemAndFirstHeader(viewHolder);
+            }
+        }
+    }
+
+    private void checkLongPressForItemAndFirstHeader(ViewHolder viewHolder){
+        OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
+        if (onItemClickListener != null) {
+            if (viewHolder.getItemType() == ViewHolderType.ITEM) {
+                onItemClickListener.onItemLongClick(viewHolder.getRowIndex(), viewHolder.getColumnIndex());
+            } else if (viewHolder.getItemType() == ViewHolderType.FIRST_HEADER) {
+                onItemClickListener.onLeftTopHeaderLongClick();
             }
         }
     }
@@ -1462,53 +1478,54 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
 
     @Override
     public boolean onActionUp(MotionEvent e) {
+        if (mState.isDragging()){
+            // remove shadows from dragging views
+            mShadowHelper.removeAllDragAndDropShadows(this);
 
-        // remove shadows from dragging views
-        mShadowHelper.removeAllDragAndDropShadows(this);
+            // stop smooth scrolling
+            if (!mScrollerDragAndDropRunnable.isFinished()) {
+                mScrollerDragAndDropRunnable.stop();
+            }
 
-        // stop smooth scrolling
-        if (!mScrollerDragAndDropRunnable.isFinished()) {
-            mScrollerDragAndDropRunnable.stop();
-        }
-
-        // remove dragging flag from all item view holders
-        Collection<ViewHolder> holders = mViewHolders.getAll();
-        for (ViewHolder holder : holders) {
-            holder.setIsDragging(false);
-        }
-
-        // remove dragging flag from all column header view holders
-
-        for (int count = mHeaderColumnViewHolders.size(), i = 0; i < count; i++) {
-            int key = mHeaderColumnViewHolders.keyAt(i);
-            // get the object by the key.
-            ViewHolder holder = mHeaderColumnViewHolders.get(key);
-            if (holder != null) {
+            // remove dragging flag from all item view holders
+            Collection<ViewHolder> holders = mViewHolders.getAll();
+            for (ViewHolder holder : holders) {
                 holder.setIsDragging(false);
             }
-        }
 
-        // remove dragging flag from all row header view holders
-        for (int count = mHeaderRowViewHolders.size(), i = 0; i < count; i++) {
-            int key = mHeaderRowViewHolders.keyAt(i);
-            // get the object by the key.
-            ViewHolder holder = mHeaderRowViewHolders.get(key);
-            if (holder != null) {
-                holder.setIsDragging(false);
+            // remove dragging flag from all column header view holders
+
+            for (int count = mHeaderColumnViewHolders.size(), i = 0; i < count; i++) {
+                int key = mHeaderColumnViewHolders.keyAt(i);
+                // get the object by the key.
+                ViewHolder holder = mHeaderColumnViewHolders.get(key);
+                if (holder != null) {
+                    holder.setIsDragging(false);
+                }
             }
+
+            // remove dragging flag from all row header view holders
+            for (int count = mHeaderRowViewHolders.size(), i = 0; i < count; i++) {
+                int key = mHeaderRowViewHolders.keyAt(i);
+                // get the object by the key.
+                ViewHolder holder = mHeaderRowViewHolders.get(key);
+                if (holder != null) {
+                    holder.setIsDragging(false);
+                }
+            }
+
+            // remove dragging flags from state
+            mState.setRowDragging(false, AdaptiveTableState.NO_DRAGGING_POSITION);
+            mState.setColumnDragging(false, AdaptiveTableState.NO_DRAGGING_POSITION);
+
+            // clear dragging point positions
+            mDragAndDropPoints.setStart(0, 0);
+            mDragAndDropPoints.setOffset(0, 0);
+            mDragAndDropPoints.setEnd(0, 0);
+
+            // update main layout
+            refreshViewHolders();
         }
-
-        // remove dragging flags from state
-        mState.setRowDragging(false, AdaptiveTableState.NO_DRAGGING_POSITION);
-        mState.setColumnDragging(false, AdaptiveTableState.NO_DRAGGING_POSITION);
-
-        // clear dragging point positions
-        mDragAndDropPoints.setStart(0, 0);
-        mDragAndDropPoints.setOffset(0, 0);
-        mDragAndDropPoints.setEnd(0, 0);
-
-        // update main layout
-        refreshViewHolders();
         return true;
     }
 
@@ -1680,6 +1697,14 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
 
     public void setSolidRowHeader(boolean solidRowHeader) {
         mSettings.setSolidRowHeader(solidRowHeader);
+    }
+
+    public boolean isDragAndDropEnabled(){
+        return mSettings.isDragAndDropEnabled();
+    }
+
+    public void setDragAndDropEnabled(boolean enabled){
+        mSettings.setDragAndDropEnabled(enabled);
     }
 
     private static class TableInstanceSaver implements Parcelable {
