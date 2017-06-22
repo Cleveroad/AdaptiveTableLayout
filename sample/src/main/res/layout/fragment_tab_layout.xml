@@ -25,8 +25,9 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
         app:cellMargin="1dp"
+        app:dragAndDropEnabled="true"
         app:fixedHeaders="true"
-        app:solidRowHeaders="true" />
+        app:solidRowHeaders="true"/>
 
     <View
         android:id="@+id/separator"

@@ -21,6 +21,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
 
     public static final String EXTRA_VALUE_SOLID_HEADER = "EXTRA_VALUE_SOLID_HEADER";
     public static final String EXTRA_VALUE_HEADER_FIXED = "EXTRA_VALUE_HEADER_FIXED";
+    public static final String EXTRA_VALUE_DRAG_AND_DROP_ENABLED = "EXTRA_VALUE_DRAG_AND_DROP_ENABLED";
 
     /**
      * if true - value of row header fixed to the row. Fixed to the data
@@ -30,9 +31,13 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
 
     private boolean mIsHeaderFixed;
 
+    private boolean mIsDragAndDropEnabled;
+
     private SwitchCompat swSolidRow;
 
     private SwitchCompat swFixedHeaders;
+
+    private SwitchCompat swDragAndDropEnabled;
 
     public static SettingsDialog newInstance(boolean isHeaderFixed, boolean solidRowHeader) {
         SettingsDialog dialog = new SettingsDialog();
@@ -43,11 +48,22 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
         return dialog;
     }
 
+    public static SettingsDialog newInstance(boolean isHeaderFixed, boolean solidRowHeader, boolean isDragAndDropEnabled) {
+        SettingsDialog dialog = new SettingsDialog();
+        Bundle args = new Bundle();
+        args.putBoolean(EXTRA_VALUE_HEADER_FIXED, isHeaderFixed);
+        args.putBoolean(EXTRA_VALUE_SOLID_HEADER, solidRowHeader);
+        args.putBoolean(EXTRA_VALUE_DRAG_AND_DROP_ENABLED, isDragAndDropEnabled);
+        dialog.setArguments(args);
+        return dialog;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSolidRowHeader = getArguments().getBoolean(EXTRA_VALUE_SOLID_HEADER);
         mIsHeaderFixed = getArguments().getBoolean(EXTRA_VALUE_HEADER_FIXED);
+        mIsDragAndDropEnabled = getArguments().getBoolean(EXTRA_VALUE_DRAG_AND_DROP_ENABLED);
     }
 
     @Nullable
@@ -59,6 +75,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
         View view = inflater.inflate(R.layout.dialog_settings, container, false);
         swSolidRow = (SwitchCompat) view.findViewById(R.id.swSolidRow);
         swFixedHeaders = (SwitchCompat) view.findViewById(R.id.swFixedHeaders);
+        swDragAndDropEnabled = (SwitchCompat) view.findViewById(R.id.swDragAndDropEnabled);
 
         return view;
     }
@@ -72,6 +89,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
 
         swFixedHeaders.setChecked(mIsHeaderFixed);
         swSolidRow.setChecked(mSolidRowHeader);
+        swDragAndDropEnabled.setChecked(mIsDragAndDropEnabled);
 
         swFixedHeaders.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -85,7 +103,12 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
                 mSolidRowHeader = isChecked;
             }
         });
-
+        swDragAndDropEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                mIsDragAndDropEnabled = isChecked;
+            }
+        });
 
     }
 
@@ -110,6 +133,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
                 Intent intent = new Intent();
                 intent.putExtra(EXTRA_VALUE_SOLID_HEADER, mSolidRowHeader);
                 intent.putExtra(EXTRA_VALUE_HEADER_FIXED, mIsHeaderFixed);
+                intent.putExtra(EXTRA_VALUE_DRAG_AND_DROP_ENABLED, mIsDragAndDropEnabled);
                 getParentFragment().onActivityResult(REQUEST_CODE_SETTINGS, Activity.RESULT_OK, intent);
                 break;
             case R.id.bNegative:

@@ -154,6 +154,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             mSettings.setHeaderFixed(a.getBoolean(R.styleable.AdaptiveTableLayout_fixedHeaders, true));
             mSettings.setCellMargin(a.getDimensionPixelSize(R.styleable.AdaptiveTableLayout_cellMargin, 0));
             mSettings.setSolidRowHeader(a.getBoolean(R.styleable.AdaptiveTableLayout_solidRowHeaders, true));
+            mSettings.setDragAndDropEnabled(a.getBoolean(R.styleable.AdaptiveTableLayout_dragAndDropEnabled, true));
         } finally {
             a.recycle();
         }
@@ -1294,6 +1295,11 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         // search view holder by x, y
         ViewHolder viewHolder = getViewHolderByPosition((int) e.getX(), (int) e.getY());
         if (viewHolder != null) {
+
+            if (!mSettings.isDragAndDropEnabled()){
+                checkLongPressForItemAndFirstHeader(viewHolder);
+                return;
+            }
             // save start dragging touch position
             mDragAndDropPoints.setStart((int) (mState.getScrollX() + e.getX()), (int) (mState.getScrollY() + e.getY()));
             if (viewHolder.getItemType() == ViewHolderType.COLUMN_HEADER) {
@@ -1329,14 +1335,18 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 refreshViewHolders();
 
             } else {
-                OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
-                if (onItemClickListener != null) {
-                    if (viewHolder.getItemType() == ViewHolderType.ITEM) {
-                        onItemClickListener.onItemLongClick(viewHolder.getRowIndex(), viewHolder.getColumnIndex());
-                    } else if (viewHolder.getItemType() == ViewHolderType.FIRST_HEADER) {
-                        onItemClickListener.onLeftTopHeaderLongClick();
-                    }
-                }
+                checkLongPressForItemAndFirstHeader(viewHolder);
+            }
+        }
+    }
+
+    private void checkLongPressForItemAndFirstHeader(ViewHolder viewHolder){
+        OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
+        if (onItemClickListener != null) {
+            if (viewHolder.getItemType() == ViewHolderType.ITEM) {
+                onItemClickListener.onItemLongClick(viewHolder.getRowIndex(), viewHolder.getColumnIndex());
+            } else if (viewHolder.getItemType() == ViewHolderType.FIRST_HEADER) {
+                onItemClickListener.onLeftTopHeaderLongClick();
             }
         }
     }
@@ -1597,6 +1607,14 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
 
     public void setSolidRowHeader(boolean solidRowHeader) {
         mSettings.setSolidRowHeader(solidRowHeader);
+    }
+
+    public boolean isDragAndDropEnabled(){
+        return mSettings.isDragAndDropEnabled();
+    }
+
+    public void setDragAndDropEnabled(boolean enabled){
+        mSettings.setDragAndDropEnabled(enabled);
     }
 
     private static class TableInstanceSaver implements Parcelable {

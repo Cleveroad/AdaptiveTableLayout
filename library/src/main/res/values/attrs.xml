@@ -4,5 +4,6 @@
         <attr name="fixedHeaders" format="boolean"/>
         <attr name="cellMargin" format="dimension"/>
         <attr name="solidRowHeaders" format="boolean"/>
+        <attr name="dragAndDropEnabled" format="boolean"/>
     </declare-styleable>
 </resources>

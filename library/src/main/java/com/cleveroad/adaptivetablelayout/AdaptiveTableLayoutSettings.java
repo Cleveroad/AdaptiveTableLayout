@@ -24,6 +24,11 @@ class AdaptiveTableLayoutSettings {
      */
     private boolean mSolidRowHeader;
 
+    /**
+     * If true, then the table can be edited, otherwise it is impossible
+     */
+    private boolean mDragAndDropEnabled;
+
 
     AdaptiveTableLayoutSettings() {
     }
@@ -71,5 +76,13 @@ class AdaptiveTableLayoutSettings {
     public AdaptiveTableLayoutSettings setSolidRowHeader(boolean solidRowHeader) {
         mSolidRowHeader = solidRowHeader;
         return this;
+    }
+
+    public boolean isDragAndDropEnabled() {
+        return mDragAndDropEnabled;
+    }
+
+    public void setDragAndDropEnabled(boolean dragAndDropEnabled) {
+        mDragAndDropEnabled = dragAndDropEnabled;
     }
 }

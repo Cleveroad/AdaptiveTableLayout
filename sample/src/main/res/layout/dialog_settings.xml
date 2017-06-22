@@ -47,6 +47,16 @@
             android:textColor="@color/colorTextWhite"
             android:textSize="18sp"/>
 
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/swDragAndDropEnabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/swFixedHeaders"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_drag_and_drop_enabled"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="18sp"/>
+
         <LinearLayout
             android:id="@+id/llButtonsContainer"
             android:layout_width="match_parent"

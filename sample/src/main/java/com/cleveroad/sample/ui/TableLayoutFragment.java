@@ -18,10 +18,10 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.cleveroad.adaptivetablelayout.AdaptiveTableLayout;
 import com.cleveroad.adaptivetablelayout.LinkedAdaptiveTableAdapter;
 import com.cleveroad.adaptivetablelayout.OnItemClickListener;
 import com.cleveroad.adaptivetablelayout.OnItemLongClickListener;
-import com.cleveroad.adaptivetablelayout.AdaptiveTableLayout;
 import com.cleveroad.sample.R;
 import com.cleveroad.sample.adapter.SampleLinkedTableAdapter;
 import com.cleveroad.sample.datasource.CsvFileDataSourceImpl;
@@ -90,7 +90,10 @@ public class TableLayoutFragment
                 if (item.getItemId() == R.id.actionSave) {
                     applyChanges();
                 } else if (item.getItemId() == R.id.actionSettings) {
-                    SettingsDialog.newInstance(mTableLayout.isHeaderFixed(), mTableLayout.isSolidRowHeader())
+                    SettingsDialog.newInstance(
+                            mTableLayout.isHeaderFixed(),
+                            mTableLayout.isSolidRowHeader(),
+                            mTableLayout.isDragAndDropEnabled())
                             .show(getChildFragmentManager(), SettingsDialog.class.getSimpleName());
                 }
                 return true;
@@ -142,6 +145,7 @@ public class TableLayoutFragment
         } else if (requestCode == SettingsDialog.REQUEST_CODE_SETTINGS && resultCode == Activity.RESULT_OK && data != null) {
             mTableLayout.setHeaderFixed(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_HEADER_FIXED, mTableLayout.isHeaderFixed()));
             mTableLayout.setSolidRowHeader(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_SOLID_HEADER, mTableLayout.isSolidRowHeader()));
+            mTableLayout.setDragAndDropEnabled(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_DRAG_AND_DROP_ENABLED, mTableLayout.isDragAndDropEnabled()));
             mTableAdapter.notifyDataSetChanged();
         }
     }
