@@ -1478,53 +1478,54 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
 
     @Override
     public boolean onActionUp(MotionEvent e) {
+        if (mState.isDragging()){
+            // remove shadows from dragging views
+            mShadowHelper.removeAllDragAndDropShadows(this);
 
-        // remove shadows from dragging views
-        mShadowHelper.removeAllDragAndDropShadows(this);
+            // stop smooth scrolling
+            if (!mScrollerDragAndDropRunnable.isFinished()) {
+                mScrollerDragAndDropRunnable.stop();
+            }
 
-        // stop smooth scrolling
-        if (!mScrollerDragAndDropRunnable.isFinished()) {
-            mScrollerDragAndDropRunnable.stop();
-        }
-
-        // remove dragging flag from all item view holders
-        Collection<ViewHolder> holders = mViewHolders.getAll();
-        for (ViewHolder holder : holders) {
-            holder.setIsDragging(false);
-        }
-
-        // remove dragging flag from all column header view holders
-
-        for (int count = mHeaderColumnViewHolders.size(), i = 0; i < count; i++) {
-            int key = mHeaderColumnViewHolders.keyAt(i);
-            // get the object by the key.
-            ViewHolder holder = mHeaderColumnViewHolders.get(key);
-            if (holder != null) {
+            // remove dragging flag from all item view holders
+            Collection<ViewHolder> holders = mViewHolders.getAll();
+            for (ViewHolder holder : holders) {
                 holder.setIsDragging(false);
             }
-        }
 
-        // remove dragging flag from all row header view holders
-        for (int count = mHeaderRowViewHolders.size(), i = 0; i < count; i++) {
-            int key = mHeaderRowViewHolders.keyAt(i);
-            // get the object by the key.
-            ViewHolder holder = mHeaderRowViewHolders.get(key);
-            if (holder != null) {
-                holder.setIsDragging(false);
+            // remove dragging flag from all column header view holders
+
+            for (int count = mHeaderColumnViewHolders.size(), i = 0; i < count; i++) {
+                int key = mHeaderColumnViewHolders.keyAt(i);
+                // get the object by the key.
+                ViewHolder holder = mHeaderColumnViewHolders.get(key);
+                if (holder != null) {
+                    holder.setIsDragging(false);
+                }
             }
+
+            // remove dragging flag from all row header view holders
+            for (int count = mHeaderRowViewHolders.size(), i = 0; i < count; i++) {
+                int key = mHeaderRowViewHolders.keyAt(i);
+                // get the object by the key.
+                ViewHolder holder = mHeaderRowViewHolders.get(key);
+                if (holder != null) {
+                    holder.setIsDragging(false);
+                }
+            }
+
+            // remove dragging flags from state
+            mState.setRowDragging(false, AdaptiveTableState.NO_DRAGGING_POSITION);
+            mState.setColumnDragging(false, AdaptiveTableState.NO_DRAGGING_POSITION);
+
+            // clear dragging point positions
+            mDragAndDropPoints.setStart(0, 0);
+            mDragAndDropPoints.setOffset(0, 0);
+            mDragAndDropPoints.setEnd(0, 0);
+
+            // update main layout
+            refreshViewHolders();
         }
-
-        // remove dragging flags from state
-        mState.setRowDragging(false, AdaptiveTableState.NO_DRAGGING_POSITION);
-        mState.setColumnDragging(false, AdaptiveTableState.NO_DRAGGING_POSITION);
-
-        // clear dragging point positions
-        mDragAndDropPoints.setStart(0, 0);
-        mDragAndDropPoints.setOffset(0, 0);
-        mDragAndDropPoints.setEnd(0, 0);
-
-        // update main layout
-        refreshViewHolders();
         return true;
     }
 
