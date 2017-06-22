@@ -1294,38 +1294,39 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         canvas.save();
         int headerFixedX = mSettings.isHeaderFixed() ? getRowHeaderStartX() : mState.getScrollX();
         int headerFixedY = mSettings.isHeaderFixed() ? 0 : mState.getScrollY();
+
+        int itemsAndColumnsLeft = !isRTL()
+                ? Math.max(0, mManager.getHeaderRowWidth() - headerFixedX)
+                : 0;
+        int itemsAndColumnsRight = mSettings.getLayoutWidth();
+        if (isRTL()) {
+            itemsAndColumnsRight += mSettings.getCellMargin()
+                    - mManager.getHeaderRowWidth() * (isHeaderFixed() ? 1 : 0);
+        }
+
         //noinspection StatementWithEmptyBody
         if (viewHolder == null) {
             //ignore
         } else if (viewHolder.getItemType() == ViewHolderType.ITEM) {
             // prepare canvas rect area for draw item (cell in table)
-            canvas.clipRect(!isRTL()
-                            ? Math.max(0, mManager.getHeaderRowWidth() - headerFixedX)
-                            : 0,
+            canvas.clipRect(
+                    itemsAndColumnsLeft,
                     Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY),
-                    !isRTL()
-                            ? mSettings.getLayoutWidth()
-                            : mSettings.getLayoutWidth() + mSettings.getCellMargin() - mManager.getHeaderRowWidth() * (isHeaderFixed() ? 1 : 0),
+                    itemsAndColumnsRight,
                     mSettings.getLayoutHeight());
-
-
         } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
             // prepare canvas rect area for draw row header
             canvas.clipRect(
-                    getRowHeaderStartX() + mSettings.getCellMargin() * (isRTL() ? 0 : -1),
+                    getRowHeaderStartX() - mSettings.getCellMargin() * (isRTL() ? 0 : 1),
                     Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY),
                     Math.max(0, getRowHeaderStartX() + mManager.getHeaderRowWidth() + mSettings.getCellMargin()),
                     mSettings.getLayoutHeight());
         } else if (viewHolder.getItemType() == ViewHolderType.COLUMN_HEADER) {
             // prepare canvas rect area for draw column header
             canvas.clipRect(
-                    !isRTL()
-                            ? Math.max(0, mManager.getHeaderRowWidth() - headerFixedX)
-                            : 0,
+                    itemsAndColumnsLeft,
                     0,
-                    !isRTL()
-                            ? mSettings.getLayoutWidth()
-                            : mSettings.getLayoutWidth() + mSettings.getCellMargin() - mManager.getHeaderRowWidth() * (isHeaderFixed() ? 1 : 0),
+                    itemsAndColumnsRight,
                     Math.max(0, mManager.getHeaderColumnHeight() - headerFixedY));
         } else if (viewHolder.getItemType() == ViewHolderType.FIRST_HEADER) {
             // prepare canvas rect area for draw item (cell in table)
