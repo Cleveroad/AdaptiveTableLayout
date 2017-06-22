@@ -137,11 +137,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
      * @return true if layout direction is RightToLeft
      */
     public boolean isRTL() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return getLayoutDirection() == LAYOUT_DIRECTION_RTL;
-        } else {
-            return false;
-        }
+        return LayoutDirectionHelper.isRTL(this);
     }
 
     @Override
