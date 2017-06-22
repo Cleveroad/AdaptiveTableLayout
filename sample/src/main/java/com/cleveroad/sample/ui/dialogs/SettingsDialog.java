@@ -21,7 +21,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
 
     public static final String EXTRA_VALUE_SOLID_HEADER = "EXTRA_VALUE_SOLID_HEADER";
     public static final String EXTRA_VALUE_HEADER_FIXED = "EXTRA_VALUE_HEADER_FIXED";
-    public static final String EXTRA_VALUE_DRAG_AND_DROP_ENABLED = "EXTRA_VALUE_DRAG_AND_DROP_ENABLED";
+    public static final String EXTRA_VALUE_DRAG_AND_DROP_ENABLED = "EXTRA_VALUE_DRAG_AND_DROP_ENABLED"; 
 
     /**
      * if true - value of row header fixed to the row. Fixed to the data
