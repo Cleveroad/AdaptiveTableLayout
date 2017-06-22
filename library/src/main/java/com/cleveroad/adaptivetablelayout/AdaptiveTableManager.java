@@ -61,7 +61,7 @@ class AdaptiveTableManager {
         mIsInited = true;
     }
 
-    private void checkForInit() {
+    void checkForInit() {
         if (!mIsInited) {
             throw new IllegalStateException("You need to init matrix before work!");
         }
@@ -357,5 +357,13 @@ class AdaptiveTableManager {
         int cellData = mRowHeights[rowToIndex];
         mRowHeights[rowToIndex] = mRowHeights[rowIndex];
         mRowHeights[rowIndex] = cellData;
+    }
+
+    public int[] getColumnWidths() {
+        return mColumnWidths;
+    }
+
+    public int[] getRowHeights() {
+        return mRowHeights;
     }
 }

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,10 +19,10 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.cleveroad.adaptivetablelayout.AdaptiveTableLayout;
 import com.cleveroad.adaptivetablelayout.LinkedAdaptiveTableAdapter;
 import com.cleveroad.adaptivetablelayout.OnItemClickListener;
 import com.cleveroad.adaptivetablelayout.OnItemLongClickListener;
-import com.cleveroad.adaptivetablelayout.AdaptiveTableLayout;
 import com.cleveroad.sample.R;
 import com.cleveroad.sample.adapter.SampleLinkedTableAdapter;
 import com.cleveroad.sample.datasource.CsvFileDataSourceImpl;
@@ -90,12 +91,18 @@ public class TableLayoutFragment
                 if (item.getItemId() == R.id.actionSave) {
                     applyChanges();
                 } else if (item.getItemId() == R.id.actionSettings) {
-                    SettingsDialog.newInstance(mTableLayout.isHeaderFixed(), mTableLayout.isSolidRowHeader())
+                    SettingsDialog.newInstance(
+                            mTableLayout.isHeaderFixed(),
+                            mTableLayout.isSolidRowHeader(),
+                            mTableLayout.isRTL())
                             .show(getChildFragmentManager(), SettingsDialog.class.getSimpleName());
                 }
                 return true;
             }
         });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            mTableLayout.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+        }
         initAdapter();
 
         return view;
@@ -142,6 +149,11 @@ public class TableLayoutFragment
         } else if (requestCode == SettingsDialog.REQUEST_CODE_SETTINGS && resultCode == Activity.RESULT_OK && data != null) {
             mTableLayout.setHeaderFixed(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_HEADER_FIXED, mTableLayout.isHeaderFixed()));
             mTableLayout.setSolidRowHeader(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_SOLID_HEADER, mTableLayout.isSolidRowHeader()));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                mTableLayout.setLayoutDirection(
+                        data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_RTL_DIRECTION, mTableLayout.isRTL())
+                                ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
+            }
             mTableAdapter.notifyDataSetChanged();
         }
     }

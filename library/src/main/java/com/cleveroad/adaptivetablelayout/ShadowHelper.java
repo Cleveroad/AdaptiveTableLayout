@@ -6,23 +6,28 @@ import android.view.View;
 import android.view.ViewGroup;
 
 class ShadowHelper {
+
     @Nullable
     private View mRightShadow;
-
     @Nullable
     private View mLeftShadow;
-
     @Nullable
     private View mTopShadow;
-
     @Nullable
     private View mBottomShadow;
-
     @Nullable
     private View mColumnsHeadersShadow;
-
     @Nullable
     private View mRowsHeadersShadow;
+    private View mParentView;
+
+    public ShadowHelper(View v) {
+        mParentView = v;
+    }
+
+    private int getLayoutDirection() {
+        return LayoutDirectionHelper.getLayoutDirection(mParentView);
+    }
 
     @NonNull
     View addColumnsHeadersShadow(ViewGroup group) {
@@ -43,7 +48,9 @@ class ShadowHelper {
     View addRowsHeadersShadow(ViewGroup group) {
         if (mRowsHeadersShadow == null) {
             mRowsHeadersShadow = new View(group.getContext());
-            mRowsHeadersShadow.setBackgroundResource(R.drawable.shadow_right);
+            mRowsHeadersShadow.setBackgroundResource(getLayoutDirection() == LayoutDirection.RTL
+                    ? R.drawable.shadow_right
+                    : R.drawable.shadow_left);
             group.addView(mRowsHeadersShadow, 0);
         }
         return mRowsHeadersShadow;
@@ -149,5 +156,4 @@ class ShadowHelper {
             mBottomShadow = null;
         }
     }
-
 }
