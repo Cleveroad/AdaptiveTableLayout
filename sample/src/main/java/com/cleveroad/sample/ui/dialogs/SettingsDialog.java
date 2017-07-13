@@ -57,6 +57,16 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
         return dialog;
     }
 
+    public static SettingsDialog newInstance(boolean isHeaderFixed, boolean solidRowHeader, boolean isDragAndDropEnabled) {
+        SettingsDialog dialog = new SettingsDialog();
+        Bundle args = new Bundle();
+        args.putBoolean(EXTRA_VALUE_HEADER_FIXED, isHeaderFixed);
+        args.putBoolean(EXTRA_VALUE_SOLID_HEADER, solidRowHeader);
+        args.putBoolean(EXTRA_VALUE_DRAG_AND_DROP_ENABLED, isDragAndDropEnabled);
+        dialog.setArguments(args);
+        return dialog;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
