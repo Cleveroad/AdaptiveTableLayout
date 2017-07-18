@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">CSV Editor</string>
 
     <string name="pick_csv_file">Add CSV table from your phone memory and you can read and edit it.</string>
