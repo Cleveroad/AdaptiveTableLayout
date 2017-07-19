@@ -19,9 +19,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.ScrollHelperListener, AdaptiveTableDataSetObserver {
@@ -528,8 +530,9 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         if (isColumnDragging && holder.isDragging() && mDragAndDropPoints.getOffset().x > 0) {
             // visible dragging column. Calculate left offset using drag and drop points.
             left = mState.getScrollX() + mDragAndDropPoints.getOffset().x - view.getWidth() / 2;
-            if (!isRTL())
+            if (!isRTL()) {
                 left -= mManager.getHeaderRowWidth();
+            }
             view.bringToFront();
         } else if (isRowDragging && holder.isDragging() && mDragAndDropPoints.getOffset().y > 0) {
             // visible dragging row. Calculate top offset using drag and drop points.
@@ -569,8 +572,9 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
      */
     private void refreshHeaderColumnViewHolder(ViewHolder holder) {
         int left = mManager.getColumnsWidth(0, Math.max(0, holder.getColumnIndex()));
-        if (!isRTL())
+        if (!isRTL()) {
             left += mManager.getHeaderRowWidth();
+        }
 
         int top = mSettings.isHeaderFixed() ? 0 : -mState.getScrollY();
         View view = holder.getItemView();
@@ -776,11 +780,13 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             return;
         }
 
+        final List<Integer> headerKeysToRemove = new ArrayList<>();
+
         // item view holders
         for (ViewHolder holder : mViewHolders.getAll()) {
             if (holder != null && !holder.isDragging()) {
                 View view = holder.getItemView();
-
+                // recycle view holder
                 if (isRecycleAll
                         || (view.getRight() < 0
                         || view.getLeft() > mSettings.getLayoutWidth()
@@ -800,16 +806,18 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             if (holder != null) {
                 View view = holder.getItemView();
                 // recycle view holder
-                if (isRecycleAll || (view.getRight() < 0 || view.getLeft() > mSettings.getLayoutWidth())) {
-                    mHeaderColumnViewHolders.remove(key);
+                if (isRecycleAll
+                        || view.getRight() < 0
+                        || view.getLeft() > mSettings.getLayoutWidth()) {
+                    headerKeysToRemove.add(key);
                     recycleViewHolder(holder);
                 }
             }
-
         }
 
-        // row header view holders
+        removeKeys(headerKeysToRemove, mHeaderColumnViewHolders);
 
+        // row header view holders
         for (int count = mHeaderRowViewHolders.size(), i = 0; i < count; i++) {
             int key = mHeaderRowViewHolders.keyAt(i);
             // get the object by the key.
@@ -817,12 +825,28 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             if (holder != null && !holder.isDragging()) {
                 View view = holder.getItemView();
                 // recycle view holder
-                if (isRecycleAll || (view.getBottom() < 0 || view.getTop() > mSettings.getLayoutHeight())) {
-                    mHeaderRowViewHolders.remove(key);
+                if (isRecycleAll
+                        || view.getBottom() < 0
+                        || view.getTop() > mSettings.getLayoutHeight()) {
+                    headerKeysToRemove.add(key);
                     recycleViewHolder(holder);
                 }
             }
+        }
 
+        removeKeys(headerKeysToRemove, mHeaderRowViewHolders);
+    }
+
+
+    /**
+     * Remove recycled viewholders from sparseArray
+     *
+     * @param keysToRemove List of ViewHolders keys that we need to remove
+     * @param headers      SparseArray of viewHolders from where we need to remove
+     */
+    private void removeKeys(List<Integer> keysToRemove, SparseArrayCompat<ViewHolder> headers) {
+        for (Integer key : keysToRemove) {
+            headers.remove(key);
         }
     }
 
@@ -866,6 +890,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 refreshHeaderRowViewHolder(viewHolder);
             }
         }
+
         for (int i = leftColumn; i <= rightColumn; i++) {
             // column view header holders
             ViewHolder viewHolder = mHeaderColumnViewHolders.get(i);
@@ -889,8 +914,9 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                     MeasureSpec.makeMeasureSpec(mManager.getHeaderColumnHeight(), MeasureSpec.EXACTLY));
 
             int viewPosLeft = mSettings.getCellMargin();
-            if (isRTL())
+            if (isRTL()) {
                 viewPosLeft += getRowHeaderStartX();
+            }
             int viewPosRight = viewPosLeft + mManager.getHeaderRowWidth();
             int viewPosTop = mSettings.getCellMargin();
             int viewPosBottom = viewPosTop + mManager.getHeaderColumnHeight();
@@ -1367,7 +1393,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
                     onItemClickListener.onRowHeaderClick(viewHolder.getRowIndex());
                 } else if (viewHolder.getItemType() == ViewHolderType.COLUMN_HEADER) {
-                    onItemClickListener.onColumnHeaderClick(viewHolder.getColumnIndex());
+                    onItemClickListener.onColumnHeaderClick(getBindColumn(viewHolder.getColumnIndex()));
                 } else {
                     onItemClickListener.onLeftTopHeaderClick();
                 }
@@ -1383,7 +1409,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         ViewHolder viewHolder = getViewHolderByPosition((int) e.getX(), (int) e.getY());
         if (viewHolder != null) {
 
-            if (!mSettings.isDragAndDropEnabled()){
+            if (!mSettings.isDragAndDropEnabled()) {
                 checkLongPressForItemAndFirstHeader(viewHolder);
                 return;
             }
@@ -1427,7 +1453,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         }
     }
 
-    private void checkLongPressForItemAndFirstHeader(ViewHolder viewHolder){
+    private void checkLongPressForItemAndFirstHeader(ViewHolder viewHolder) {
         OnItemLongClickListener onItemClickListener = mAdapter.getOnItemLongClickListener();
         if (onItemClickListener != null) {
             if (viewHolder.getItemType() == ViewHolderType.ITEM) {
@@ -1478,7 +1504,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
 
     @Override
     public boolean onActionUp(MotionEvent e) {
-        if (mState.isDragging()){
+        if (mState.isDragging()) {
             // remove shadows from dragging views
             mShadowHelper.removeAllDragAndDropShadows(this);
 
@@ -1544,7 +1570,8 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             tempY = absY;
         }
 
-        if (tempY < mManager.getHeaderColumnHeight() && tempX < mManager.getHeaderRowWidth()) {
+        if (tempY < mManager.getHeaderColumnHeight() && tempX < mManager.getHeaderRowWidth() && !isRTL()
+                || tempY < mManager.getHeaderColumnHeight() && tempX > calculateRowHeadersLeft() && isRTL()) {
             // left top view was clicked
             viewHolder = mLeftTopViewHolder;
         } else if (mSettings.isHeaderFixed()) {
@@ -1699,11 +1726,11 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         mSettings.setSolidRowHeader(solidRowHeader);
     }
 
-    public boolean isDragAndDropEnabled(){
+    public boolean isDragAndDropEnabled() {
         return mSettings.isDragAndDropEnabled();
     }
 
-    public void setDragAndDropEnabled(boolean enabled){
+    public void setDragAndDropEnabled(boolean enabled) {
         mSettings.setDragAndDropEnabled(enabled);
     }
 
