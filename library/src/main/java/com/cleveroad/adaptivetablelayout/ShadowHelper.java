@@ -27,7 +27,7 @@ class ShadowHelper {
     }
 
     private int getLayoutDirection() {
-        return LayoutDirectionHelper.getLayoutDirection(mParentView);
+        return LayoutDirectionHelper.getLayoutDirection();
     }
 
     @NonNull

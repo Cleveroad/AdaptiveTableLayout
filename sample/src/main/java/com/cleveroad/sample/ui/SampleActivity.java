@@ -26,15 +26,19 @@ public class SampleActivity extends AppCompatActivity implements
 
     @Override
     public void onCsvFileSelected(String fileName) {
-        File file = new File(fileName);
-        if (file.exists() && fileName.endsWith(".csv")) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.container, TableLayoutFragment.newInstance(fileName), CsvPickerFragment.class.getSimpleName())
-                    .addToBackStack(CsvPickerFragment.class.getSimpleName())
-                    .commit();
+        if (fileName != null && !fileName.isEmpty()) {
+            File file = new File(fileName);
+            if (file.exists() && fileName.endsWith(".csv")) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.container, TableLayoutFragment.newInstance(fileName), CsvPickerFragment.class.getSimpleName())
+                        .addToBackStack(CsvPickerFragment.class.getSimpleName())
+                        .commit();
+            } else {
+                Toast.makeText(this, R.string.not_csv_file_error, Toast.LENGTH_SHORT).show();
+            }
         } else {
-            Toast.makeText(this, R.string.not_csv_file_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.no_such_file_error, Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -105,6 +105,8 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
      */
     private ShadowHelper mShadowHelper;
 
+    private int mLayoutDirection;
+
     /**
      * Instant state
      */
@@ -139,12 +141,14 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
      * @return true if layout direction is RightToLeft
      */
     public boolean isRTL() {
-        return LayoutDirectionHelper.isRTL(this);
+        return LayoutDirectionHelper.isRTL();
     }
 
     @Override
     public void setLayoutDirection(int layoutDirection) {
         super.setLayoutDirection(layoutDirection);
+        LayoutDirectionHelper.setLayoutDirection(layoutDirection);
+        mLayoutDirection = layoutDirection;
         mShadowHelper.onLayoutDirectionChanged();
     }
 
@@ -203,6 +207,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         mSaver = new TableInstanceSaver();
         mSaver.mScrollX = mState.getScrollX();
         mSaver.mScrollY = mState.getScrollY();
+        mSaver.mLayoutDirection = mLayoutDirection;
         if (mAdapter != null) {
             mAdapter.onSaveInstanceState(bundle);
         }
@@ -264,10 +269,11 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 mState.getScrollY() + mSettings.getLayoutHeight());
         addViewHolders(mVisibleArea);
         if (mSaver != null) {
+            setLayoutDirection(mSaver.mLayoutDirection);
             scrollTo(mSaver.mScrollX, mSaver.mScrollY);
             mSaver = null;
         } else if (isRTL()) {
-            scrollTo((int) mManager.getFullWidth(), 0);
+            scrollTo(mSettings.getLayoutWidth(), 0);
         }
     }
 
@@ -365,7 +371,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         long maxX = mManager.getFullWidth() + shadowShiftX;
         long maxY = mManager.getFullHeight() + shadowShiftY;
 
-        if (x < 0) {
+        if (x <= 0) {
             // scroll over view to the left
             absoluteX = 0;
         } else if (mSettings.getLayoutWidth() + x > maxX) {
@@ -375,7 +381,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
 
         mState.setScrollX(absoluteX);
 
-        if (y < 0) {
+        if (y <= 0) {
             // scroll over view to the top
             absoluteY = 0;
         } else if (mSettings.getLayoutHeight() + absoluteY > maxY) {
@@ -411,7 +417,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         long maxX = mManager.getFullWidth() + shadowShiftX;
         long maxY = mManager.getFullHeight() + shadowShiftY;
 
-        if (mState.getScrollX() + tempX < 0) {
+        if (mState.getScrollX() + tempX <= 0) {
             // scroll over view to the left
             diffX = mState.getScrollX();
             mState.setScrollX(0);
@@ -428,7 +434,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             mState.setScrollX(mState.getScrollX() + tempX);
         }
 
-        if (mState.getScrollY() + tempY < 0) {
+        if (mState.getScrollY() + tempY <= 0) {
             // scroll over view to the top
             diffY = mState.getScrollY();
             mState.setScrollY(0);
@@ -525,6 +531,11 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                                        boolean isRowDragging, boolean isColumnDragging) {
 
         int left = mManager.getColumnsWidth(0, Math.max(0, holder.getColumnIndex()));
+        if (isRTL() && mManager.getFullWidth() <= mSettings.getLayoutWidth()) {
+            left = getRowHeaderStartX()
+                    - (mManager.getColumnsWidthRtl(mManager.getColumnCount() - 1, Math.max(0, holder.getColumnIndex()))
+                    + mSettings.getCellMargin());
+        }
         int top = mManager.getRowsHeight(0, Math.max(0, holder.getRowIndex()));
         View view = holder.getItemView();
         if (isColumnDragging && holder.isDragging() && mDragAndDropPoints.getOffset().x > 0) {
@@ -541,12 +552,13 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         }
         int leftMargin = holder.getColumnIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
         int topMargin = holder.getRowIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
+        if (!isRTL()) {
+            left += mManager.getHeaderRowWidth();
+        }
 
         // calculate view layout positions
         int viewPosLeft = left - mState.getScrollX() + leftMargin;
-        if (!isRTL()) {
-            viewPosLeft += mManager.getHeaderRowWidth();
-        }
+
         int viewPosRight = viewPosLeft + mManager.getColumnWidth(holder.getColumnIndex());
         int viewPosTop = top - mState.getScrollY() + mManager.getHeaderColumnHeight() + topMargin;
         int viewPosBottom = viewPosTop + mManager.getRowHeight(holder.getRowIndex());
@@ -574,6 +586,9 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         int left = mManager.getColumnsWidth(0, Math.max(0, holder.getColumnIndex()));
         if (!isRTL()) {
             left += mManager.getHeaderRowWidth();
+        } else if (isRTL() && mManager.getFullWidth() <= mSettings.getLayoutWidth()) {
+            left = getRowHeaderStartX() - (mManager.getColumnsWidthRtl(mManager.getColumnCount() - 1,
+                    holder.getColumnIndex()) + mSettings.getCellMargin());
         }
 
         int top = mSettings.isHeaderFixed() ? 0 : -mState.getScrollY();
@@ -653,8 +668,9 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
     private void refreshHeaderRowViewHolder(ViewHolder holder) {
         int top = mManager.getRowsHeight(0, Math.max(0, holder.getRowIndex())) + mManager.getHeaderColumnHeight();
         int left = calculateRowHeadersLeft();
-        if (isRTL())
+        if (isRTL()) {
             left += mSettings.getCellMargin();
+        }
         View view = holder.getItemView();
 
         int leftMargin = holder.getColumnIndex() * mSettings.getCellMargin() + mSettings.getCellMargin();
@@ -754,9 +770,13 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             if (!isRTL()) {
                 left = -mState.getScrollX();
             } else {
-                left = -mState.getScrollX()
-                        + (int) (mManager.getFullWidth() - mManager.getHeaderRowWidth())
-                        + mManager.getColumnCount() * mSettings.getCellMargin();
+                if (mManager.getFullWidth() <= mSettings.getLayoutWidth()) {
+                    left = -mState.getScrollX() + getRowHeaderStartX();
+                } else {
+                    left = -mState.getScrollX()
+                            + (int) (mManager.getFullWidth() - mManager.getHeaderRowWidth())
+                            + mManager.getColumnCount() * mSettings.getCellMargin();
+                }
             }
         }
         return left;
@@ -798,6 +818,9 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 }
             }
         }
+        if (!headerKeysToRemove.isEmpty()) {
+            headerKeysToRemove.clear();
+        }
         // column header view holders
         for (int count = mHeaderColumnViewHolders.size(), i = 0; i < count; i++) {
             int key = mHeaderColumnViewHolders.keyAt(i);
@@ -817,6 +840,9 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
 
         removeKeys(headerKeysToRemove, mHeaderColumnViewHolders);
 
+        if (!headerKeysToRemove.isEmpty()) {
+            headerKeysToRemove.clear();
+        }
         // row header view holders
         for (int count = mHeaderRowViewHolders.size(), i = 0; i < count; i++) {
             int key = mHeaderRowViewHolders.keyAt(i);
@@ -859,6 +885,15 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         mRecycler.pushRecycledView(holder);
         removeView(holder.getItemView());
         mAdapter.onViewHolderRecycled(holder);
+    }
+
+
+    private int getEmptySpace() {
+        if (isRTL() && mSettings.getLayoutWidth() > mManager.getFullWidth()) {
+            return mSettings.getLayoutWidth() - (int) mManager.getFullWidth();
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -1049,7 +1084,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 return mScrollHelper.onTouch(event);
             }
             // calculate absolute x, y
-            int absoluteX = (int) (mState.getScrollX() + event.getX());
+            int absoluteX = (int) (mState.getScrollX() + event.getX()) - getEmptySpace();
             int absoluteY = (int) (mState.getScrollY() + event.getY());
 
             // if column drag and drop mode and column offset > SHIFT_VIEWS_THRESHOLD
@@ -1062,8 +1097,9 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                     if (fromColumn != toColumn) {
                         int columnWidth = mManager.getColumnWidth(toColumn);
                         int absoluteColumnX = mManager.getColumnsWidth(0, toColumn);
-                        if (!isRTL())
+                        if (!isRTL()) {
                             absoluteColumnX += mManager.getHeaderRowWidth();
+                        }
 
                         if (fromColumn < toColumn) {
                             // left column is dragging one
@@ -1327,6 +1363,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         int itemsAndColumnsLeft = !isRTL()
                 ? Math.max(0, mManager.getHeaderRowWidth() - headerFixedX)
                 : 0;
+
         int itemsAndColumnsRight = mSettings.getLayoutWidth();
         if (isRTL()) {
             itemsAndColumnsRight += mSettings.getCellMargin()
@@ -1577,7 +1614,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         } else if (mSettings.isHeaderFixed()) {
             if (tempY < mManager.getHeaderColumnHeight()) {
                 // coordinate x, y in the column header's area
-                int column = mManager.getColumnByXWithShift(absX, mSettings.getCellMargin());
+                int column = mManager.getColumnByXWithShift(absX - getEmptySpace(), mSettings.getCellMargin());
                 viewHolder = mHeaderColumnViewHolders.get(column);
             } else if (tempX < mManager.getHeaderRowWidth() && !isRTL()
                     || tempX > calculateRowHeadersLeft() && isRTL()) {
@@ -1586,14 +1623,14 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 viewHolder = mHeaderRowViewHolders.get(row);
             } else {
                 // coordinate x, y in the items area
-                int column = mManager.getColumnByXWithShift(absX, mSettings.getCellMargin());
+                int column = mManager.getColumnByXWithShift(absX - getEmptySpace(), mSettings.getCellMargin());
                 int row = mManager.getRowByYWithShift(absY, mSettings.getCellMargin());
                 viewHolder = mViewHolders.get(row, column);
             }
         } else {
             if (absY < mManager.getHeaderColumnHeight()) {
                 // coordinate x, y in the column header's area
-                int column = mManager.getColumnByXWithShift(absX, mSettings.getCellMargin());
+                int column = mManager.getColumnByXWithShift(absX - getEmptySpace(), mSettings.getCellMargin());
                 viewHolder = mHeaderColumnViewHolders.get(column);
             } else if (absX < mManager.getHeaderRowWidth() && !isRTL()
                     || absX > calculateRowHeadersLeft() && isRTL()) {
@@ -1602,7 +1639,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 viewHolder = mHeaderRowViewHolders.get(row);
             } else {
                 // coordinate x, y in the items area
-                int column = mManager.getColumnByXWithShift(absX, mSettings.getCellMargin());
+                int column = mManager.getColumnByXWithShift(absX - getEmptySpace(), mSettings.getCellMargin());
                 int row = mManager.getRowByYWithShift(absY, mSettings.getCellMargin());
                 viewHolder = mViewHolders.get(row, column);
             }
@@ -1748,6 +1785,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         };
         private int mScrollX;
         private int mScrollY;
+        private int mLayoutDirection;
 
         public TableInstanceSaver() {
             // no default data
@@ -1756,6 +1794,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         protected TableInstanceSaver(Parcel in) {
             this.mScrollX = in.readInt();
             this.mScrollY = in.readInt();
+            this.mLayoutDirection = in.readInt();
         }
 
         @Override
@@ -1767,6 +1806,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(this.mScrollX);
             dest.writeInt(this.mScrollY);
+            dest.writeInt(this.mLayoutDirection);
         }
     }
 

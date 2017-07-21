@@ -116,6 +116,15 @@ class AdaptiveTableManager {
         return width;
     }
 
+    int getColumnsWidthRtl(int from, int to){
+        checkForInit();
+        int width = 0;
+        for (int i = from; i >= to && mColumnWidths != null; i--){
+            width+=mColumnWidths[i];
+        }
+        return width;
+    }
+
     /**
      * @return columns count
      */
