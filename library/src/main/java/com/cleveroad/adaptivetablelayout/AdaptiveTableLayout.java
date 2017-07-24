@@ -211,6 +211,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         mSaver.mScrollX = mState.getScrollX();
         mSaver.mScrollY = mState.getScrollY();
         mSaver.mLayoutDirection = mLayoutDirection;
+        mSaver.mFixedHeaders = mSettings.isHeaderFixed();
         if (mAdapter != null) {
             mAdapter.onSaveInstanceState(bundle);
         }
@@ -228,6 +229,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 mSaver = (TableInstanceSaver) parcelable;
                 mLayoutDirection = mSaver.mLayoutDirection;
                 setLayoutDirection(mSaver.mLayoutDirection);
+                mSettings.setHeaderFixed(mSaver.mFixedHeaders);
             }
             if (mAdapter != null) {
                 mAdapter.onRestoreInstanceState(bundle);
@@ -850,7 +852,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
 
     private int getEmptySpace() {
         if (isRTL() && mSettings.getLayoutWidth() > mManager.getFullWidth()) {
-            return mSettings.getLayoutWidth() - (int) mManager.getFullWidth();
+            return mSettings.getLayoutWidth() - (int) mManager.getFullWidth() - mManager.getColumnCount() * mSettings.getCellMargin();
         } else {
             return 0;
         }
@@ -1563,7 +1565,6 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         int absY = tempY + mState.getScrollY();
 
         if (!mSettings.isHeaderFixed()) {
-            tempX = absX;
             tempY = absY;
         }
 
@@ -1745,15 +1746,17 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         private int mScrollX;
         private int mScrollY;
         private int mLayoutDirection;
+        private boolean mFixedHeaders;
 
         public TableInstanceSaver() {
             // no default data
         }
 
         protected TableInstanceSaver(Parcel in) {
-            this.mScrollX = in.readInt();
-            this.mScrollY = in.readInt();
-            this.mLayoutDirection = in.readInt();
+            mScrollX = in.readInt();
+            mScrollY = in.readInt();
+            mLayoutDirection = in.readInt();
+            mFixedHeaders = in.readByte() != 0;
         }
 
         @Override
@@ -1766,6 +1769,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             dest.writeInt(this.mScrollX);
             dest.writeInt(this.mScrollY);
             dest.writeInt(this.mLayoutDirection);
+            dest.writeByte((byte) (mFixedHeaders ? 1 : 0));
         }
     }
 
