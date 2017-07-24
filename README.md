@@ -19,7 +19,7 @@ The main goal of the library is to apply all its functions in the process of wor
 by gradle : 
 ```groovy
 dependencies {
-    compile "com.cleveroad:adaptivetablelayout:1.0.1"
+    compile "com.cleveroad:adaptivetablelayout:1.1.1"
 }
 ```
 ### Features ###
@@ -126,10 +126,14 @@ mTableAdapter.notifyDataSetChanged();
         android:layout_below="@+id/toolbar"
         app:cellMargin="1dp"
         app:fixedHeaders="true"
-        app:solidRowHeaders="true" />
+        app:solidRowHeaders="true"
+        app:dragAndDropEnabled="true"/>
 ```
 #### Adapter usage ####
 <a href="sample/src/main/java/com/cleveroad/sample/adapter/SampleLinkedTableAdapter.java"> Adapter sample </a>
+
+## Changelog
+See [changelog history].
 
 ### Support ###
 If you have any questions, issues or propositions, please create a <a href="../../issues/new">new issue</a> in this repository.
