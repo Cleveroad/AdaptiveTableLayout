@@ -2,8 +2,6 @@ package com.cleveroad.adaptivetablelayout;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import android.view.View;
-import android.view.ViewGroup;
 
 /**
  * same as {@link AdaptiveTableManager}, but support rtl direction
@@ -11,29 +9,27 @@ import android.view.ViewGroup;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 class AdaptiveTableManagerRTL extends AdaptiveTableManager {
 
-    private ViewGroup parentView;
+    private LayoutDirectionHelper mLayoutDirectionHelper;
 
-    public AdaptiveTableManagerRTL(ViewGroup parentView) {
-        this.parentView = parentView;
+    AdaptiveTableManagerRTL(LayoutDirectionHelper layoutDirectionHelper) {
+        mLayoutDirectionHelper = layoutDirectionHelper;
     }
 
     @Override
     int getColumnByXWithShift(int x, int shiftEveryStep) {
-        if (parentView.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
+        if (!mLayoutDirectionHelper.isRTL()) {
             return super.getColumnByXWithShift(x, shiftEveryStep);
         } else {
             checkForInit();
             int sum = 0;
-            // header offset
-            int tempX = x;
-            if (tempX <= sum) {
+            if (x <= sum) {
                 return 0;
             }
             for (int count = getColumnWidths().length, i = 0; i < count; i++) {
                 int nextSum = sum + getColumnWidths()[i] + shiftEveryStep;
-                if (tempX > sum && tempX < nextSum) {
+                if (x > sum && x < nextSum) {
                     return i;
-                } else if (tempX < nextSum) {
+                } else if (x < nextSum) {
                     return i - 1;
                 }
                 sum = nextSum;
