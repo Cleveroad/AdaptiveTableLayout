@@ -1563,8 +1563,11 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
 
         int absX = tempX + mState.getScrollX() - getEmptySpace();
         int absY = tempY + mState.getScrollY();
-
-        if (!mSettings.isHeaderFixed()) {
+        if (!mSettings.isHeaderFixed() && isRTL() && getEmptySpace() == 0) {
+            tempX = absX - mState.getScrollX();
+            tempY = absY - mState.getScrollY();
+        } else if (!mSettings.isHeaderFixed() && !isRTL()) {
+            tempX = absX;
             tempY = absY;
         }
 
@@ -1594,7 +1597,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 int column = mManager.getColumnByXWithShift(absX, mSettings.getCellMargin());
                 viewHolder = mHeaderColumnViewHolders.get(column);
             } else if (absX < mManager.getHeaderRowWidth() && !isRTL()
-                    || absX > calculateRowHeadersLeft() && isRTL()) {
+                    || absX - mState.getScrollX() > calculateRowHeadersLeft() - getEmptySpace() && isRTL()) {
                 // coordinate x, y in the row header's area
                 int row = mManager.getRowByYWithShift(absY, mSettings.getCellMargin());
                 viewHolder = mHeaderRowViewHolders.get(row);
