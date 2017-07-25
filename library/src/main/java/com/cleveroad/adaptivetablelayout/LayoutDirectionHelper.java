@@ -1,23 +1,25 @@
 package com.cleveroad.adaptivetablelayout;
 
-import android.os.Build;
-import android.view.View;
-
 /**
- * Helper for convenient work with layout direction with the version API below 17
+ * Helper for convenient work with layout direction
  */
 class LayoutDirectionHelper {
+    private int mLayoutDirection;
 
-    static int getLayoutDirection(View view) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return view.getLayoutDirection();
-        } else {
-            return LayoutDirection.LTR;
-        }
+    LayoutDirectionHelper(int direction) {
+        mLayoutDirection = direction;
     }
 
-    static boolean isRTL(View view) {
-        return getLayoutDirection(view) == LayoutDirection.RTL;
+    private int getLayoutDirection() {
+            return mLayoutDirection;
+    }
+
+    void setLayoutDirection(int direction) {
+        mLayoutDirection = direction;
+    }
+
+    boolean isRTL() {
+        return getLayoutDirection() == LayoutDirection.RTL;
     }
 
 }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">CSV Editor</string>
 
     <string name="pick_csv_file">Add CSV table from your phone memory and you can read and edit it.</string>
@@ -42,6 +41,7 @@
 
     <string name="changes_saved">All changes have been saved</string>
     <string name="unexpected_error">Unexpected error</string>
+    <string name="no_such_file_error">No such csv file</string>
     <string name="not_csv_file_error">Not csv file</string>
 
 </resources>

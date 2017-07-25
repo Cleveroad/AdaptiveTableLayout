@@ -19,7 +19,7 @@ The main goal of the library is to apply all its functions in the process of wor
 by gradle : 
 ```groovy
 dependencies {
-    compile "com.cleveroad:adaptivetablelayout:1.0.1"
+    compile "com.cleveroad:adaptivetablelayout:1.1.1"
 }
 ```
 ### Features ###
@@ -37,26 +37,37 @@ Library consists of three parts:
         android:layout_height="match_parent"      
         app:cellMargin="1dp"
         app:fixedHeaders="true"
-        app:solidRowHeaders="true" />
+        app:solidRowHeaders="true"
+        app:dragAndDropEnabled="true"/>
 ```
 |  attribute name | description |
 |---|---|
 | cellMargin  | margin between cards |
 | fixedHeaders  | fixed headers mode. If enable, headers always will be displayed in the corners. |
 | solidRowHeaders  | solid row headers mode. If enable, row header will change its position with dragging row. |
+| dragAndDropEnabled | drag and drop mode. If enable, column or row will change its position with dragging after long press on row or column header. |
 
 ```groovy
-// return fixed headers mode
+// Return fixed headers mode
 boolean isHeaderFixed(); 
 
-// return solid row headers mode
+// Return solid row headers mode
 boolean isSolidRowHeader()
+
+// Return drag and drop mode
+boolean isDragAndDropEnabled()
+
+// Return true if layout direction is RightToLeft
+boolean isRTL()
 
 // Set fixed headers mode
 void setHeaderFixed(boolean headerFixed)
 
 // Set solid row headers mode
 void setSolidRowHeader(boolean solidRowHeader)
+
+// Set drag and drop mode
+void setDragAndDrow(boolean enabled)
 
 /**
  * Set adapter with IMMUTABLE data.
@@ -115,10 +126,14 @@ mTableAdapter.notifyDataSetChanged();
         android:layout_below="@+id/toolbar"
         app:cellMargin="1dp"
         app:fixedHeaders="true"
-        app:solidRowHeaders="true" />
+        app:solidRowHeaders="true"
+        app:dragAndDropEnabled="true"/>
 ```
 #### Adapter usage ####
 <a href="sample/src/main/java/com/cleveroad/sample/adapter/SampleLinkedTableAdapter.java"> Adapter sample </a>
+
+## Changelog
+See [changelog history].
 
 ### Support ###
 If you have any questions, issues or propositions, please create a <a href="../../issues/new">new issue</a> in this repository.
@@ -153,3 +168,4 @@ Follow us:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 
+[changelog history]: /CHANGELOG.md

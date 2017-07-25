@@ -27,72 +27,86 @@
             android:textSize="18sp"
             android:textStyle="bold"/>
 
-        <android.support.v7.widget.SwitchCompat
-            android:id="@+id/swSolidRow"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_below="@+id/tvFileName"
             android:layout_marginTop="16dp"
-            android:text="@string/settings_solid_row"
-            android:textColor="@color/colorTextWhite"
-            android:textSize="18sp"/>
-
-        <android.support.v7.widget.SwitchCompat
-            android:id="@+id/swFixedHeaders"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/swSolidRow"
-            android:layout_marginTop="16dp"
-            android:text="@string/settings_fixed_header"
-            android:textColor="@color/colorTextWhite"
-            android:textSize="18sp"/>
-
-        <android.support.v7.widget.SwitchCompat
-            android:id="@+id/swRtlDirection"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/swFixedHeaders"
-            android:layout_marginTop="16dp"
-            android:text="@string/settings_rtl_direction"
-            android:textColor="@color/colorTextWhite"
-            android:textSize="18sp"/>
-
-        <android.support.v7.widget.SwitchCompat
-            android:id="@+id/swDragAndDropEnabled"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/swRtlDirection"
-            android:layout_marginTop="16dp"
-            android:text="@string/settings_drag_and_drop_enabled"
-            android:textColor="@color/colorTextWhite"
-            android:textSize="18sp"/>
-
-        <LinearLayout
-            android:id="@+id/llButtonsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:gravity="end"
-            android:orientation="horizontal">
-
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/bNegative"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:text="@string/cancel"
-                android:textColor="@color/colorTextWhite"/>
+            android:fillViewport="true"
+            android:orientation="vertical">
 
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/bPositive"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:text="@string/ok"
-                android:textColor="@color/colorTextWhite"/>
-        </LinearLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/swSolidRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/settings_solid_row"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp"/>
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/swFixedHeaders"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/swSolidRow"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/settings_fixed_header"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp"/>
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/swRtlDirection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/swFixedHeaders"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/settings_rtl_direction"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp"/>
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/swDragAndDropEnabled"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/swRtlDirection"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/settings_drag_and_drop_enabled"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp"/>
+
+                <LinearLayout
+                    android:id="@+id/llButtonsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/swDragAndDropEnabled"
+                    android:gravity="bottom|end"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/bNegative"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:text="@string/cancel"
+                        android:textColor="@color/colorTextWhite"/>
+
+
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/bPositive"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:text="@string/ok"
+                        android:textColor="@color/colorTextWhite"/>
+                </LinearLayout>
+            </RelativeLayout>
+        </ScrollView>
     </RelativeLayout>
 </android.support.v7.widget.CardView>
 

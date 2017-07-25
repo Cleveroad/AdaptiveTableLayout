@@ -141,7 +141,7 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
             int height = dm.heightPixels;
             int width = dm.widthPixels;
             window.setLayout(width, height);
-            window.setLayout((int) (width * 0.8), (int) (height * 0.6));
+            window.setLayout((int) (width * 0.8), (int) (height * 0.9));
         }
     }
 
