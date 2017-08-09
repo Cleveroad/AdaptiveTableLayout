@@ -157,6 +157,7 @@ public class TableLayoutFragment
             }
             mTableLayout.setDragAndDropEnabled(data.getBooleanExtra(
                     SettingsDialog.EXTRA_VALUE_DRAG_AND_DROP_ENABLED, mTableLayout.isDragAndDropEnabled()));
+            mTableAdapter.setRtl(mTableLayout.isRTL());
             mTableAdapter.notifyDataSetChanged();
         }
     }

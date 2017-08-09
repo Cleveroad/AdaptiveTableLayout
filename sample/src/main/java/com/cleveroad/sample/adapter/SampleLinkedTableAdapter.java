@@ -120,8 +120,9 @@ public class SampleLinkedTableAdapter extends LinkedAdaptiveTableAdapter<ViewHol
 
         vh.tvText.setText(mTableDataSource.getColumnHeaderData(column));  // skip left top header
         int color = COLORS[column % COLORS.length];
+
         GradientDrawable gd = new GradientDrawable(
-                GradientDrawable.Orientation.LEFT_RIGHT,
+                mIsRtl ? GradientDrawable.Orientation.RIGHT_LEFT : GradientDrawable.Orientation.LEFT_RIGHT,
                 new int[]{ColorUtils.setAlphaComponent(color, 50), 0x00000000});
         gd.setCornerRadius(0f);
         vh.vGradient.setBackground(gd);

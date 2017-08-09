@@ -12,6 +12,7 @@ import java.util.List;
  * can be used in {@link AdaptiveTableLayout}.
  */
 public abstract class LinkedAdaptiveTableAdapter<VH extends ViewHolder> implements AdaptiveTableAdapter<VH> {
+    protected boolean mIsRtl;
     /**
      * Set with observers
      */
@@ -137,5 +138,13 @@ public abstract class LinkedAdaptiveTableAdapter<VH extends ViewHolder> implemen
     @Override
     public void onViewHolderRecycled(@NonNull VH viewHolder) {
         //do something
+    }
+
+    public boolean isRtl() {
+        return mIsRtl;
+    }
+
+    public void setRtl(boolean rtl) {
+        mIsRtl = rtl;
     }
 }
