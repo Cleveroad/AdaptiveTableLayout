@@ -70,12 +70,22 @@
                     android:textSize="18sp"/>
 
                 <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/swDragAndDropEnabled"
+                    android:id="@+id/swRowDragAndDropEnabled"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/swRtlDirection"
                     android:layout_marginTop="16dp"
-                    android:text="@string/settings_drag_and_drop_enabled"
+                    android:text="@string/settings_row_drag_and_drop_enabled"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp"/>
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/swColumnDragAndDropEnabled"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/swRowDragAndDropEnabled"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/settings_column_drag_and_drop_enabled"
                     android:textColor="@color/colorTextWhite"
                     android:textSize="18sp"/>
 
@@ -83,7 +93,7 @@
                     android:id="@+id/llButtonsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_below="@+id/swDragAndDropEnabled"
+                    android:layout_below="@+id/swColumnDragAndDropEnabled"
                     android:gravity="bottom|end"
                     android:layout_marginTop="16dp"
                     android:orientation="horizontal">

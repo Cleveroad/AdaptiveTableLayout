@@ -175,7 +175,8 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             mSettings.setHeaderFixed(a.getBoolean(R.styleable.AdaptiveTableLayout_fixedHeaders, true));
             mSettings.setCellMargin(a.getDimensionPixelSize(R.styleable.AdaptiveTableLayout_cellMargin, 0));
             mSettings.setSolidRowHeader(a.getBoolean(R.styleable.AdaptiveTableLayout_solidRowHeaders, true));
-            mSettings.setDragAndDropEnabled(a.getBoolean(R.styleable.AdaptiveTableLayout_dragAndDropEnabled, true));
+            mSettings.setRowDragAndDropEnabled(a.getBoolean(R.styleable.AdaptiveTableLayout_rowDragAndDropEnabled, false));
+            mSettings.setColumnDragAndDropEnabled(a.getBoolean(R.styleable.AdaptiveTableLayout_columnDragAndDropEnabled, false));
         } finally {
             a.recycle();
         }
@@ -1408,43 +1409,46 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         ViewHolder viewHolder = getViewHolderByPosition((int) e.getX(), (int) e.getY());
         if (viewHolder != null) {
 
-            if (!mSettings.isDragAndDropEnabled()) {
+            if (!mSettings.isRowDragAndDropEnabled() && !mSettings.isColumnDragAndDropEnabled()) {
                 checkLongPressForItemAndFirstHeader(viewHolder);
                 return;
             }
             // save start dragging touch position
             mDragAndDropPoints.setStart((int) (mState.getScrollX() + e.getX()), (int) (mState.getScrollY() + e.getY()));
             if (viewHolder.getItemType() == ViewHolderType.COLUMN_HEADER) {
-                // dragging column header
-                mState.setRowDragging(false, viewHolder.getRowIndex());
-                mState.setColumnDragging(true, viewHolder.getColumnIndex());
+                if (mSettings.isColumnDragAndDropEnabled()) {
+                    // dragging column header
+                    mState.setRowDragging(false, viewHolder.getRowIndex());
+                    mState.setColumnDragging(true, viewHolder.getColumnIndex());
 
-                // set dragging flags to column's view holder
-                setDraggingToColumn(viewHolder.getColumnIndex(), true);
+                    // set dragging flags to column's view holder
+                    setDraggingToColumn(viewHolder.getColumnIndex(), true);
 
-                mShadowHelper.removeColumnsHeadersShadow(this);
+                    mShadowHelper.removeColumnsHeadersShadow(this);
 
-                mShadowHelper.addLeftShadow(this);
-                mShadowHelper.addRightShadow(this);
+                    mShadowHelper.addLeftShadow(this);
+                    mShadowHelper.addRightShadow(this);
 
-                // update view
-                refreshViewHolders();
-
+                    // update view
+                    refreshViewHolders();
+                }
             } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
-                // dragging column header
-                mState.setRowDragging(true, viewHolder.getRowIndex());
-                mState.setColumnDragging(false, viewHolder.getColumnIndex());
+                if (mSettings.isRowDragAndDropEnabled()) {
+                    // dragging column header
+                    mState.setRowDragging(true, viewHolder.getRowIndex());
+                    mState.setColumnDragging(false, viewHolder.getColumnIndex());
 
-                // set dragging flags to row's view holder
-                setDraggingToRow(viewHolder.getRowIndex(), true);
+                    // set dragging flags to row's view holder
+                    setDraggingToRow(viewHolder.getRowIndex(), true);
 
-                mShadowHelper.removeRowsHeadersShadow(this);
+                    mShadowHelper.removeRowsHeadersShadow(this);
 
-                mShadowHelper.addTopShadow(this);
-                mShadowHelper.addBottomShadow(this);
+                    mShadowHelper.addTopShadow(this);
+                    mShadowHelper.addBottomShadow(this);
 
-                // update view
-                refreshViewHolders();
+                    // update view
+                    refreshViewHolders();
+                }
 
             } else {
                 checkLongPressForItemAndFirstHeader(viewHolder);
@@ -1726,12 +1730,20 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         mSettings.setSolidRowHeader(solidRowHeader);
     }
 
-    public boolean isDragAndDropEnabled() {
-        return mSettings.isDragAndDropEnabled();
+    public boolean isRowDragAndDropEnabled() {
+        return mSettings.isRowDragAndDropEnabled();
     }
 
-    public void setDragAndDropEnabled(boolean enabled) {
-        mSettings.setDragAndDropEnabled(enabled);
+    public boolean isColumnDragAndDropEnabled() {
+        return mSettings.isColumnDragAndDropEnabled();
+    }
+
+    public void setRowDragAndDropEnabled(boolean enabled) {
+        mSettings.setRowDragAndDropEnabled(enabled);
+    }
+
+    public void setColumnDragAndDropEnabled(boolean enabled) {
+        mSettings.setColumnDragAndDropEnabled(enabled);
     }
 
     private static class TableInstanceSaver implements Parcelable {
