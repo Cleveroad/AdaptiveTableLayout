@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.SparseIntArray;
 import android.view.ViewGroup;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This is AdaptiveTableAdapter decorator (wrapper).
@@ -15,18 +13,16 @@ import java.util.Map;
  *
  * @param <VH> Adapter's ViewHolder class
  */
-class LinkedAdaptiveTableAdapterImpl<VH extends ViewHolder> extends LinkedAdaptiveTableAdapter<VH> implements
+public class LinkedAdaptiveTableAdapterImpl<VH extends ViewHolder> extends LinkedAdaptiveTableAdapter<VH> implements
         DataAdaptiveTableLayoutAdapter<VH>,
         OnItemClickListener,
         OnItemLongClickListener {
-    private static final String EXTRA_SAVE_STATE_COLUMN_INDEX_TO_ID = "EXTRA_SAVE_STATE_COLUMN_INDEX_TO_ID";
-    private static final String EXTRA_SAVE_STATE_COLUMN_ID_TO_INDEX = "EXTRA_SAVE_STATE_COLUMN_ID_TO_INDEX";
-    private static final String EXTRA_SAVE_STATE_ROW_INDEX_TO_ID = "EXTRA_SAVE_STATE_ROW_INDEX_TO_ID";
-    private static final String EXTRA_SAVE_STATE_ROW_ID_TO_INDEX = "EXTRA_SAVE_STATE_ROW_ID_TO_INDEX";
     /**
      * Decorated AdaptiveTableAdapter
      */
     private final AdaptiveTableAdapter<VH> mInner;
+
+    private final ModificationsHolder mModsHolder;
 
     /**
      * need to fix row header to data or to row' number
@@ -37,25 +33,25 @@ class LinkedAdaptiveTableAdapterImpl<VH extends ViewHolder> extends LinkedAdapti
     /**
      * Redirect column's ids
      */
-    private HashMap<Integer, Integer> mColumnIndexToId;
-    private HashMap<Integer, Integer> mColumnIdToIndex;
+    private final SparseIntArray mColumnIndexToId;
+    private SparseIntArray mColumnIdToIndex;
 
     /**
      * Redirect row's ids
      */
-    private HashMap<Integer, Integer> mRowIndexToId;
-    private HashMap<Integer, Integer> mRowIdToIndex;
+    private final SparseIntArray mRowIndexToId;
+    private SparseIntArray mRowIdToIndex;
 
     @SuppressLint("UseSparseArrays")
     LinkedAdaptiveTableAdapterImpl(@NonNull AdaptiveTableAdapter<VH> inner, boolean isSolidRowHeader) {
         mInner = inner;
+        mModsHolder = inner instanceof ModificationsHolder ? ((ModificationsHolder) inner) : null;
         mIsSolidRowHeader = isSolidRowHeader;
-
         // init data
-        mColumnIndexToId = new HashMap<>();
-        mColumnIdToIndex = new HashMap<>();
-        mRowIndexToId = new HashMap<>();
-        mRowIdToIndex = new HashMap<>();
+        mColumnIndexToId = new SparseIntArray();
+        mColumnIdToIndex = new SparseIntArray();
+        mRowIndexToId = new SparseIntArray();
+        mRowIdToIndex = new SparseIntArray();
     }
 
     @Override
@@ -119,21 +115,24 @@ class LinkedAdaptiveTableAdapterImpl<VH extends ViewHolder> extends LinkedAdapti
         int fromId = columnIndexToId(tempColumnIndex);
         int toId = columnIndexToId(tempColumnToIndex);
         if (tempColumnIndex != toId) {
-            mColumnIndexToId.put(tempColumnIndex, toId);
+            getColumnsIndexToIdModifications().put(tempColumnIndex, toId);
             mColumnIdToIndex.put(toId, tempColumnIndex);
         } else {
             //remove excess modifications
-            mColumnIndexToId.remove(tempColumnIndex);
-            mColumnIdToIndex.remove(toId);
+            getColumnsIndexToIdModifications().delete(tempColumnIndex);
+            mColumnIdToIndex.delete(toId);
         }
 
         if (tempColumnToIndex != fromId) {
-            mColumnIndexToId.put(tempColumnToIndex, fromId);
+            getColumnsIndexToIdModifications().put(tempColumnToIndex, fromId);
             mColumnIdToIndex.put(fromId, tempColumnToIndex);
         } else {
             //remove excess modifications
-            mColumnIndexToId.remove(tempColumnToIndex);
-            mColumnIdToIndex.remove(fromId);
+            getColumnsIndexToIdModifications().delete(tempColumnToIndex);
+            mColumnIdToIndex.delete(fromId);
+        }
+        if (mModsHolder != null) {
+            mModsHolder.changeColumns(columnIndex, columnToIndex);
         }
     }
 
@@ -147,19 +146,19 @@ class LinkedAdaptiveTableAdapterImpl<VH extends ViewHolder> extends LinkedAdapti
         int fromId = rowIndexToId(tempRowIndex);
         int toId = rowIndexToId(tempRowToIndex);
         if (tempRowIndex != toId) {
-            mRowIndexToId.put(tempRowIndex, toId);
+            getRowsIndexToIdModifications().put(tempRowIndex, toId);
             mRowIdToIndex.put(toId, tempRowIndex);
         } else {
-            mRowIndexToId.remove(tempRowIndex);
-            mRowIdToIndex.remove(toId);
+            getRowsIndexToIdModifications().delete(tempRowIndex);
+            mRowIdToIndex.delete(toId);
         }
 
         if (tempRowToIndex != fromId) {
-            mRowIndexToId.put(tempRowToIndex, fromId);
+            getRowsIndexToIdModifications().put(tempRowToIndex, fromId);
             mRowIdToIndex.put(fromId, tempRowToIndex);
         } else {
-            mRowIndexToId.remove(tempRowToIndex);
-            mRowIdToIndex.remove(fromId);
+            getRowsIndexToIdModifications().delete(tempRowToIndex);
+            mRowIdToIndex.delete(fromId);
         }
     }
 
@@ -262,21 +261,22 @@ class LinkedAdaptiveTableAdapterImpl<VH extends ViewHolder> extends LinkedAdapti
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle bundle) {
-        bundle.putSerializable(EXTRA_SAVE_STATE_COLUMN_INDEX_TO_ID, mColumnIndexToId);
-        bundle.putSerializable(EXTRA_SAVE_STATE_COLUMN_ID_TO_INDEX, mColumnIdToIndex);
-
-        bundle.putSerializable(EXTRA_SAVE_STATE_ROW_INDEX_TO_ID, mRowIndexToId);
-        bundle.putSerializable(EXTRA_SAVE_STATE_ROW_ID_TO_INDEX, mRowIdToIndex);
+        /*bundle.putSerializable(EXTRA_SAVE_STATE_COLUMN_INDEX_TO_ID, (Serializable) getColumnsIndexToIdModifications());
+        bundle.putSerializable(EXTRA_SAVE_STATE_ROW_INDEX_TO_ID, (Serializable) getRowsIndexToIdModifications());*/
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void onRestoreInstanceState(@NonNull Bundle bundle) {
-        mColumnIndexToId = (HashMap<Integer, Integer>) bundle.getSerializable(EXTRA_SAVE_STATE_COLUMN_INDEX_TO_ID);
-        mColumnIdToIndex = (HashMap<Integer, Integer>) bundle.getSerializable(EXTRA_SAVE_STATE_COLUMN_ID_TO_INDEX);
+        /*HashMap<Integer, Integer> columnsMods = (HashMap<Integer, Integer>) bundle.getSerializable(EXTRA_SAVE_STATE_COLUMN_INDEX_TO_ID);
+        if (columnsMods != null) {
+            setColumnsModifications(columnsMods);
+        }
 
-        mRowIndexToId = (HashMap<Integer, Integer>) bundle.getSerializable(EXTRA_SAVE_STATE_ROW_INDEX_TO_ID);
-        mRowIdToIndex = (HashMap<Integer, Integer>) bundle.getSerializable(EXTRA_SAVE_STATE_ROW_ID_TO_INDEX);
+        HashMap<Integer, Integer> rowsMods = (HashMap<Integer, Integer>) bundle.getSerializable(EXTRA_SAVE_STATE_ROW_INDEX_TO_ID);
+        if (rowsMods != null) {
+            setRowsModifications(rowsMods);
+        }*/
     }
 
     @Override
@@ -294,31 +294,65 @@ class LinkedAdaptiveTableAdapterImpl<VH extends ViewHolder> extends LinkedAdapti
         super.notifyColumnChanged(columnIdToIndex(columnIndex));
     }
 
-    public Map<Integer, Integer> getRowsModifications() {
-        return mRowIndexToId;
+    @NonNull
+    @Override
+    public SparseIntArray getRowsIndexToIdModifications() {
+        return mModsHolder == null ? mRowIndexToId : mModsHolder.getRowsIndexToIdModifications();
     }
 
-    public Map<Integer, Integer> getColumnsModifications() {
-        return mColumnIndexToId;
+    @NonNull
+    @Override
+    public SparseIntArray getColumnsIndexToIdModifications() {
+        return mModsHolder == null ? mColumnIndexToId : mModsHolder.getColumnsIndexToIdModifications();
+    }
+
+    @Override
+    public void setRowsModifications(@NonNull SparseIntArray mod) {
+        mRowIndexToId.clear();
+        mRowIdToIndex.clear();
+        for (int i = 0; i < mod.size(); i++) {
+            mRowIndexToId.put(mod.keyAt(i), mod.valueAt(i));
+            mRowIdToIndex.put(mod.valueAt(i), mod.keyAt(i));
+        }
+        if (mModsHolder != null) {
+            mModsHolder.setRowsModifications(mod);
+        } else {
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void setColumnsModifications(@NonNull SparseIntArray mod) {
+        mColumnIndexToId.clear();
+        mColumnIdToIndex.clear();
+        for (int i = 0; i < mod.size(); i++) {
+            mColumnIndexToId.put(mod.keyAt(i), mod.valueAt(i));
+            mColumnIdToIndex.put(mod.valueAt(i), mod.keyAt(i));
+        }
+        if (mModsHolder != null) {
+            mModsHolder.setColumnsModifications(mod);
+        } else {
+            notifyDataSetChanged();
+        }
     }
 
     private int columnIndexToId(int columnIndex) {
-        Integer id = mColumnIndexToId.get(columnIndex);
-        return id != null ? id : columnIndex;
+        int id = getColumnsIndexToIdModifications().get(columnIndex, -1);
+        return id >= 0 ? id : columnIndex;
     }
 
     private int columnIdToIndex(int columnId) {
-        Integer index = mColumnIdToIndex.get(columnId);
-        return index != null ? index : columnId;
+        int index = mColumnIdToIndex.get(columnId, -1);
+        return index >= 0 ? index : columnId;
     }
 
     private int rowIndexToId(int rowIndex) {
-        Integer id = mRowIndexToId.get(rowIndex);
-        return id != null ? id : rowIndex;
+        int id = getRowsIndexToIdModifications().get(rowIndex, -1);
+        return id >= 0 ? id : rowIndex;
     }
 
     private int rowIdToIndex(int rowId) {
-        Integer index = mRowIdToIndex.get(rowId);
-        return index != null ? index : rowId;
+        int index = mRowIdToIndex.get(rowId, -1);
+        return index >= 0 ? index : rowId;
     }
 }

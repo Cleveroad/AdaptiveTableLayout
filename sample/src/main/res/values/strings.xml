@@ -45,4 +45,6 @@
     <string name="no_such_file_error">No such csv file</string>
     <string name="not_csv_file_error">Not csv file</string>
 
+    <string name="facebook_app_id">dummy</string>
+
 </resources>
