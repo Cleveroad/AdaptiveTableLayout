@@ -838,7 +838,18 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 }
             }
         }
-
+        if (mLeftTopViewHolder != null) {
+            View view = mLeftTopViewHolder.getItemView();
+            // recycle view holder
+            if (isRecycleAll
+                    || view.getRight() < 0
+                    || view.getLeft() > mSettings.getLayoutWidth()
+                    || view.getBottom() < 0
+                    || view.getTop() > mSettings.getLayoutHeight()) {
+                recycleViewHolder(mLeftTopViewHolder);
+                mLeftTopViewHolder = null;
+            }
+        }
         removeKeys(headerKeysToRemove, mHeaderRowViewHolders);
     }
 
