@@ -95,7 +95,8 @@ public class TableLayoutFragment
                             mTableLayout.isHeaderFixed(),
                             mTableLayout.isSolidRowHeader(),
                             mTableLayout.isRTL(),
-                            mTableLayout.isDragAndDropEnabled())
+                            mTableLayout.isRowDragAndDropEnabled(),
+                            mTableLayout.isColumnDragAndDropEnabled())
                             .show(getChildFragmentManager(), SettingsDialog.class.getSimpleName());
                 }
                 return true;
@@ -155,8 +156,10 @@ public class TableLayoutFragment
                         data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_RTL_DIRECTION, mTableLayout.isRTL())
                                 ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
             }
-            mTableLayout.setDragAndDropEnabled(data.getBooleanExtra(
-                    SettingsDialog.EXTRA_VALUE_DRAG_AND_DROP_ENABLED, mTableLayout.isDragAndDropEnabled()));
+            mTableLayout.setRowDragAndDropEnabled(data.getBooleanExtra(
+                    SettingsDialog.EXTRA_VALUE_ROW_DRAG_AND_DROP_ENABLED, mTableLayout.isRowDragAndDropEnabled()));
+            mTableLayout.setColumnDragAndDropEnabled(data.getBooleanExtra(
+                    SettingsDialog.EXTRA_VALUE_COLUMN_DRAG_AND_DROP_ENABLED, mTableLayout.isColumnDragAndDropEnabled()));
             mTableAdapter.setRtl(mTableLayout.isRTL());
             mTableAdapter.notifyDataSetChanged();
         }

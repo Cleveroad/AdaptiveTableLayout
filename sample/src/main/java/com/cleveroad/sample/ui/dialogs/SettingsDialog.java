@@ -22,7 +22,8 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
     public static final String EXTRA_VALUE_SOLID_HEADER = "EXTRA_VALUE_SOLID_HEADER";
     public static final String EXTRA_VALUE_HEADER_FIXED = "EXTRA_VALUE_HEADER_FIXED";
     public static final String EXTRA_VALUE_RTL_DIRECTION = "EXTRA_VALUE_RTL_DIRECTION";
-    public static final String EXTRA_VALUE_DRAG_AND_DROP_ENABLED = "EXTRA_VALUE_DRAG_AND_DROP_ENABLED";
+    public static final String EXTRA_VALUE_ROW_DRAG_AND_DROP_ENABLED = "EXTRA_VALUE_ROW_DRAG_AND_DROP_ENABLED";
+    public static final String EXTRA_VALUE_COLUMN_DRAG_AND_DROP_ENABLED = "EXTRA_VALUE_COLUMN_DRAG_AND_DROP_ENABLED";
 
     /**
      * if true - value of row header fixed to the row. Fixed to the data
@@ -34,7 +35,9 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
 
     private boolean mIsRtlDirection;
 
-    private boolean mIsDragAndDropEnabled;
+    private boolean mIsRowDragAndDropEnabled;
+
+    private boolean mIsColumnDragAndDropEnabled;
 
     private SwitchCompat swSolidRow;
 
@@ -42,27 +45,33 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
 
     private SwitchCompat swRtlDirection;
 
-    private SwitchCompat swDragAndDropEnabled;
+    private SwitchCompat swRowDragAndDropEnabled;
+
+    private SwitchCompat swColumnDragAndDropEnabled;
 
 
     public static SettingsDialog newInstance(boolean isHeaderFixed, boolean solidRowHeader,
-                                             boolean isRtlDirection ,boolean isDragAndDropEnabled) {
+                                             boolean isRtlDirection, boolean isRowDragAndDropEnabled,
+                                             boolean isColumnDragAndDropEnabled) {
         SettingsDialog dialog = new SettingsDialog();
         Bundle args = new Bundle();
         args.putBoolean(EXTRA_VALUE_HEADER_FIXED, isHeaderFixed);
         args.putBoolean(EXTRA_VALUE_SOLID_HEADER, solidRowHeader);
         args.putBoolean(EXTRA_VALUE_RTL_DIRECTION, isRtlDirection);
-        args.putBoolean(EXTRA_VALUE_DRAG_AND_DROP_ENABLED, isDragAndDropEnabled);
+        args.putBoolean(EXTRA_VALUE_ROW_DRAG_AND_DROP_ENABLED, isRowDragAndDropEnabled);
+        args.putBoolean(EXTRA_VALUE_COLUMN_DRAG_AND_DROP_ENABLED, isColumnDragAndDropEnabled);
         dialog.setArguments(args);
         return dialog;
     }
 
-    public static SettingsDialog newInstance(boolean isHeaderFixed, boolean solidRowHeader, boolean isDragAndDropEnabled) {
+    public static SettingsDialog newInstance(boolean isHeaderFixed, boolean solidRowHeader,
+                                             boolean isRowDragAndDropEnabled, boolean isColumnDragAndDropEnabled) {
         SettingsDialog dialog = new SettingsDialog();
         Bundle args = new Bundle();
         args.putBoolean(EXTRA_VALUE_HEADER_FIXED, isHeaderFixed);
         args.putBoolean(EXTRA_VALUE_SOLID_HEADER, solidRowHeader);
-        args.putBoolean(EXTRA_VALUE_DRAG_AND_DROP_ENABLED, isDragAndDropEnabled);
+        args.putBoolean(EXTRA_VALUE_ROW_DRAG_AND_DROP_ENABLED, isRowDragAndDropEnabled);
+        args.putBoolean(EXTRA_VALUE_COLUMN_DRAG_AND_DROP_ENABLED, isColumnDragAndDropEnabled);
         dialog.setArguments(args);
         return dialog;
     }
@@ -73,7 +82,8 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
         mSolidRowHeader = getArguments().getBoolean(EXTRA_VALUE_SOLID_HEADER);
         mIsHeaderFixed = getArguments().getBoolean(EXTRA_VALUE_HEADER_FIXED);
         mIsRtlDirection = getArguments().getBoolean(EXTRA_VALUE_RTL_DIRECTION);
-        mIsDragAndDropEnabled = getArguments().getBoolean(EXTRA_VALUE_DRAG_AND_DROP_ENABLED);
+        mIsRowDragAndDropEnabled = getArguments().getBoolean(EXTRA_VALUE_ROW_DRAG_AND_DROP_ENABLED);
+        mIsColumnDragAndDropEnabled = getArguments().getBoolean(EXTRA_VALUE_COLUMN_DRAG_AND_DROP_ENABLED);
     }
 
     @Nullable
@@ -86,7 +96,8 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
         swSolidRow = (SwitchCompat) view.findViewById(R.id.swSolidRow);
         swFixedHeaders = (SwitchCompat) view.findViewById(R.id.swFixedHeaders);
         swRtlDirection = (SwitchCompat) view.findViewById(R.id.swRtlDirection);
-        swDragAndDropEnabled = (SwitchCompat) view.findViewById(R.id.swDragAndDropEnabled);
+        swRowDragAndDropEnabled = (SwitchCompat) view.findViewById(R.id.swRowDragAndDropEnabled);
+        swColumnDragAndDropEnabled = (SwitchCompat) view.findViewById(R.id.swColumnDragAndDropEnabled);
 
         return view;
     }
@@ -101,7 +112,8 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
         swFixedHeaders.setChecked(mIsHeaderFixed);
         swSolidRow.setChecked(mSolidRowHeader);
         swRtlDirection.setChecked(mIsRtlDirection);
-        swDragAndDropEnabled.setChecked(mIsDragAndDropEnabled);
+        swRowDragAndDropEnabled.setChecked(mIsRowDragAndDropEnabled);
+        swColumnDragAndDropEnabled.setChecked(mIsColumnDragAndDropEnabled);
 
         swFixedHeaders.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -121,10 +133,16 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
                 mIsRtlDirection = isChecked;
             }
         });
-        swDragAndDropEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        swRowDragAndDropEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                mIsDragAndDropEnabled = isChecked;
+                mIsRowDragAndDropEnabled = isChecked;
+            }
+        });
+        swColumnDragAndDropEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                mIsColumnDragAndDropEnabled = isChecked;
             }
         });
 
@@ -153,7 +171,8 @@ public class SettingsDialog extends DialogFragment implements View.OnClickListen
                 intent.putExtra(EXTRA_VALUE_SOLID_HEADER, mSolidRowHeader);
                 intent.putExtra(EXTRA_VALUE_HEADER_FIXED, mIsHeaderFixed);
                 intent.putExtra(EXTRA_VALUE_RTL_DIRECTION, mIsRtlDirection);
-                intent.putExtra(EXTRA_VALUE_DRAG_AND_DROP_ENABLED, mIsDragAndDropEnabled);
+                intent.putExtra(EXTRA_VALUE_ROW_DRAG_AND_DROP_ENABLED, mIsRowDragAndDropEnabled);
+                intent.putExtra(EXTRA_VALUE_COLUMN_DRAG_AND_DROP_ENABLED, mIsColumnDragAndDropEnabled);
                 getParentFragment().onActivityResult(REQUEST_CODE_SETTINGS, Activity.RESULT_OK, intent);
                 break;
             case R.id.bNegative:

@@ -13,20 +13,23 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.util.SparseArrayCompat;
+import android.support.v4.view.NestedScrollingChild2;
+import android.support.v4.view.NestedScrollingChildHelper;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.util.SparseIntArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.ScrollHelperListener, AdaptiveTableDataSetObserver {
+import static android.support.v4.view.ViewCompat.TYPE_TOUCH;
+
+public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.ScrollHelperListener, AdaptiveTableDataSetObserver, NestedScrollingChild2 {
 
     private static final String EXTRA_STATE_SUPER = "EXTRA_STATE_SUPER";
     private static final String EXTRA_STATE_VIEW_GROUP = "EXTRA_STATE_VIEW_GROUP";
@@ -115,6 +118,10 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
     @Nullable
     private TableInstanceSaver mSaver;
 
+    private NestedScrollingChildHelper mScrollingChildHelper;
+    private int[] consumed = new int[2];
+    private int[] offset = new int[2];
+
     public AdaptiveTableLayout(Context context) {
         super(context);
         init(context);
@@ -175,11 +182,16 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             mSettings.setHeaderFixed(a.getBoolean(R.styleable.AdaptiveTableLayout_fixedHeaders, true));
             mSettings.setCellMargin(a.getDimensionPixelSize(R.styleable.AdaptiveTableLayout_cellMargin, 0));
             mSettings.setSolidRowHeader(a.getBoolean(R.styleable.AdaptiveTableLayout_solidRowHeaders, true));
-            mSettings.setDragAndDropEnabled(a.getBoolean(R.styleable.AdaptiveTableLayout_dragAndDropEnabled, true));
+            mSettings.setRowDragAndDropEnabled(a.getBoolean(R.styleable.AdaptiveTableLayout_rowDragAndDropEnabled, false));
+            mSettings.setColumnDragAndDropEnabled(a.getBoolean(R.styleable.AdaptiveTableLayout_columnDragAndDropEnabled, false));
         } finally {
             a.recycle();
         }
 
+    }
+
+    public void setCellMargin(int marginInPixels) {
+        mSettings.setCellMargin(marginInPixels);
     }
 
     private void init(Context context) {
@@ -308,7 +320,14 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             // remove adapter
             mAdapter = null;
         }
+        if (mSettings.getLayoutHeight() != 0 && mSettings.getLayoutWidth() != 0) {
+            // if layout has width and height
+            initItems();
+        }
+    }
 
+    public void refreshView() {
+        recycleViewHolders(true);
         if (mSettings.getLayoutHeight() != 0 && mSettings.getLayoutWidth() != 0) {
             // if layout has width and height
             initItems();
@@ -347,11 +366,10 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
      *
      * @return row position modification map. Includes only modified row numbers
      */
-    @SuppressWarnings("unchecked")
-    public Map<Integer, Integer> getLinkedAdapterRowsModifications() {
+    public SparseIntArray getLinkedAdapterRowsModifications() {
         return mAdapter instanceof LinkedAdaptiveTableAdapterImpl ?
-                ((LinkedAdaptiveTableAdapterImpl) mAdapter).getRowsModifications() :
-                Collections.<Integer, Integer>emptyMap();
+                mAdapter.getRowsIndexToIdModifications() :
+                new SparseIntArray();
     }
 
     /**
@@ -360,16 +378,15 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
      *
      * @return row position modification map. Includes only modified column numbers
      */
-    @SuppressWarnings("unchecked")
-    public Map<Integer, Integer> getLinkedAdapterColumnsModifications() {
+    public SparseIntArray getLinkedAdapterColumnsModifications() {
         return mAdapter instanceof LinkedAdaptiveTableAdapterImpl ?
-                ((LinkedAdaptiveTableAdapterImpl) mAdapter).getColumnsModifications() :
-                Collections.<Integer, Integer>emptyMap();
+                mAdapter.getColumnsIndexToIdModifications() :
+                new SparseIntArray();
     }
 
     @Override
     public void scrollTo(int x, int y) {
-        scrollBy(x, y);
+        scrollBy(x - mState.getScrollX(), y - mState.getScrollY());
     }
 
     @Override
@@ -603,7 +620,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             view.bringToFront();
         }
 
-        if (!mState.isColumnDragging()) {
+        /*if (!mState.isColumnDragging()) {
             View shadow = mShadowHelper.getColumnsHeadersShadow();
 
             if (shadow == null) {
@@ -618,7 +635,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                     top + mManager.getHeaderColumnHeight() + SHADOW_HEADERS_THICK);
 
             shadow.bringToFront();
-        }
+        }*/
 
     }
 
@@ -677,7 +694,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             view.bringToFront();
         }
 
-        if (!mState.isRowDragging()) {
+        /*if (!mState.isRowDragging()) {
             View shadow = mShadowHelper.getRowsHeadersShadow();
 
             if (shadow == null) {
@@ -695,7 +712,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                     mSettings.getLayoutHeight());
 
             shadow.bringToFront();
-        }
+        }*/
     }
 
     /**
@@ -821,7 +838,18 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 }
             }
         }
-
+        if (mLeftTopViewHolder != null) {
+            View view = mLeftTopViewHolder.getItemView();
+            // recycle view holder
+            if (isRecycleAll
+                    || view.getRight() < 0
+                    || view.getLeft() > mSettings.getLayoutWidth()
+                    || view.getBottom() < 0
+                    || view.getTop() > mSettings.getLayoutHeight()) {
+                recycleViewHolder(mLeftTopViewHolder);
+                mLeftTopViewHolder = null;
+            }
+        }
         removeKeys(headerKeysToRemove, mHeaderRowViewHolders);
     }
 
@@ -1377,12 +1405,21 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         if (!mScrollerRunnable.isFinished()) {
             mScrollerRunnable.forceFinished();
         }
+        startNestedScroll(ViewCompat.SCROLL_AXIS_VERTICAL);
         return true;
     }
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
         // simple click event
+        int shadowShiftX = mManager.getColumnCount() * mSettings.getCellMargin();
+        int shadowShiftY = mManager.getRowCount() * mSettings.getCellMargin();
+
+        long maxX = mManager.getFullWidth() + shadowShiftX;
+        long maxY = mManager.getFullHeight() + shadowShiftY;
+        if (e.getX() > maxX || e.getY() > maxY) {
+            return false;
+        }
         ViewHolder viewHolder = getViewHolderByPosition((int) e.getX(), (int) e.getY());
         if (viewHolder != null) {
             OnItemClickListener onItemClickListener = mAdapter.getOnItemClickListener();
@@ -1408,43 +1445,46 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         ViewHolder viewHolder = getViewHolderByPosition((int) e.getX(), (int) e.getY());
         if (viewHolder != null) {
 
-            if (!mSettings.isDragAndDropEnabled()) {
+            if (!mSettings.isRowDragAndDropEnabled() && !mSettings.isColumnDragAndDropEnabled()) {
                 checkLongPressForItemAndFirstHeader(viewHolder);
                 return;
             }
             // save start dragging touch position
             mDragAndDropPoints.setStart((int) (mState.getScrollX() + e.getX()), (int) (mState.getScrollY() + e.getY()));
             if (viewHolder.getItemType() == ViewHolderType.COLUMN_HEADER) {
-                // dragging column header
-                mState.setRowDragging(false, viewHolder.getRowIndex());
-                mState.setColumnDragging(true, viewHolder.getColumnIndex());
+                if (mSettings.isColumnDragAndDropEnabled()) {
+                    // dragging column header
+                    mState.setRowDragging(false, viewHolder.getRowIndex());
+                    mState.setColumnDragging(true, viewHolder.getColumnIndex());
 
-                // set dragging flags to column's view holder
-                setDraggingToColumn(viewHolder.getColumnIndex(), true);
+                    // set dragging flags to column's view holder
+                    setDraggingToColumn(viewHolder.getColumnIndex(), true);
 
-                mShadowHelper.removeColumnsHeadersShadow(this);
+                    mShadowHelper.removeColumnsHeadersShadow(this);
 
-                mShadowHelper.addLeftShadow(this);
-                mShadowHelper.addRightShadow(this);
+                    mShadowHelper.addLeftShadow(this);
+                    mShadowHelper.addRightShadow(this);
 
-                // update view
-                refreshViewHolders();
-
+                    // update view
+                    refreshViewHolders();
+                }
             } else if (viewHolder.getItemType() == ViewHolderType.ROW_HEADER) {
-                // dragging column header
-                mState.setRowDragging(true, viewHolder.getRowIndex());
-                mState.setColumnDragging(false, viewHolder.getColumnIndex());
+                if (mSettings.isRowDragAndDropEnabled()) {
+                    // dragging column header
+                    mState.setRowDragging(true, viewHolder.getRowIndex());
+                    mState.setColumnDragging(false, viewHolder.getColumnIndex());
 
-                // set dragging flags to row's view holder
-                setDraggingToRow(viewHolder.getRowIndex(), true);
+                    // set dragging flags to row's view holder
+                    setDraggingToRow(viewHolder.getRowIndex(), true);
 
-                mShadowHelper.removeRowsHeadersShadow(this);
+                    mShadowHelper.removeRowsHeadersShadow(this);
 
-                mShadowHelper.addTopShadow(this);
-                mShadowHelper.addBottomShadow(this);
+                    mShadowHelper.addTopShadow(this);
+                    mShadowHelper.addBottomShadow(this);
 
-                // update view
-                refreshViewHolders();
+                    // update view
+                    refreshViewHolders();
+                }
 
             } else {
                 checkLongPressForItemAndFirstHeader(viewHolder);
@@ -1614,11 +1654,22 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
         if (!mState.isDragging()) {
-            // simple scroll....
             if (!mScrollerRunnable.isFinished()) {
                 mScrollerRunnable.forceFinished();
             }
-            scrollBy((int) distanceX, (int) distanceY);
+            int dX = (int) distanceX - offset[0];
+            int dY = (int) distanceY - offset[1];
+            boolean shouldTryNestedScroll = dY != 0 && Math.abs(dX / dY) < 1;
+            if (shouldTryNestedScroll && dispatchNestedPreScroll(dX, dY, consumed, offset, TYPE_TOUCH)) {
+                dX -= consumed[0];
+                dY -= consumed[1];
+            } else {
+                offset[0] = 0;
+                offset[1] = 0;
+            }
+            if (dX != 0 || dY != 0) {
+                scrollBy(dX, dY);
+            }
         }
         return true;
     }
@@ -1626,20 +1677,22 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         if (!mState.isDragging()) {
-            // simple fling
-            mScrollerRunnable.start(
-                    mState.getScrollX(), mState.getScrollY(),
-                    (int) velocityX / 2, (int) velocityY / 2,
-                    (int) (mManager.getFullWidth() - mSettings.getLayoutWidth() + mManager.getColumnCount() * mSettings.getCellMargin()),
-                    (int) (mManager.getFullHeight() - mSettings.getLayoutHeight() + mManager.getRowCount() * mSettings.getCellMargin())
-            );
+            if (!dispatchNestedPreFling(velocityX, velocityY)) {
+                dispatchNestedFling(velocityX, velocityY, true);
+                mScrollerRunnable.start(
+                        mState.getScrollX(), mState.getScrollY(),
+                        (int) velocityX, (int) velocityY,
+                        (int) (mManager.getFullWidth() - mSettings.getLayoutWidth() + mManager.getColumnCount() * mSettings.getCellMargin()),
+                        (int) (mManager.getFullHeight() - mSettings.getLayoutHeight() + mManager.getRowCount() * mSettings.getCellMargin())
+                );
+            }
         }
         return true;
     }
 
     @Override
     public void notifyDataSetChanged() {
-        recycleViewHolders(true);
+        refreshView();
         mVisibleArea.set(mState.getScrollX(),
                 mState.getScrollY(),
                 mState.getScrollX() + mSettings.getLayoutWidth(),
@@ -1726,12 +1779,20 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         mSettings.setSolidRowHeader(solidRowHeader);
     }
 
-    public boolean isDragAndDropEnabled() {
-        return mSettings.isDragAndDropEnabled();
+    public boolean isRowDragAndDropEnabled() {
+        return mSettings.isRowDragAndDropEnabled();
     }
 
-    public void setDragAndDropEnabled(boolean enabled) {
-        mSettings.setDragAndDropEnabled(enabled);
+    public boolean isColumnDragAndDropEnabled() {
+        return mSettings.isColumnDragAndDropEnabled();
+    }
+
+    public void setRowDragAndDropEnabled(boolean enabled) {
+        mSettings.setRowDragAndDropEnabled(enabled);
+    }
+
+    public void setColumnDragAndDropEnabled(boolean enabled) {
+        mSettings.setColumnDragAndDropEnabled(enabled);
     }
 
     private static class TableInstanceSaver implements Parcelable {
@@ -1774,6 +1835,88 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             dest.writeInt(this.mLayoutDirection);
             dest.writeByte((byte) (mFixedHeaders ? 1 : 0));
         }
+    }
+
+    private NestedScrollingChildHelper getScrollingChildHelper() {
+        if (mScrollingChildHelper == null) {
+            mScrollingChildHelper = new NestedScrollingChildHelper(this);
+        }
+        return mScrollingChildHelper;
+    }
+
+    @Override
+    public void setNestedScrollingEnabled(boolean enabled) {
+        getScrollingChildHelper().setNestedScrollingEnabled(enabled);
+    }
+
+    @Override
+    public boolean isNestedScrollingEnabled() {
+        return getScrollingChildHelper().isNestedScrollingEnabled();
+    }
+
+    @Override
+    public boolean startNestedScroll(int axes) {
+        return getScrollingChildHelper().startNestedScroll(axes);
+    }
+
+    @Override
+    public void stopNestedScroll() {
+        getScrollingChildHelper().stopNestedScroll();
+    }
+
+    @Override
+    public boolean hasNestedScrollingParent() {
+        return getScrollingChildHelper().hasNestedScrollingParent();
+    }
+
+    @Override
+    public boolean dispatchNestedScroll(int dxConsumed, int dyConsumed, int dxUnconsumed,
+                                        int dyUnconsumed, int[] offsetInWindow) {
+        return getScrollingChildHelper().dispatchNestedScroll(dxConsumed, dyConsumed,
+                dxUnconsumed, dyUnconsumed, offsetInWindow);
+    }
+
+    @Override
+    public boolean dispatchNestedPreScroll(int dx, int dy, int[] consumed,
+                                           int[] offsetInWindow) {
+        return getScrollingChildHelper().dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow);
+    }
+
+    @Override
+    public boolean dispatchNestedFling(float velocityX, float velocityY, boolean consumed) {
+        return getScrollingChildHelper().dispatchNestedFling(velocityX, velocityY, consumed);
+    }
+
+    @Override
+    public boolean dispatchNestedPreFling(float velocityX, float velocityY) {
+        return getScrollingChildHelper().dispatchNestedPreFling(velocityX, velocityY);
+    }
+
+    @Override
+    public boolean startNestedScroll(int axes, int type) {
+        return getScrollingChildHelper().startNestedScroll(axes, type);
+    }
+
+    @Override
+    public void stopNestedScroll(int type) {
+        getScrollingChildHelper().stopNestedScroll(type);
+    }
+
+    @Override
+    public boolean hasNestedScrollingParent(int type) {
+        return getScrollingChildHelper().hasNestedScrollingParent(type);
+    }
+
+    @Override
+    public boolean dispatchNestedScroll(int dxConsumed, int dyConsumed, int dxUnconsumed,
+                                        int dyUnconsumed, @Nullable int[] offsetInWindow, int type) {
+        return getScrollingChildHelper().dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, offsetInWindow, type);
+    }
+
+    @Override
+    public boolean dispatchNestedPreScroll(int dx, int dy, @Nullable int[] consumed,
+                                           @Nullable int[] offsetInWindow, int type) {
+        return getScrollingChildHelper().dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow, type);
     }
 
 }

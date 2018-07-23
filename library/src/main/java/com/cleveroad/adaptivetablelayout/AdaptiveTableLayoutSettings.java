@@ -25,9 +25,14 @@ class AdaptiveTableLayoutSettings {
     private boolean mSolidRowHeader;
 
     /**
-     * If true, then the table can be edited, otherwise it is impossible
+     * If true, then the table row can be edited, otherwise it is impossible
      */
-    private boolean mDragAndDropEnabled;
+    private boolean mRowDragAndDropEnabled;
+
+    /**
+     * If true, then the table column can be edited, otherwise it is impossible
+     */
+    private boolean mColumnDragAndDropEnabled;
 
 
     AdaptiveTableLayoutSettings() {
@@ -78,11 +83,19 @@ class AdaptiveTableLayoutSettings {
         return this;
     }
 
-    public boolean isDragAndDropEnabled() {
-        return mDragAndDropEnabled;
+    public boolean isRowDragAndDropEnabled() {
+        return mRowDragAndDropEnabled;
     }
 
-    public void setDragAndDropEnabled(boolean dragAndDropEnabled) {
-        mDragAndDropEnabled = dragAndDropEnabled;
+    public boolean isColumnDragAndDropEnabled() {
+        return mColumnDragAndDropEnabled;
+    }
+
+    public void setRowDragAndDropEnabled(boolean rowDragAndDropEnabled) {
+        mRowDragAndDropEnabled = rowDragAndDropEnabled;
+    }
+
+    public void setColumnDragAndDropEnabled(boolean columnDragAndDropEnabled) {
+        mColumnDragAndDropEnabled = columnDragAndDropEnabled;
     }
 }

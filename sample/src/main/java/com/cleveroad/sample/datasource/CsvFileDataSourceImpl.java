@@ -9,6 +9,7 @@ import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.cleveroad.sample.utils.ClosableUtil;
 import com.cleveroad.sample.utils.CsvUtils;
@@ -104,8 +105,8 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
 
     public void applyChanges(
             LoaderManager loaderManager,
-            final Map<Integer, Integer> rowModifications,
-            final Map<Integer, Integer> columnModifications,
+            final SparseIntArray rowModifications,
+            final SparseIntArray columnModifications,
             final boolean isSolidRowHeader,
             final UpdateFileCallback callback) {
 

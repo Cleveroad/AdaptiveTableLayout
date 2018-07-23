@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Environment;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import com.cleveroad.sample.utils.ClosableUtil;
 import com.cleveroad.sample.utils.StringUtils;
@@ -23,14 +24,14 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<String> {
     private static final String TAG = UpdateCsvFileLoader.class.getSimpleName();
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.getDefault());
     private final CsvFileDataSourceImpl mCsvFileDataSource;
-    private final Map<Integer, Integer> mRowModifications;
-    private final Map<Integer, Integer> mColumnModifications;
+    private final SparseIntArray mRowModifications;
+    private final SparseIntArray mColumnModifications;
     private final boolean mIsSolidRowHeader;
 
     public UpdateCsvFileLoader(Context context,
                                CsvFileDataSourceImpl csvFileDataSource,
-                               Map<Integer, Integer> rowModifications,
-                               Map<Integer, Integer> columnModifications,
+                               SparseIntArray rowModifications,
+                               SparseIntArray columnModifications,
                                boolean isSolidRowHeader) {
         super(context);
         mCsvFileDataSource = csvFileDataSource;
@@ -40,12 +41,12 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<String> {
         onContentChanged();
     }
 
-    private List<String> modifyListPositions(List<String> inputList, Map<Integer, Integer>
+    private List<String> modifyListPositions(List<String> inputList, SparseIntArray
             modifications) {
         List<String> result = new ArrayList<>(inputList.size());
         for (int i = 0, size = inputList.size(); i < size; i++) {
             Integer newPosition = modifications.get(i);
-            String value = inputList.get(newPosition != null ? newPosition : i);
+            String value = inputList.get(newPosition);
             if (value.contains(",")) {
                 value = "\"" + value + "\"";
             }
