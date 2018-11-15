@@ -10,12 +10,10 @@ import java.io.File;
 
 public class SampleActivity extends AppCompatActivity implements
         CsvPickerFragment.OnCsvFileSelectedListener {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
-
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()

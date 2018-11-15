@@ -3,7 +3,7 @@
     <string name="app_name">CSV Editor</string>
 
     <string name="pick_csv_file">Add CSV table from your phone memory and you can read and edit it.</string>
-    <string name="pick_csv_or_demo_file">Open any CSVor you can use this DEMO file</string>
+    <string name="pick_csv_or_demo_file">Open any CSV or you can use this DEMO file</string>
     <string name="pick_file">Pick CSV-file</string>
     <string name="demo">Demo</string>
     <!-- edit song dialog -->
@@ -43,5 +43,16 @@
     <string name="unexpected_error">Unexpected error</string>
     <string name="no_such_file_error">No such csv file</string>
     <string name="not_csv_file_error">Not csv file</string>
+    <string name="delete_row">Delete row</string>
+    <string name="add_row">Add row</string>
+    <string name="add_above_row">Add row above</string>
+    <string name="add_below_row">Add row below</string>
+
+    <string name="want_to_delete">This may take some time. Do you want to delete?</string>
+    <string name="add_column">Add column</string>
+    <string name="delete_column">Delete column</string>
+    <string name="add_column_left">Add a column to the left</string>
+    <string name="add_column_right">Add a column to the right</string>
+    <string name="message">This may take some time.</string>
 
 </resources>

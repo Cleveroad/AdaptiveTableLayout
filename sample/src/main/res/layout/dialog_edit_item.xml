@@ -10,7 +10,7 @@
     android:layout_marginStart="42dp"
     app:cardBackgroundColor="@color/medium_jungle_green"
     app:cardCornerRadius="8dp"
-    app:cardElevation="3sp"
+    app:cardElevation="3dp"
     app:contentPadding="16dp">
 
     <RelativeLayout
@@ -54,11 +54,32 @@
 
                 </android.support.design.widget.TextInputLayout>
 
+                <TextView
+                    android:id="@+id/tvDelete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tilValue"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/tvAdd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/tvDelete"
+                    android:layout_alignStart="@+id/tvDelete"
+                    android:layout_below="@+id/tvDelete"
+                    android:layout_marginTop="11dp"
+                    android:textColor="@color/colorTextWhite"
+                    android:textSize="18sp"/>
+
                 <LinearLayout
                     android:id="@+id/llButtonsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_below="@+id/tilValue"
+                    android:layout_below="@+id/tvAdd"
                     android:layout_marginTop="16dp"
                     android:gravity="end|bottom"
                     android:orientation="horizontal">

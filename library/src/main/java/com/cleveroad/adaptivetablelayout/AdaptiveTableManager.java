@@ -51,7 +51,6 @@ class AdaptiveTableManager {
         mHeaderRowWidth = 0;
 
         mIsInited = false;
-
     }
 
     void init(int rowCount, int columnCount) {

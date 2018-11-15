@@ -7,8 +7,8 @@
     android:layout_marginEnd="42dp"
     android:layout_marginLeft="42dp"
     android:layout_marginRight="42dp"
-    app:cardBackgroundColor="@color/medium_jungle_green"
     android:layout_marginStart="42dp"
+    app:cardBackgroundColor="@color/medium_jungle_green"
     app:cardCornerRadius="8dp"
     app:cardElevation="3dp"
     app:contentPadding="16dp">
@@ -21,31 +21,28 @@
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/edit_song"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/colorTextWhite"
             android:textSize="18sp"
             android:textStyle="bold"/>
 
-        <android.support.v4.widget.NestedScrollView
-            android:id="@+id/nsvColumns"
+        <TextView
+            android:id="@+id/tvDeleteRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tvTitle"
-            android:layout_marginBottom="45dp">
-
-            <LinearLayout
-                android:id="@+id/llColumnsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"/>
-        </android.support.v4.widget.NestedScrollView>
-
+            android:layout_below="@+id/tvTitle"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="@string/want_to_delete"
+            android:textColor="@color/colorTextWhite"
+            android:textSize="16sp"/>
 
         <LinearLayout
+            android:id="@+id/llButtonsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:gravity="end"
+            android:layout_below="@+id/tvDeleteRow"
+            android:layout_marginTop="16dp"
+            android:gravity="center|bottom"
             android:orientation="horizontal">
 
             <android.support.v7.widget.AppCompatButton
@@ -56,7 +53,6 @@
                 android:text="@string/cancel"
                 android:textColor="@color/colorTextWhite"/>
 
-
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/bPositive"
                 android:layout_width="wrap_content"
@@ -65,7 +61,5 @@
                 android:text="@string/ok"
                 android:textColor="@color/colorTextWhite"/>
         </LinearLayout>
-
     </RelativeLayout>
 </android.support.v7.widget.CardView>
-

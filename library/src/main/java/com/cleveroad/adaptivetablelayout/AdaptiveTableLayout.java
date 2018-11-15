@@ -1,5 +1,6 @@
 package com.cleveroad.adaptivetablelayout;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -308,11 +309,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
             // remove adapter
             mAdapter = null;
         }
-
-        if (mSettings.getLayoutHeight() != 0 && mSettings.getLayoutWidth() != 0) {
-            // if layout has width and height
-            initItems();
-        }
+        initItems();
     }
 
     /**
@@ -1033,6 +1030,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         return true;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (mState.isDragging()) {

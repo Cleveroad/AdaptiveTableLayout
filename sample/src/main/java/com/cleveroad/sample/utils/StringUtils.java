@@ -1,9 +1,10 @@
 package com.cleveroad.sample.utils;
 
 public class StringUtils {
-    private StringUtils(){
+    private StringUtils() {
 
     }
+
     public static String toString(Iterable iterable, String separator) {
         StringBuilder stringBuilder = new StringBuilder();
 

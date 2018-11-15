@@ -1,6 +1,7 @@
 package com.cleveroad.sample.ui;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,13 +24,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cleveroad.sample.R;
+import com.cleveroad.sample.provider.DocumentsProvider;
 import com.cleveroad.sample.utils.FileUtils;
 import com.cleveroad.sample.utils.PermissionHelper;
-import com.cleveroad.sample.utils.UriHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 import static android.content.Intent.EXTRA_MIME_TYPES;
 
@@ -37,6 +39,8 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
     private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE = 1;
     private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE_DEMO = 3;
     private static final int REQUEST_CODE_PICK_CSV = 2;
+    private static final int START_CHARACTER = 33;
+    private static final int END_CHARACTER = 37;
     private TextView tvPickFile;
 
     public static CsvPickerFragment newInstance() {
@@ -54,22 +58,22 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_csv_picker, container, false);
         view.findViewById(R.id.bPickFile).setOnClickListener(this);
-        tvPickFile = (TextView) view.findViewById(R.id.tvPickFile);
+        tvPickFile = view.findViewById(R.id.tvPickFile);
         return view;
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         SpannableString ss = new SpannableString(getString(R.string.pick_csv_or_demo_file));
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View textView) {
                 if (PermissionHelper.checkOrRequest(CsvPickerFragment.this, REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE_DEMO,
-                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                        Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     createDemoFile();
                 }
             }
@@ -80,7 +84,7 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
                 ds.setUnderlineText(false);
             }
         };
-        ss.setSpan(clickableSpan, 32, 36, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        ss.setSpan(clickableSpan, START_CHARACTER, END_CHARACTER, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         tvPickFile.setText(ss);
         tvPickFile.setMovementMethod(LinkMovementMethod.getInstance());
@@ -89,20 +93,28 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            pickCsvFile();
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            switch (requestCode) {
+                case REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE:
+                    pickCsvFile();
+                    break;
+                case REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE_DEMO:
+                    createDemoFile();
+                    break;
+            }
         }
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_PICK_CSV && data != null) {
+        DocumentsProvider documentsProvider = new DocumentsProvider();
+        if (requestCode == REQUEST_CODE_PICK_CSV && data != null && resultCode == Activity.RESULT_OK) {
             Activity activity = getActivity();
             if (activity instanceof OnCsvFileSelectedListener) {
-                ((OnCsvFileSelectedListener) activity).onCsvFileSelected(
-                        UriHelper.getPath(getContext(), data.getData()));
+                ((OnCsvFileSelectedListener) activity).onCsvFileSelected(documentsProvider.getType(data.getData()));
             }
         }
     }
@@ -110,31 +122,36 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
     @Override
     public void onClick(View v) {
         if (PermissionHelper.checkOrRequest(this, REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             pickCsvFile();
         }
     }
 
     private void pickCsvFile() {
+        String[] mimeTypes = {"text/comma-separated-values", "text/csv"};
+        Intent intent;
 
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-        intent.setType("*/*");
-        String[] mimetypes = {"text/comma-separated-values", "text/csv"};
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            intent.putExtra(EXTRA_MIME_TYPES, mimetypes);
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.putExtra(EXTRA_MIME_TYPES, mimeTypes);
+            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        } else {
+            intent = new Intent(Intent.ACTION_GET_CONTENT);
         }
 
+        intent.setType("*/*");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(Intent.createChooser(intent, getString(R.string.pick_file)), REQUEST_CODE_PICK_CSV);
     }
 
     private void createDemoFile() {
-
         File file = createDemoTempFile();
         try {
             if (!file.exists() && file.createNewFile()) {
-                InputStream inputStream = getContext().getAssets().open("example.csv");
+                InputStream inputStream = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                    inputStream = Objects.requireNonNull(getContext()).getAssets().open("fifa100.csv");
+                }
                 FileUtils.copy(inputStream, file);
             }
         } catch (IOException e) {

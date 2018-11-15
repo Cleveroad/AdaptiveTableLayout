@@ -9,7 +9,7 @@ import android.view.ViewGroup;
  *
  * @param <VH> Implementation of ViewHolder {@link ViewHolder}
  */
-interface AdaptiveTableAdapter<VH extends ViewHolder> extends AdaptiveTableDataSetObserver {
+public interface AdaptiveTableAdapter<VH extends ViewHolder> extends AdaptiveTableDataSetObserver {
     /**
      * @return Item click listener
      */

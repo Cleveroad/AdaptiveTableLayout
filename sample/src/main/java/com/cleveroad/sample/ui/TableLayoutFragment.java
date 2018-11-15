@@ -27,9 +27,33 @@ import com.cleveroad.sample.R;
 import com.cleveroad.sample.adapter.SampleLinkedTableAdapter;
 import com.cleveroad.sample.datasource.CsvFileDataSourceImpl;
 import com.cleveroad.sample.datasource.UpdateFileCallback;
+import com.cleveroad.sample.ui.dialogs.AddColumnDialog;
+import com.cleveroad.sample.ui.dialogs.AddRowDialog;
+import com.cleveroad.sample.ui.dialogs.DeleteDialog;
 import com.cleveroad.sample.ui.dialogs.EditItemDialog;
 import com.cleveroad.sample.ui.dialogs.SettingsDialog;
 import com.cleveroad.sample.utils.PermissionHelper;
+
+import java.util.Objects;
+
+import static com.cleveroad.sample.datasource.Constants.ADD_COLUMN;
+import static com.cleveroad.sample.datasource.Constants.ADD_ROW;
+import static com.cleveroad.sample.datasource.Constants.DELETE_COLUMN;
+import static com.cleveroad.sample.datasource.Constants.DELETE_ROW;
+import static com.cleveroad.sample.datasource.Constants.EXTRA_BEFORE_OR_AFTER;
+import static com.cleveroad.sample.datasource.Constants.EXTRA_COLUMN_NUMBER;
+import static com.cleveroad.sample.datasource.Constants.EXTRA_ROW_NUMBER;
+import static com.cleveroad.sample.datasource.Constants.EXTRA_VALUE;
+import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_ADD_COLUMN;
+import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_ADD_COLUMN_CONFIRMED;
+import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_ADD_ROW;
+import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_ADD_ROW_CONFIRMED;
+import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_DELETE_COLUMN;
+import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_DELETE_COLUMN_CONFIRMED;
+import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_DELETE_ROW;
+import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_DELETE_ROW_CONFIRMED;
+import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_EDIT_SONG;
+import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_SETTINGS;
 
 public class TableLayoutFragment
         extends Fragment
@@ -54,7 +78,6 @@ public class TableLayoutFragment
     public static TableLayoutFragment newInstance(@NonNull String filename) {
         Bundle args = new Bundle();
         args.putString(EXTRA_CSV_FILE, filename);
-
         TableLayoutFragment fragment = new TableLayoutFragment();
         fragment.setArguments(args);
         return fragment;
@@ -64,24 +87,28 @@ public class TableLayoutFragment
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        mCsvFile = Uri.parse(getArguments().getString(EXTRA_CSV_FILE));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            mCsvFile = Uri.parse(Objects.requireNonNull(getArguments()).getString(EXTRA_CSV_FILE));
+        }
         mCsvFileDataSource = new CsvFileDataSourceImpl(getContext(), mCsvFile);
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_tab_layout, container, false);
 
-        mTableLayout = (AdaptiveTableLayout) view.findViewById(R.id.tableLayout);
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        mTableLayout = view.findViewById(R.id.tableLayout);
+        progressBar = view.findViewById(R.id.progressBar);
         vHandler = view.findViewById(R.id.vHandler);
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().onBackPressed();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    Objects.requireNonNull(getActivity()).onBackPressed();
+                }
             }
         });
         toolbar.inflateMenu(R.menu.table_layout);
@@ -110,10 +137,10 @@ public class TableLayoutFragment
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mSnackbar = Snackbar.make(view, R.string.changes_saved, Snackbar.LENGTH_INDEFINITE);
-        TextView tv = (TextView) mSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        TextView tv = mSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
         tv.setMaxLines(3);
         mSnackbar.setAction("Close", new View.OnClickListener() {
             @Override
@@ -124,41 +151,71 @@ public class TableLayoutFragment
     }
 
     private void applyChanges() {
-        if (PermissionHelper.checkOrRequest(
-                getActivity(),
-                REQUEST_EXTERNAL_STORAGE,
-                PERMISSIONS_STORAGE)) {
-            showProgress();
-            mCsvFileDataSource.applyChanges(
-                    getLoaderManager(),
-                    mTableLayout.getLinkedAdapterRowsModifications(),
-                    mTableLayout.getLinkedAdapterColumnsModifications(),
-                    mTableLayout.isSolidRowHeader(),
-                    TableLayoutFragment.this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (PermissionHelper.checkOrRequest(
+                    Objects.requireNonNull(getActivity()),
+                    REQUEST_EXTERNAL_STORAGE,
+                    PERMISSIONS_STORAGE)) {
+                showProgress();
+                mCsvFileDataSource.applyChanges(
+                        getLoaderManager(),
+                        mTableLayout.getLinkedAdapterRowsModifications(),
+                        mTableLayout.getLinkedAdapterColumnsModifications(),
+                        mTableLayout.isSolidRowHeader(),
+                        TableLayoutFragment.this);
+            }
+        }
+    }
 
+    private void applyChanges(int actionChangeData, int position, boolean beforeOrAfter) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (PermissionHelper.checkOrRequest(
+                    Objects.requireNonNull(getActivity()),
+                    REQUEST_EXTERNAL_STORAGE,
+                    PERMISSIONS_STORAGE)) {
+                showProgress();
+                mCsvFileDataSource.applyChanges(
+                        getLoaderManager(),
+                        mTableLayout.getLinkedAdapterRowsModifications(),
+                        mTableLayout.getLinkedAdapterColumnsModifications(),
+                        mTableLayout.isSolidRowHeader(),
+                        actionChangeData,
+                        position,
+                        beforeOrAfter,
+                        TableLayoutFragment.this);
+            }
         }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == EditItemDialog.REQUEST_CODE_EDIT_SONG && resultCode == Activity.RESULT_OK && data != null) {
-            int columnIndex = data.getIntExtra(EditItemDialog.EXTRA_COLUMN_NUMBER, 0);
-            int rowIndex = data.getIntExtra(EditItemDialog.EXTRA_ROW_NUMBER, 0);
-            String value = data.getStringExtra(EditItemDialog.EXTRA_VALUE);
-            mCsvFileDataSource.updateItem(rowIndex, columnIndex, value);
-            mTableAdapter.notifyItemChanged(rowIndex, columnIndex);
-        } else if (requestCode == SettingsDialog.REQUEST_CODE_SETTINGS && resultCode == Activity.RESULT_OK && data != null) {
-            mTableLayout.setHeaderFixed(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_HEADER_FIXED, mTableLayout.isHeaderFixed()));
-            mTableLayout.setSolidRowHeader(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_SOLID_HEADER, mTableLayout.isSolidRowHeader()));
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                mTableLayout.setLayoutDirection(
-                        data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_RTL_DIRECTION, mTableLayout.isRTL())
-                                ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            int columnIndex = data.getIntExtra(EXTRA_COLUMN_NUMBER, 0);
+            int rowIndex = data.getIntExtra(EXTRA_ROW_NUMBER, 0);
+            boolean beforeOrAfter = data.getBooleanExtra(EXTRA_BEFORE_OR_AFTER, true);
+            if (requestCode == REQUEST_CODE_EDIT_SONG) {
+                String value = data.getStringExtra(EXTRA_VALUE);
+                mCsvFileDataSource.updateItem(rowIndex, columnIndex, value);
+                mTableAdapter.notifyItemChanged(rowIndex, columnIndex);
+            } else if (requestCode == REQUEST_CODE_SETTINGS) {
+                applySettings(data);
+            } else if (requestCode == REQUEST_CODE_DELETE_ROW) {
+                showDeleteDialog(rowIndex, 0);
+            } else if (requestCode == REQUEST_CODE_DELETE_ROW_CONFIRMED) {
+                applyChanges(DELETE_ROW, rowIndex, false);
+            } else if (requestCode == REQUEST_CODE_ADD_ROW) {
+                showAddRowDialog(rowIndex);
+            } else if (requestCode == REQUEST_CODE_ADD_ROW_CONFIRMED) {
+                applyChanges(ADD_ROW, rowIndex, beforeOrAfter);
+            } else if (requestCode == REQUEST_CODE_DELETE_COLUMN) {
+                showDeleteDialog(0, columnIndex);
+            } else if (requestCode == REQUEST_CODE_DELETE_COLUMN_CONFIRMED) {
+                applyChanges(DELETE_COLUMN, columnIndex, false);
+            } else if (requestCode == REQUEST_CODE_ADD_COLUMN) {
+                showAddColumnDialog(columnIndex);
+            } else if (requestCode == REQUEST_CODE_ADD_COLUMN_CONFIRMED) {
+                applyChanges(ADD_COLUMN, columnIndex, beforeOrAfter);
             }
-            mTableLayout.setDragAndDropEnabled(data.getBooleanExtra(
-                    SettingsDialog.EXTRA_VALUE_DRAG_AND_DROP_ENABLED, mTableLayout.isDragAndDropEnabled()));
-            mTableAdapter.setRtl(mTableLayout.isRTL());
-            mTableAdapter.notifyDataSetChanged();
         }
     }
 
@@ -239,12 +296,23 @@ public class TableLayoutFragment
         }
     }
 
-    private void initAdapter() {
+    @Override
+    public void onFileUpdated(final String filePath) {
+        hideProgress();
+        View view = getView();
+        if (view == null) {
+            return;
+        }
+        mCsvFile = Uri.parse(filePath);
+        mCsvFileDataSource = new CsvFileDataSourceImpl(getContext(), mCsvFile);
+        initAdapter();
+        mTableAdapter.notifyDataSetChanged();
+    }
 
+    private void initAdapter() {
         mTableAdapter = new SampleLinkedTableAdapter(getContext(), mCsvFileDataSource);
         mTableAdapter.setOnItemClickListener(this);
         mTableAdapter.setOnItemLongClickListener(this);
-
         mTableLayout.setAdapter(mTableAdapter);
     }
 
@@ -258,4 +326,32 @@ public class TableLayoutFragment
         vHandler.setVisibility(View.GONE);
     }
 
+    private void showDeleteDialog(int rowIndex, int columnIndex) {
+        DeleteDialog.newInstance(rowIndex, columnIndex)
+                .show(getChildFragmentManager(), DeleteDialog.class.getSimpleName());
+    }
+
+    private void showAddRowDialog(int rowIndex) {
+        AddRowDialog.newInstance(rowIndex)
+                .show(getChildFragmentManager(), AddRowDialog.class.getSimpleName());
+    }
+
+    private void showAddColumnDialog(int columnIndex) {
+        AddColumnDialog.newInstance(columnIndex)
+                .show(getChildFragmentManager(), AddRowDialog.class.getSimpleName());
+    }
+
+    private void applySettings(Intent data) {
+        mTableLayout.setHeaderFixed(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_HEADER_FIXED, mTableLayout.isHeaderFixed()));
+        mTableLayout.setSolidRowHeader(data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_SOLID_HEADER, mTableLayout.isSolidRowHeader()));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            mTableLayout.setLayoutDirection(
+                    data.getBooleanExtra(SettingsDialog.EXTRA_VALUE_RTL_DIRECTION, mTableLayout.isRTL())
+                            ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
+        }
+        mTableLayout.setDragAndDropEnabled(data.getBooleanExtra(
+                SettingsDialog.EXTRA_VALUE_DRAG_AND_DROP_ENABLED, mTableLayout.isDragAndDropEnabled()));
+        mTableAdapter.setRtl(mTableLayout.isRTL());
+        mTableAdapter.notifyDataSetChanged();
+    }
 }
