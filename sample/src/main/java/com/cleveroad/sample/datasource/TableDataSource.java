@@ -13,5 +13,4 @@ public interface TableDataSource<TFirstHeaderDataType, TRowHeaderDataType, TColu
     TColumnHeaderDataType getColumnHeaderData(int index);
 
     TItemDataType getItemData(int rowIndex, int columnIndex);
-
 }

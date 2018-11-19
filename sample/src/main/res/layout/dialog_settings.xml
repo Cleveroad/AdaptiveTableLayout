@@ -10,7 +10,7 @@
     android:layout_marginStart="42dp"
     app:cardBackgroundColor="@color/medium_jungle_green"
     app:cardCornerRadius="8dp"
-    app:cardElevation="3sp"
+    app:cardElevation="3dp"
     app:contentPadding="16dp">
 
     <RelativeLayout
@@ -84,8 +84,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_below="@+id/swDragAndDropEnabled"
-                    android:gravity="bottom|end"
                     android:layout_marginTop="16dp"
+                    android:gravity="bottom|end"
                     android:orientation="horizontal">
 
                     <android.support.v7.widget.AppCompatButton

@@ -1,14 +1,19 @@
 package com.cleveroad.sample;
 
 import android.app.Application;
-
-import com.facebook.appevents.AppEventsLogger;
+import android.content.Context;
 
 public class SampleApplication extends Application {
+
+    private static Context context;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        AppEventsLogger.activateApp(this);
+        SampleApplication.context = getApplicationContext();
+    }
+
+    public static Context getAppContext() {
+        return SampleApplication.context;
     }
 }

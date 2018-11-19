@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#FF273238</color>
     <color name="colorAccent">#FF394249</color>
     <color name="colorTextWhite">#ffffffff</color>
+    <color name="colorCheckBox">#ffffffff</color>
 
     <!--<color name="colorTable1">#8e44ad</color>-->
     <!--<color name="colorTable2">#2ecc71</color>-->

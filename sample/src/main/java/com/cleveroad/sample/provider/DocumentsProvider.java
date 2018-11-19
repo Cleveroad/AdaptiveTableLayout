@@ -1,27 +1,39 @@
-package com.cleveroad.sample.utils;
+package com.cleveroad.sample.provider;
 
-import android.content.ContentUris;
+import android.annotation.SuppressLint;
+import android.content.ContentProvider;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import com.cleveroad.sample.SampleApplication;
 
 import java.io.File;
 
-public class UriHelper {
-    private static final String TAG = UriHelper.class.getSimpleName();
+public class DocumentsProvider extends ContentProvider {
 
-    private UriHelper() {
-
+    @Override
+    public boolean onCreate() {
+        return true;
     }
 
-    public static String getPath(final Context context, final Uri uri) {
-        // DocumentProvider
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
+    @Nullable
+    @Override
+    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+        return null;
+    }
 
+    @SuppressLint("NewApi")
+    @Override
+    public String getType(@NonNull Uri uri) {
+        if (DocumentsContract.isDocumentUri(SampleApplication.getAppContext(), uri)) {
             if (isExternalStorageDocument(uri)) {// ExternalStorageProvider
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
@@ -46,17 +58,16 @@ public class UriHelper {
                             throw new NullPointerException("Couldn't find file path -> " + path);
                         }
                     }
-
                     return path;
                 }
-
-            } else if (isDownloadsDocument(uri)) {// DownloadsProvider
-
+            } else if (isDownloadsDocument(uri)) {
                 final String id = DocumentsContract.getDocumentId(uri);
-                final Uri contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-
-                return getDataColumn(context, contentUri, null, null);
+                if (id.contains("raw:")) {
+                    final String[] idArray = id.split("raw:");
+                    return idArray[1];
+                } else {
+                    return null;
+                }
 
             } else if (isMediaDocument(uri)) {// MediaProvider
                 final String docId = DocumentsContract.getDocumentId(uri);
@@ -76,27 +87,38 @@ public class UriHelper {
                 final String[] selectionArgs = new String[]{
                         split[1]
                 };
-
-                return getDataColumn(context, contentUri, selection, selectionArgs);
+                return getDataColumn(SampleApplication.getAppContext(), contentUri, selection, selectionArgs);
             }
-
         } else if ("content".equalsIgnoreCase(uri.getScheme())) {// MediaStore (and general)
-
             // Return the remote address
-            if (isGooglePhotosUri(uri))
+            if (isGooglePhotosUri(uri)) {
                 return uri.getLastPathSegment();
-
-            return getDataColumn(context, uri, null, null);
-
+            }
+            return getDataColumn(SampleApplication.getAppContext(), uri, null, null);
         } else if ("file".equalsIgnoreCase(uri.getScheme())) {// File
             return uri.getPath();
         }
-
         return null;
     }
 
-    public static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+    @Nullable
+    @Override
+    public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
+        return null;
+    }
 
+    @Override
+    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return 0;
+    }
+
+    @Override
+    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
+        return 0;
+    }
+
+
+    public static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
         Cursor cursor = null;
         final String column = "_data";
         final String[] projection = {
@@ -106,16 +128,18 @@ public class UriHelper {
         try {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
             if (cursor != null && cursor.moveToFirst()) {
+                StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+                StrictMode.setVmPolicy(builder.build());
                 final int columnIndex = cursor.getColumnIndexOrThrow(column);
                 return cursor.getString(columnIndex);
             }
         } finally {
-            if (cursor != null)
+            if (cursor != null) {
                 cursor.close();
+            }
         }
         return null;
     }
-
 
     public static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());

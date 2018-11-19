@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
@@ -29,6 +30,7 @@ import java.util.WeakHashMap;
 public class CsvFileDataSourceImpl implements TableDataSource<String, String, String, String> {
     private static final String TAG = CsvFileDataSourceImpl.class.getSimpleName();
     private static final int READ_FILE_LINES_LIMIT = 200;
+    private static final int CSV_LOADER = 0;
     private final Context mContext;
     private final Uri mCsvFileUri;
     private final Map<Integer, List<String>> mItemsCache = new WeakHashMap<>();
@@ -109,7 +111,8 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
             final boolean isSolidRowHeader,
             final UpdateFileCallback callback) {
 
-        loaderManager.restartLoader(0, Bundle.EMPTY, new LoaderManager.LoaderCallbacks<String>() {
+        loaderManager.restartLoader(CSV_LOADER, Bundle.EMPTY, new LoaderManager.LoaderCallbacks<String>() {
+            @NonNull
             @Override
             public Loader<String> onCreateLoader(int id, Bundle args) {
                 return new UpdateCsvFileLoader(
@@ -121,12 +124,49 @@ public class CsvFileDataSourceImpl implements TableDataSource<String, String, St
             }
 
             @Override
-            public void onLoadFinished(Loader<String> loader, String data) {
+            public void onLoadFinished(@NonNull Loader<String> loader, String data) {
                 callback.onFileUpdated(data, data != null && !data.isEmpty());
             }
 
             @Override
-            public void onLoaderReset(Loader<String> loader) {
+            public void onLoaderReset(@NonNull Loader<String> loader) {
+                //do nothing
+            }
+        });
+    }
+
+    public void applyChanges(
+            LoaderManager loaderManager,
+            final Map<Integer, Integer> rowModifications,
+            final Map<Integer, Integer> columnModifications,
+            final boolean isSolidRowHeader,
+            final int actionChangeData,
+            final int position,
+            final boolean beforeOrAfter,
+            final UpdateFileCallback callback) {
+
+        loaderManager.restartLoader(CSV_LOADER, Bundle.EMPTY, new LoaderManager.LoaderCallbacks<String>() {
+            @NonNull
+            @Override
+            public Loader<String> onCreateLoader(int id, Bundle args) {
+                return new UpdateCsvFileLoader(
+                        mContext,
+                        CsvFileDataSourceImpl.this,
+                        rowModifications,
+                        columnModifications,
+                        actionChangeData,
+                        position,
+                        beforeOrAfter,
+                        isSolidRowHeader);
+            }
+
+            @Override
+            public void onLoadFinished(@NonNull Loader<String> loader, String data) {
+                callback.onFileUpdated(data);
+            }
+
+            @Override
+            public void onLoaderReset(@NonNull Loader<String> loader) {
                 //do nothing
             }
         });

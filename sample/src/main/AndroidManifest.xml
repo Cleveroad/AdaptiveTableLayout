@@ -22,7 +22,18 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+
+        <provider
+            android:name=".provider.DocumentsProvider"
+            android:authorities="com.cleveroad.sample.provider.DocumentsProvider.documents"
+            android:grantUriPermissions="true"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+        <!--<meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>-->
     </application>
 
 </manifest>
