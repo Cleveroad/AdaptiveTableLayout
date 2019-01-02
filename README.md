@@ -19,7 +19,7 @@ The main goal of the library is to apply all its functions in the process of wor
 by gradle : 
 ```groovy
 dependencies {
-    implementation "com.cleveroad:adaptivetablelayout:1.2.0"
+    implementation "com.cleveroad:adaptivetablelayout:1.2.1"
 }
 ```
 ### Features ###
@@ -65,7 +65,7 @@ void setHeaderFixed(boolean headerFixed)
 
 // Set solid row headers mode
 void setSolidRowHeader(boolean solidRowHeader)
-
+1.2.0
 // Set drag and drop mode
 void setDragAndDrow(boolean enabled)
 
