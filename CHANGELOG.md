@@ -20,4 +20,4 @@ Version | Changes
 ---     | ---
 v.1.1.1 | <ul><li>Added rtl support</li><li>Increased size of dialogs for small screens</li></ul>
 v.1.1.2 | <ul><li>Fix issue #9 https://github.com/Cleveroad/AdaptiveTableLayout/issues/19</li></ul>
-v.1.2.0 | <ul><li>Fix issue</li><li>Updated version of the support libraries</li><li>Updated version of the build tools</li><li>Updated version of Glide</li></ul>
+v.1.2.1 | <ul><li>Fix issue</li><li>Updated version of the support libraries</li><li>Updated version of the build tools</li><li>Updated version of Glide</li></ul>
