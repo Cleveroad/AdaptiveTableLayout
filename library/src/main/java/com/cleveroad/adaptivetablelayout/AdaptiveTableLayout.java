@@ -25,7 +25,9 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static android.support.v4.view.ViewCompat.TYPE_TOUCH;
 
@@ -121,6 +123,7 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
     private NestedScrollingChildHelper mScrollingChildHelper;
     private int[] consumed = new int[2];
     private int[] offset = new int[2];
+    private Set<OnScrollListener> mScrollListeners;
 
     public AdaptiveTableLayout(Context context) {
         super(context);
@@ -384,6 +387,19 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
                 new SparseIntArray();
     }
 
+    public void addOnScrollListener(@NonNull OnScrollListener listener) {
+        if (mScrollListeners == null) {
+            mScrollListeners = new HashSet<>();
+        }
+        mScrollListeners.add(listener);
+    }
+
+    public void removeScrollListener(@NonNull OnScrollListener listener) {
+        if (mScrollListeners != null) {
+            mScrollListeners.remove(listener);
+        }
+    }
+
     @Override
     public void scrollTo(int x, int y) {
         scrollBy(x - mState.getScrollX(), y - mState.getScrollY());
@@ -440,7 +456,11 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         if (diffX == 0 && diffY == 0) {
             return;
         }
-
+        if (mScrollListeners != null) {
+            for (OnScrollListener listener : mScrollListeners) {
+                listener.onScrolled(this, diffX, diffY);
+            }
+        }
         if (mAdapter != null) {
             // refresh views
             recycleViewHolders();
@@ -1917,6 +1937,10 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
     public boolean dispatchNestedPreScroll(int dx, int dy, @Nullable int[] consumed,
                                            @Nullable int[] offsetInWindow, int type) {
         return getScrollingChildHelper().dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow, type);
+    }
+
+    public interface OnScrollListener {
+        void onScrolled(@NonNull AdaptiveTableLayout tableLayout, int dx, int dy);
     }
 
 }
