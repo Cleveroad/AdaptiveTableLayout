@@ -1,9 +1,9 @@
 package com.cleveroad.sample.datasource;
 
 import android.content.Context;
-import android.os.Environment;
-import androidx.loader.content.AsyncTaskLoader;
 import android.util.Log;
+
+import androidx.loader.content.AsyncTaskLoader;
 
 import com.cleveroad.sample.utils.ClosableUtil;
 import com.cleveroad.sample.utils.StringUtils;
@@ -104,6 +104,7 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<String> {
 
         final String originalFilePath = mCsvFileDataSource.getCsvFileUri().getEncodedPath();
         File originalFile = new File(originalFilePath);
+        File originalFileDir = originalFile.getParentFile();
         final String originalFileName = originalFile.getName();
 
         final String newFilePath;
@@ -128,7 +129,7 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<String> {
                 newFileName = originalFileName.replace(CSV, TEMP_CSV);
             }
 
-            changedFile = new File(Environment.getExternalStorageDirectory(), newFileName);
+            changedFile = new File(originalFileDir, newFileName);
             try {
                 changedFile.createNewFile();
             } catch (IOException e1) {
@@ -200,6 +201,7 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<String> {
 
         final String originalFilePath = mCsvFileDataSource.getCsvFileUri().getEncodedPath();
         File originalFile = new File(originalFilePath);
+        File originalFileDir = originalFile.getParentFile();
         final String originalFileName = originalFile.getName();
 
         final String newFilePath;
@@ -224,7 +226,7 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<String> {
             } else {
                 newFileName = originalFileName.replace(CSV, TEMP_CSV);
             }
-            changedFile = new File(Environment.getExternalStorageDirectory(), newFileName);
+            changedFile = new File(originalFileDir, newFileName);
             try {
                 changedFile.createNewFile();
             } catch (IOException e1) {
@@ -345,9 +347,9 @@ public class UpdateCsvFileLoader extends AsyncTaskLoader<String> {
                         writer.write(NEW_LINE);
                     } else {
                         // include an empty line if you deleted the last line
-                        if (row != null && mCsvFileDataSource.getRowsCount() == 2){
+                        if (row != null && mCsvFileDataSource.getRowsCount() == 2) {
                             StringBuilder emptyRow = new StringBuilder();
-                            for(int j = 0; j < row.size() - 1; j++){
+                            for (int j = 0; j < row.size() - 1; j++) {
                                 emptyRow.append(SEPARATOR);
                             }
                             writer.write(emptyRow.toString());

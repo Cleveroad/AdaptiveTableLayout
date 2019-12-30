@@ -171,7 +171,7 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
 
     public File createDemoTempFile() {
         String tempFileName = "DEMO_table_layout_application.csv";
-        return new File(Environment.getExternalStorageDirectory(), tempFileName);
+        return new File(requireContext().getFilesDir(), tempFileName);
     }
 
     interface OnCsvFileSelectedListener {
