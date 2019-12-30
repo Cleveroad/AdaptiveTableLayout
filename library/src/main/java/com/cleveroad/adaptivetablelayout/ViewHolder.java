@@ -6,7 +6,7 @@ import android.view.View;
 /**
  * A {@link ViewHolder} describes an item view and metadata about its place within the {@link AdaptiveTableLayout}.
  */
-interface ViewHolder {
+public interface ViewHolder {
     /**
      * @return item represents the item of the {@link AdaptiveTableLayout}
      */
