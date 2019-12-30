@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.loader.app.LoaderManager;
 
 import com.cleveroad.adaptivetablelayout.AdaptiveTableLayout;
 import com.cleveroad.adaptivetablelayout.LinkedAdaptiveTableAdapter;
@@ -34,8 +35,6 @@ import com.cleveroad.sample.ui.dialogs.EditItemDialog;
 import com.cleveroad.sample.ui.dialogs.SettingsDialog;
 import com.cleveroad.sample.utils.PermissionHelper;
 import com.google.android.material.snackbar.Snackbar;
-
-import java.util.Objects;
 
 import static com.cleveroad.sample.datasource.Constants.ADD_COLUMN;
 import static com.cleveroad.sample.datasource.Constants.ADD_ROW;
@@ -88,9 +87,7 @@ public class TableLayoutFragment
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mCsvFile = Uri.parse(Objects.requireNonNull(getArguments()).getString(EXTRA_CSV_FILE));
-        }
+        mCsvFile = Uri.parse(requireArguments().getString(EXTRA_CSV_FILE));
         mCsvFileDataSource = new CsvFileDataSourceImpl(getContext(), mCsvFile);
     }
 
@@ -107,9 +104,7 @@ public class TableLayoutFragment
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    Objects.requireNonNull(getActivity()).onBackPressed();
-                }
+                requireActivity().onBackPressed();
             }
         });
         toolbar.inflateMenu(R.menu.table_layout);
@@ -152,39 +147,35 @@ public class TableLayoutFragment
     }
 
     private void applyChanges() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (PermissionHelper.checkOrRequest(
-                    Objects.requireNonNull(getActivity()),
-                    REQUEST_EXTERNAL_STORAGE,
-                    PERMISSIONS_STORAGE)) {
-                showProgress();
-                mCsvFileDataSource.applyChanges(
-                        getLoaderManager(),
-                        mTableLayout.getLinkedAdapterRowsModifications(),
-                        mTableLayout.getLinkedAdapterColumnsModifications(),
-                        mTableLayout.isSolidRowHeader(),
-                        TableLayoutFragment.this);
-            }
+        if (PermissionHelper.checkOrRequest(
+                requireActivity(),
+                REQUEST_EXTERNAL_STORAGE,
+                PERMISSIONS_STORAGE)) {
+            showProgress();
+            mCsvFileDataSource.applyChanges(
+                    LoaderManager.getInstance(this),
+                    mTableLayout.getLinkedAdapterRowsModifications(),
+                    mTableLayout.getLinkedAdapterColumnsModifications(),
+                    mTableLayout.isSolidRowHeader(),
+                    TableLayoutFragment.this);
         }
     }
 
     private void applyChanges(int actionChangeData, int position, boolean beforeOrAfter) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (PermissionHelper.checkOrRequest(
-                    Objects.requireNonNull(getActivity()),
-                    REQUEST_EXTERNAL_STORAGE,
-                    PERMISSIONS_STORAGE)) {
-                showProgress();
-                mCsvFileDataSource.applyChanges(
-                        getLoaderManager(),
-                        mTableLayout.getLinkedAdapterRowsModifications(),
-                        mTableLayout.getLinkedAdapterColumnsModifications(),
-                        mTableLayout.isSolidRowHeader(),
-                        actionChangeData,
-                        position,
-                        beforeOrAfter,
-                        TableLayoutFragment.this);
-            }
+        if (PermissionHelper.checkOrRequest(
+                requireActivity(),
+                REQUEST_EXTERNAL_STORAGE,
+                PERMISSIONS_STORAGE)) {
+            showProgress();
+            mCsvFileDataSource.applyChanges(
+                    LoaderManager.getInstance(this),
+                    mTableLayout.getLinkedAdapterRowsModifications(),
+                    mTableLayout.getLinkedAdapterColumnsModifications(),
+                    mTableLayout.isSolidRowHeader(),
+                    actionChangeData,
+                    position,
+                    beforeOrAfter,
+                    TableLayoutFragment.this);
         }
     }
 

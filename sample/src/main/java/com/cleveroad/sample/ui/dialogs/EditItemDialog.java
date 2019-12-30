@@ -3,14 +3,7 @@ package com.cleveroad.sample.ui.dialogs;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,9 +11,14 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
 
-import com.cleveroad.sample.R;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 
-import java.util.Objects;
+import com.cleveroad.sample.R;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import static com.cleveroad.sample.datasource.Constants.EXTRA_COLUMN_NUMBER;
 import static com.cleveroad.sample.datasource.Constants.EXTRA_ROW_NUMBER;
@@ -92,12 +90,10 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
     @Override
     public void onResume() {
         super.onResume();
-        Window window = getDialog().getWindow();
+        Window window = requireDialog().getWindow();
         if (window != null) {
             DisplayMetrics dm = new DisplayMetrics();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                Objects.requireNonNull(getActivity()).getWindowManager().getDefaultDisplay().getMetrics(dm);
-            }
+            requireActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
             int height = dm.heightPixels;
             int width = dm.widthPixels;
             window.setLayout(width, height);

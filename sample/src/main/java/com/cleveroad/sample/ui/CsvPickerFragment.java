@@ -8,10 +8,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -23,6 +19,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.cleveroad.sample.R;
 import com.cleveroad.sample.provider.DocumentsProvider;
 import com.cleveroad.sample.utils.FileUtils;
@@ -31,7 +31,6 @@ import com.cleveroad.sample.utils.PermissionHelper;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 
 import static android.content.Intent.EXTRA_MIME_TYPES;
 
@@ -71,7 +70,7 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
         SpannableString ss = new SpannableString(getString(R.string.pick_csv_or_demo_file));
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
-            public void onClick(View textView) {
+            public void onClick(@NonNull View textView) {
                 if (PermissionHelper.checkOrRequest(CsvPickerFragment.this, REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE_DEMO,
                         Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     createDemoFile();
@@ -79,7 +78,7 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
             }
 
             @Override
-            public void updateDrawState(TextPaint ds) {
+            public void updateDrawState(@NonNull TextPaint ds) {
                 super.updateDrawState(ds);
                 ds.setUnderlineText(false);
             }
@@ -148,10 +147,7 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
         File file = createDemoTempFile();
         try {
             if (!file.exists() && file.createNewFile()) {
-                InputStream inputStream = null;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                    inputStream = Objects.requireNonNull(getContext()).getAssets().open("fifa100.csv");
-                }
+                InputStream inputStream = requireContext().getAssets().open("fifa100.csv");
                 FileUtils.copy(inputStream, file);
             }
         } catch (IOException e) {
