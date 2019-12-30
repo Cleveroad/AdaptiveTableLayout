@@ -2,8 +2,8 @@ package com.cleveroad.adaptivetablelayout;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.view.ViewGroup;
 
 import java.util.HashMap;

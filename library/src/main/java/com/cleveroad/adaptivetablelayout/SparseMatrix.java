@@ -1,8 +1,8 @@
 package com.cleveroad.adaptivetablelayout;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.SparseArrayCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.collection.SparseArrayCompat;
 
 import java.util.Collection;
 import java.util.LinkedList;

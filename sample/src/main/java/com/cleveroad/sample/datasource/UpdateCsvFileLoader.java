@@ -2,7 +2,7 @@ package com.cleveroad.sample.datasource;
 
 import android.content.Context;
 import android.os.Environment;
-import android.support.v4.content.AsyncTaskLoader;
+import androidx.loader.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.cleveroad.sample.utils.ClosableUtil;
