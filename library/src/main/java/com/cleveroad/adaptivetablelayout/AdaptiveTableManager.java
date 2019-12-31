@@ -54,6 +54,12 @@ class AdaptiveTableManager {
     }
 
     void init(int rowCount, int columnCount) {
+        if (rowCount < 0) {
+            rowCount = 0;
+        }
+        if (columnCount < 0) {
+            columnCount = 0;
+        }
         // create objects
         mRowHeights = new int[rowCount];
         mColumnWidths = new int[columnCount];
