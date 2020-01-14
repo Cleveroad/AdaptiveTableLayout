@@ -10,15 +10,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v4.util.SparseArrayCompat;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.collection.SparseArrayCompat;
+import androidx.core.view.ViewCompat;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -820,6 +821,15 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         }
 
         removeKeys(headerKeysToRemove, mHeaderRowViewHolders);
+
+        //top left header view holder
+        if (mLeftTopViewHolder != null) {
+            // recycle view holder
+            if (isRecycleAll) {
+                recycleViewHolder(mLeftTopViewHolder);
+                mLeftTopViewHolder = null;
+            }
+        }
     }
 
 
@@ -867,31 +877,36 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         int topRow = mManager.getRowByYWithShift(filledArea.top, mSettings.getCellMargin());
         int bottomRow = mManager.getRowByYWithShift(filledArea.bottom, mSettings.getCellMargin());
 
-        for (int i = topRow; i <= bottomRow; i++) {
-            for (int j = leftColumn; j <= rightColumn; j++) {
-                // item view holders
-                ViewHolder viewHolder = mViewHolders.get(i, j);
-                if (viewHolder == null && mAdapter != null) {
-                    addViewHolder(i, j, ViewHolderType.ITEM);
+        int columnCount = mManager.getColumnCount();
+        if (columnCount > 0) {
+            if (mManager.getRowCount() > 0) {
+                for (int i = topRow; i <= bottomRow; i++) {
+                    for (int j = leftColumn; j <= rightColumn; j++) {
+                        // item view holders
+                        ViewHolder viewHolder = mViewHolders.get(i, j);
+                        if (viewHolder == null && mAdapter != null) {
+                            addViewHolder(i, j, ViewHolderType.ITEM);
+                        }
+                    }
+
+                    // row view headers holders
+                    ViewHolder viewHolder = mHeaderRowViewHolders.get(i);
+                    if (viewHolder == null && mAdapter != null) {
+                        addViewHolder(i, isRTL() ? columnCount : 0, ViewHolderType.ROW_HEADER);
+                    } else if (viewHolder != null && mAdapter != null) {
+                        refreshHeaderRowViewHolder(viewHolder);
+                    }
                 }
             }
 
-            // row view headers holders
-            ViewHolder viewHolder = mHeaderRowViewHolders.get(i);
-            if (viewHolder == null && mAdapter != null) {
-                addViewHolder(i, isRTL() ? mManager.getColumnCount() : 0, ViewHolderType.ROW_HEADER);
-            } else if (viewHolder != null && mAdapter != null) {
-                refreshHeaderRowViewHolder(viewHolder);
-            }
-        }
-
-        for (int i = leftColumn; i <= rightColumn; i++) {
-            // column view header holders
-            ViewHolder viewHolder = mHeaderColumnViewHolders.get(i);
-            if (viewHolder == null && mAdapter != null) {
-                addViewHolder(0, i, ViewHolderType.COLUMN_HEADER);
-            } else if (viewHolder != null && mAdapter != null) {
-                refreshHeaderColumnViewHolder(viewHolder);
+            for (int i = leftColumn; i <= rightColumn; i++) {
+                // column view header holders
+                ViewHolder viewHolder = mHeaderColumnViewHolders.get(i);
+                if (viewHolder == null && mAdapter != null) {
+                    addViewHolder(0, i, ViewHolderType.COLUMN_HEADER);
+                } else if (viewHolder != null && mAdapter != null) {
+                    refreshHeaderColumnViewHolder(viewHolder);
+                }
             }
         }
 
@@ -1637,12 +1652,8 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
 
     @Override
     public void notifyDataSetChanged() {
-        recycleViewHolders(true);
-        mVisibleArea.set(mState.getScrollX(),
-                mState.getScrollY(),
-                mState.getScrollX() + mSettings.getLayoutWidth(),
-                mState.getScrollY() + mSettings.getLayoutHeight());
-        addViewHolders(mVisibleArea);
+        initItems();
+        notifyLayoutChanged();
     }
 
     @Override
