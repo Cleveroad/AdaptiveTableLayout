@@ -821,6 +821,15 @@ public class AdaptiveTableLayout extends ViewGroup implements ScrollHelper.Scrol
         }
 
         removeKeys(headerKeysToRemove, mHeaderRowViewHolders);
+
+        //top left header view holder
+        if (mLeftTopViewHolder != null) {
+            // recycle view holder
+            if (isRecycleAll) {
+                recycleViewHolder(mLeftTopViewHolder);
+                mLeftTopViewHolder = null;
+            }
+        }
     }
 
 
