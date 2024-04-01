@@ -1,8 +1,9 @@
 package com.cleveroad.adaptivetablelayout;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Base AdaptiveTableAdapter Interface for AdaptiveTableLayout's adapter.

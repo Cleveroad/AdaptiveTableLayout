@@ -2,7 +2,6 @@ package com.cleveroad.sample.datasource;
 
 import android.content.Context;
 import android.os.Environment;
-import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.cleveroad.sample.utils.ClosableUtil;
@@ -23,6 +22,8 @@ import static com.cleveroad.sample.datasource.Constants.ADD_COLUMN;
 import static com.cleveroad.sample.datasource.Constants.ADD_ROW;
 import static com.cleveroad.sample.datasource.Constants.DELETE_COLUMN;
 import static com.cleveroad.sample.datasource.Constants.DELETE_ROW;
+
+import androidx.loader.content.AsyncTaskLoader;
 
 public class UpdateCsvFileLoader extends AsyncTaskLoader<String> {
     private static final String TAG = UpdateCsvFileLoader.class.getSimpleName();

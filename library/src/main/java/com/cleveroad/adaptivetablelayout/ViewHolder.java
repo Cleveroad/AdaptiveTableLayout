@@ -1,7 +1,8 @@
 package com.cleveroad.adaptivetablelayout;
 
-import android.support.annotation.NonNull;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 /**
  * A {@link ViewHolder} describes an item view and metadata about its place within the {@link AdaptiveTableLayout}.

@@ -1,12 +1,13 @@
 package com.cleveroad.adaptivetablelayout;
 
-import android.support.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import static com.cleveroad.adaptivetablelayout.ScrollType.SCROLL_HORIZONTAL;
 import static com.cleveroad.adaptivetablelayout.ScrollType.SCROLL_VERTICAL;
+
+import androidx.annotation.IntDef;
 
 @IntDef({
         SCROLL_HORIZONTAL,

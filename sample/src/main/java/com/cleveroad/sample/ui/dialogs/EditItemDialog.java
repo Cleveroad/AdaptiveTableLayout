@@ -5,12 +5,6 @@ import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +13,8 @@ import android.view.Window;
 import android.widget.TextView;
 
 import com.cleveroad.sample.R;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Objects;
 
@@ -31,6 +27,11 @@ import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_ADD_ROW;
 import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_DELETE_COLUMN;
 import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_DELETE_ROW;
 import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_EDIT_SONG;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 
 public class EditItemDialog extends DialogFragment implements View.OnClickListener {
     private static final int ZERO_COLUMN_OR_ROW = 0;

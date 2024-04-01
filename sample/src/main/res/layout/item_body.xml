@@ -4,7 +4,7 @@
               android:layout_height="match_parent"
               android:orientation="horizontal">
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/cardView"
@@ -19,5 +19,5 @@
             android:layout_height="match_parent"
             android:gravity="center"/>
 
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 </LinearLayout>

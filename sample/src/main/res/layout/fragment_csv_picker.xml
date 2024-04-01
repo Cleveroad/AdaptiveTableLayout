@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/medium_jungle_green">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -42,7 +42,7 @@
         android:textSize="16sp"
         android:textStyle="bold" />
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/bPickFile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

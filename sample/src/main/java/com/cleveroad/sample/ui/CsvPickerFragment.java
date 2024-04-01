@@ -9,9 +9,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.provider.Settings;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -34,6 +32,10 @@ import java.io.InputStream;
 import java.util.Objects;
 
 import static android.content.Intent.EXTRA_MIME_TYPES;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 public class CsvPickerFragment extends Fragment implements View.OnClickListener {
     private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE = 1;
@@ -74,7 +76,17 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
             public void onClick(View textView) {
                 if (PermissionHelper.checkOrRequest(CsvPickerFragment.this, REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE_DEMO,
                         Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    createDemoFile();
+                    if (Build.VERSION.SDK_INT >= 30) {
+                        if (!Environment.isExternalStorageManager()) {
+                            Intent getpermission = new Intent();
+                            getpermission.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                            startActivity(getpermission);
+                        } else {
+                            createDemoFile();
+                        }
+                    } else {
+                        createDemoFile();
+                    }
                 }
             }
 
@@ -145,6 +157,13 @@ public class CsvPickerFragment extends Fragment implements View.OnClickListener 
     }
 
     private void createDemoFile() {
+        if (Build.VERSION.SDK_INT >= 30) {
+            if (!Environment.isExternalStorageManager()) {
+                Intent getpermission = new Intent();
+                getpermission.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                startActivity(getpermission);
+            }
+        }
         File file = createDemoTempFile();
         try {
             if (!file.exists() && file.createNewFile()) {

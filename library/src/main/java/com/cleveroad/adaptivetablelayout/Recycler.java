@@ -1,8 +1,9 @@
 package com.cleveroad.adaptivetablelayout;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.SparseArray;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

@@ -6,11 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -33,6 +28,7 @@ import com.cleveroad.sample.ui.dialogs.DeleteDialog;
 import com.cleveroad.sample.ui.dialogs.EditItemDialog;
 import com.cleveroad.sample.ui.dialogs.SettingsDialog;
 import com.cleveroad.sample.utils.PermissionHelper;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Objects;
 
@@ -54,6 +50,12 @@ import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_DELETE_ROW;
 import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_DELETE_ROW_CONFIRMED;
 import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_EDIT_SONG;
 import static com.cleveroad.sample.datasource.Constants.REQUEST_CODE_SETTINGS;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.loader.app.LoaderManager;
 
 public class TableLayoutFragment
         extends Fragment
@@ -119,10 +121,10 @@ public class TableLayoutFragment
                     applyChanges();
                 } else if (item.getItemId() == R.id.actionSettings) {
                     SettingsDialog.newInstance(
-                            mTableLayout.isHeaderFixed(),
-                            mTableLayout.isSolidRowHeader(),
-                            mTableLayout.isRTL(),
-                            mTableLayout.isDragAndDropEnabled())
+                                    mTableLayout.isHeaderFixed(),
+                                    mTableLayout.isSolidRowHeader(),
+                                    mTableLayout.isRTL(),
+                                    mTableLayout.isDragAndDropEnabled())
                             .show(getChildFragmentManager(), SettingsDialog.class.getSimpleName());
                 }
                 return true;
@@ -140,7 +142,7 @@ public class TableLayoutFragment
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mSnackbar = Snackbar.make(view, R.string.changes_saved, Snackbar.LENGTH_INDEFINITE);
-        TextView tv = mSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        TextView tv = mSnackbar.getView().findViewById(R.id.snackbar_text);
         tv.setMaxLines(3);
         mSnackbar.setAction("Close", new View.OnClickListener() {
             @Override
@@ -158,7 +160,7 @@ public class TableLayoutFragment
                     PERMISSIONS_STORAGE)) {
                 showProgress();
                 mCsvFileDataSource.applyChanges(
-                        getLoaderManager(),
+                        LoaderManager.getInstance(this),
                         mTableLayout.getLinkedAdapterRowsModifications(),
                         mTableLayout.getLinkedAdapterColumnsModifications(),
                         mTableLayout.isSolidRowHeader(),
@@ -175,7 +177,7 @@ public class TableLayoutFragment
                     PERMISSIONS_STORAGE)) {
                 showProgress();
                 mCsvFileDataSource.applyChanges(
-                        getLoaderManager(),
+                        LoaderManager.getInstance(this),
                         mTableLayout.getLinkedAdapterRowsModifications(),
                         mTableLayout.getLinkedAdapterColumnsModifications(),
                         mTableLayout.isSolidRowHeader(),
@@ -223,30 +225,30 @@ public class TableLayoutFragment
     @Override
     public void onItemClick(int row, int column) {
         EditItemDialog.newInstance(
-                row,
-                column,
-                mCsvFileDataSource.getColumnHeaderData(column),
-                mCsvFileDataSource.getItemData(row, column))
+                        row,
+                        column,
+                        mCsvFileDataSource.getColumnHeaderData(column),
+                        mCsvFileDataSource.getItemData(row, column))
                 .show(getChildFragmentManager(), EditItemDialog.class.getSimpleName());
     }
 
     @Override
     public void onRowHeaderClick(int row) {
         EditItemDialog.newInstance(
-                row,
-                0,
-                mCsvFileDataSource.getColumnHeaderData(0),
-                mCsvFileDataSource.getItemData(row, 0))
+                        row,
+                        0,
+                        mCsvFileDataSource.getColumnHeaderData(0),
+                        mCsvFileDataSource.getItemData(row, 0))
                 .show(getChildFragmentManager(), EditItemDialog.class.getSimpleName());
     }
 
     @Override
     public void onColumnHeaderClick(int column) {
         EditItemDialog.newInstance(
-                0,
-                column,
-                mCsvFileDataSource.getColumnHeaderData(column),
-                mCsvFileDataSource.getItemData(0, column))
+                        0,
+                        column,
+                        mCsvFileDataSource.getColumnHeaderData(column),
+                        mCsvFileDataSource.getItemData(0, column))
                 .show(getChildFragmentManager(), EditItemDialog.class.getSimpleName());
     }
 
